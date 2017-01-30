@@ -1,0 +1,30 @@
+class DOMUtil {
+
+  static closest(element, selector) {
+    selector = selector.toLowerCase();
+    let className = selector.split('.').length > 1 ? selector.split('.')[1] : '';
+    selector = selector.split('.')[0];
+    while (true) {
+      if (element.nodeName.toLowerCase() === selector && element.className.indexOf(className) !== -1) {
+        return element;
+      }
+      if (!(element = element.parentNode)) {
+        break;
+      }
+    }
+    return null;
+  }
+
+  static remove(el) {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  }
+
+  static stringToDomElement(str) {
+    let div = document.createElement('div');
+    div.innerHTML = str;
+    return div.firstChild;
+  }
+
+}
