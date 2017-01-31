@@ -1,6 +1,6 @@
 class SVGUtil {
 
-  static renderSVG(svgEl, renderedCallback, jpgQuality) {
+  static rasterizeSVG(svgEl, renderedCallback, jpgQuality) {
     // WARNING! Inline <image> tags must have a base64-encoded image as their source. Linked image files will not work.
     // transform svg into base64 image
     const s = new XMLSerializer().serializeToString(svgEl);

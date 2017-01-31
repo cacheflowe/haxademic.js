@@ -17,8 +17,9 @@ class DOMUtil {
 
   static remove(el) {
     if (el && el.parentNode) {
-      el.parentNode.removeChild(el);
+      return el.parentNode.removeChild(el);
     }
+    return null;
   }
 
   static stringToDomElement(str) {

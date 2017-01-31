@@ -5,23 +5,19 @@
 // header
 mainEl.appendChild(DOMUtil.stringToDomElement("<h1>MathUtil</h1>"));
 
-// show function
-function appendTest(str) {
-  let el = document.createElement('div');
-  el.innerHTML = str;
-  mainEl.appendChild(el);
-}
-
 // make a random number
-appendTest(`MathUtil.randRange(0, 10) | ${MathUtil.randRange(0, 10)}`);
-appendTest(`MathUtil.randRangeDecimel(0, 10) | ${MathUtil.randRangeDecimel(0, 10)}`);
-appendTest(`MathUtil.getPercentWithinRange(30, 40, 35) | ${MathUtil.getPercentWithinRange(30, 40, 235)}`);
+insertHtmlStr(`<code>MathUtil.randRange(0, 10)</code> ${MathUtil.randRange(0, 10)}`);
+insertHtmlStr(`<code>MathUtil.randRangeDecimel(0, 10)</code> ${MathUtil.randRangeDecimel(0, 10)}`);
+insertHtmlStr(`<code>MathUtil.getPercentWithinRange(30, 40, 35)</code> ${MathUtil.getPercentWithinRange(30, 40, 35)}`);
+
+// break
+insertHtmlStr('<hr/>');
 
 /////////////////////////////////////////////
 // Unit tests
 /////////////////////////////////////////////
 
-Zora()
+zoraTests
   .test('MathUtil.randRange', function*(assert) {
     assert.ok(MathUtil.randRange(0, 10));
     assert.equal(MathUtil.randRange(0, 0), 0);
@@ -34,4 +30,3 @@ Zora()
     assert.ok(MathUtil.getPercentWithinRange(30, 40, 35));
     assert.equal(MathUtil.getPercentWithinRange(30, 40, 35), 0.5);
   })
-  .run();
