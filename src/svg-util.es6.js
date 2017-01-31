@@ -3,17 +3,17 @@ class SVGUtil {
   static renderSVG(svgEl, renderedCallback, jpgQuality) {
     // WARNING! Inline <image> tags must have a base64-encoded image as their source. Linked image files will not work.
     // transform svg into base64 image
-    let s = new XMLSerializer().serializeToString(svgEl);
-    let uri = SVGUtil.dataImgPrefix + window.btoa(s);
+    const s = new XMLSerializer().serializeToString(svgEl);
+    const uri = SVGUtil.dataImgPrefix + window.btoa(s);
 
     // load svg image into canvas
-    let image = new Image();
+    const image = new Image();
     image.onload = function() {
       if(jpgQuality) {
-        let canvas = SVGUtil.drawImageToNewCanvas(image, true);
+        const canvas = SVGUtil.drawImageToNewCanvas(image, true);
         renderedCallback(canvas.toDataURL('image/jpeg', jpgQuality * 100));
       } else {
-        let canvas = SVGUtil.drawImageToNewCanvas(image);
+        const canvas = SVGUtil.drawImageToNewCanvas(image);
         renderedCallback(canvas.toDataURL('image/png'));
       }
     }
@@ -21,10 +21,10 @@ class SVGUtil {
   }
 
   static drawImageToNewCanvas(image, drawBackground) {
-    let canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     canvas.width = image.width;
     canvas.height = image.height;
-    let context = canvas.getContext('2d');
+    const context = canvas.getContext('2d');
     if(drawBackground) { // set white background before rendering
       context.fillStyle = '#fff';
       context.fillRect(0, 0, canvas.width, canvas.height);
