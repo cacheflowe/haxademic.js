@@ -11,12 +11,16 @@
   </head>
   <body>
     <div class="container">
+      <h1 style="margin-top: 4rem">Haxademic.js</h1>
+      <p>A personal JavaScript toolkit.</p>
+      <p>Check the console for unit tests output.</p>
       <div class="row">
-        <div id="main" class="twelve columns" style="margin-top: 25%"></div>
+        <div id="main" class="twelve columns"></div>
       </div>
     </div>
 
     <!-- Library -->
+    <script src="./src/console.es6.js"></script>
     <script src="./src/improved-noise.es6.js"></script>
     <script src="./src/dom-util.es6.js"></script>
     <script src="./src/math-util.es6.js"></script>
@@ -35,8 +39,10 @@
       }
 
       // load test runner
+      console.important('Running tests:');
       const zoraTests = Zora();
     </script>
+    <script src="./tests/console-tests.es6.js"></script>
     <script src="./tests/improved-noise-tests.es6.js"></script>
     <script src="./tests/dom-util-tests.es6.js"></script>
     <script src="./tests/math-util-tests.es6.js"></script>
