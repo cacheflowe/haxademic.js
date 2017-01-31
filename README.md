@@ -1,6 +1,7 @@
-# haxademic.js
+# Haxademic.js
+
 A personal JavaScript library
 
-# Notable code
+# Demo / Tests
 
-math-util.es6
+[https://cacheflowe.github.io/haxademic.js/](https://cacheflowe.github.io/haxademic.js/)
