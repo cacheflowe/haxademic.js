@@ -32,7 +32,6 @@ module.exports = function(grunt) {
 
         }
     }
-   }
   });
 
   // Load the plugin that provides the "uglify" task.
@@ -40,4 +39,5 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', ['babel']);
+
 };
