@@ -73,4 +73,29 @@ class MobileUtil {
     return (isSafari == true && isChrome == false) ? true : false;
   }
 
+  // MOBILE HELPERS
+
+  static alertErrors() {
+    // alert errors on mobile to help detect bugs
+    if(!window.addEventListener) return;
+    window.addEventListener('error', (e) => {
+      var fileComponents = e.filename.split('/');
+      var file = fileComponents[fileComponents.length-1];
+      var line = e.lineno;
+      var message = e.message;
+      alert('ERROR\n'+'Line '+line+' in '+file+'\n'+message);
+    });
+  };
+
+  static openNewWindow(href) {
+    // gets around native mobile popup blockers
+    var link = document.createElement('a');
+    link.setAttribute('href', href);
+    link.setAttribute('target','_blank');
+    var clickevent = document.createEvent('Event');
+    clickevent.initEvent('click', true, false);
+    link.dispatchEvent(clickevent);
+    return false;
+  }
+
 }
