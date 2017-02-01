@@ -1,0 +1,76 @@
+class MobileUtil {
+
+  // TOUCHSCREEN HELPERS
+
+  static enablePseudoStyles() {
+    document.addEventListener("touchstart", function(){}, false);
+  }
+
+  static lockTouchScreen( isLocked ) {
+    if( isLocked == false ) {
+      document.ontouchmove = null;
+    } else {
+      document.ontouchmove = function( event ) {
+        event.preventDefault();
+      };
+    }
+  }
+
+  static hideSoftKeyboard() {
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur()
+    var inputs = document.querySelectorAll('input');
+    for (var i = 0; i < inputs.length; i++) inputs[i].blur();
+  }
+
+  static unlockWebAudioOnTouch() {
+    window.addEventListener('touchstart', MobileUtil.playEmptyWebAudioSound);
+  }
+
+  static playEmptyWebAudioSound() {
+    var myContext = (AudioContext != null) ? new AudioContext() : new webkitAudioContext(); // create empty buffer and play it
+    var buffer = myContext.createBuffer(1, 1, 44100);
+    var source = myContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(myContext.destination);                                                  // connect to output (your speakers)
+    source.start();                                                                         // play the file
+    window.removeEventListener('touchstart', MobileUtil.playEmptyWebAudioSound);            // clean up the event listener
+  }
+
+  // PLATFORM DETECTION
+
+  static isMobileBrowser() {
+    var userAgent = navigator.userAgent.toLowerCase()
+    if(userAgent.match(/android|iphone|ipad|ipod/i)) return true;
+    return false;
+  }
+
+  static isIOS() {
+    var userAgent = navigator.userAgent.toLowerCase()
+    if(userAgent.match(/iphone/i)) return true;
+    if(userAgent.match(/ipad/i)) return true;
+    if(userAgent.match(/ipod/i)) return true;
+    if(userAgent.match(/crios/i)) return true;
+    return false;
+  }
+
+  static isIPhone() {
+    var userAgent = navigator.userAgent.toLowerCase()
+    if(userAgent.match(/iphone/i)) return true;
+    if(userAgent.match(/ipod/i)) return true;
+    return false;
+  }
+
+  static isAndroid() {
+    var userAgent = navigator.userAgent.toLowerCase()
+    if(userAgent.match(/android/i)) return true;
+    return false;
+  }
+
+  static isSafari() {
+    var userAgent = navigator.userAgent.toLowerCase()
+    var isChrome = (userAgent.match(/chrome/i)) ? true : false;
+    var isSafari = (userAgent.match(/safari/i)) ? true : false;
+    return (isSafari == true && isChrome == false) ? true : false;
+  }
+
+}

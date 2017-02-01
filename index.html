@@ -24,28 +24,31 @@
     <script src="./src/improved-noise.es6.js"></script>
     <script src="./src/dom-util.es6.js"></script>
     <script src="./src/math-util.es6.js"></script>
+    <script src="./src/mobile-util.es6.js"></script>
     <script src="./src/svg-util.es6.js"></script>
     <!-- Tests -->
     <script src="./vendor/zora.js"></script>
     <script>
       // insert test results here
-      let mainEl = document.getElementById('main');
+      const mainEl = document.getElementById('main');
 
       // insert code
       function insertHtmlStr(str) {
-        let el = document.createElement('div');
+        const el = document.createElement('div');
         el.innerHTML = str;
         mainEl.appendChild(el);
       }
 
       // load test runner
       console.important('Running tests:');
+      console.todo('Not tested: MathUtil');
       const zoraTests = Zora();
     </script>
     <script src="./tests/console-tests.es6.js"></script>
     <script src="./tests/improved-noise-tests.es6.js"></script>
     <script src="./tests/dom-util-tests.es6.js"></script>
     <script src="./tests/math-util-tests.es6.js"></script>
+    <script src="./tests/mobile-util-tests.es6.js"></script>
     <script src="./tests/svg-util-tests.es6.js"></script>
     <script>
       // run unit tests
