@@ -23,4 +23,4 @@ class EaseToValueCallback {
   }
 }
 
-EaseToValueCallback.noop = function(){};
+EaseToValueCallback.noop = () => {};
