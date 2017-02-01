@@ -62,7 +62,7 @@ class StringFormatter {
       }
       numParts[1] = numParts[1].substr(0, 2);
     }
-    return numParts.join('.');
+    return '$' + numParts.join('.');
   };
 
   /**

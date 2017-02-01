@@ -40,7 +40,7 @@ zoraTests
   })
   .test('StringFormatter.formatDollarsCents', function*(assert) {
     assert.ok(StringFormatter.formatDollarsCents('303.333333'));
-    assert.equal(StringFormatter.formatDollarsCents('303.333333'), '303.33');
+    assert.equal(StringFormatter.formatDollarsCents('303.333333'), '$303.33');
   })
   .test('StringFormatter.addCommasToNumber', function*(assert) {
     assert.ok(StringFormatter.addCommasToNumber('3000000'));
