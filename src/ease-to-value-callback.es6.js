@@ -1,0 +1,26 @@
+class EaseToValueCallback {
+
+  constructor(value = 0, easeFactor = 10, callback = EaseToValueCallback.noop, finishRange = 0.01 ) {
+    this.easingFloat = new EasingFloat( value, easeFactor );
+    this.callback = callback;
+    this.finishRange = finishRange;
+  };
+
+  setTarget( value ) {
+    this.easingFloat.setTarget( value );
+    this.easeToTarget();
+  };
+
+  easeToTarget(){
+    this.callback(this.easingFloat.update());
+    // keep easing if we're not close enough
+    if( Math.abs(this.easingFloat.value() - this.easingFloat.target() ) > this.finishRange) {
+      requestAnimationFrame(() => { this.easeToTarget(); });
+    } else {
+      this.easingFloat.setValue( this.easingFloat.target() );
+      this.callback(this.easingFloat.value()); // call the callback one last time with the final value
+    }
+  }
+}
+
+EaseToValueCallback.noop = function(){};

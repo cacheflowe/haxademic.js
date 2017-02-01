@@ -23,8 +23,12 @@
     <script src="./src/console.es6.js"></script>
     <script src="./src/improved-noise.es6.js"></script>
     <script src="./src/dom-util.es6.js"></script>
+    <script src="./src/easing-float.es6.js"></script>
+    <script src="./src/ease-to-value-callback.es6.js"></script>
+    <script src="./src/linear-float.es6.js"></script>
     <script src="./src/math-util.es6.js"></script>
     <script src="./src/mobile-util.es6.js"></script>
+    <script src="./src/penner.es6.js"></script>
     <script src="./src/svg-util.es6.js"></script>
     <!-- Tests -->
     <script src="./vendor/zora.js"></script>
@@ -42,13 +46,21 @@
       // load test runner
       console.important('Running tests:');
       console.todo('Not tested: MathUtil');
+      console.todo('Not tested: EasingFloat');
+      console.todo('Not tested: LinearFloat');
+      console.todo('Not tested: Penner');
+      console.todo('Not tested: EaseToValueCallback');
       const zoraTests = Zora();
     </script>
     <script src="./tests/console-tests.es6.js"></script>
-    <script src="./tests/improved-noise-tests.es6.js"></script>
     <script src="./tests/dom-util-tests.es6.js"></script>
+    <script src="./tests/improved-noise-tests.es6.js"></script>
+    <script src="./tests/easing-float-tests.es6.js"></script>
+    <script src="./tests/ease-to-value-callback-tests.es6.js"></script>
+    <script src="./tests/linear-float-tests.es6.js"></script>
     <script src="./tests/math-util-tests.es6.js"></script>
     <script src="./tests/mobile-util-tests.es6.js"></script>
+    <script src="./tests/penner-tests.es6.js"></script>
     <script src="./tests/svg-util-tests.es6.js"></script>
     <script>
       // run unit tests
