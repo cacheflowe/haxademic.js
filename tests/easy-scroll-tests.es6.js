@@ -22,7 +22,7 @@ scrollButtonDown.addEventListener('click', (e) => {
 });
 
 // create scroll object for specific content element
-insertHtmlStr(`<div id="easy-scroll-content-element" style="width:200px; height: 100px; overflow: auto;">Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br><h4>Bottom</h4></div>`);
+insertHtmlStr(`<div id="easy-scroll-content-element" style="width:200px; height: 100px; overflow: auto;"><div style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPgogICAgPHN0eWxlIHR5cGU9InRleHQvY3NzIj4KICAgICAgICBsaW5lIHsgc3Ryb2tlOiAjY2NjOyB9CiAgICA8L3N0eWxlPgogICAgPGRlZnM+CiAgICAgICAgPHBhdHRlcm4gaWQ9ImdyaWQiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCIgcGF0dGVyblRyYW5zZm9ybT0icm90YXRlKDQ1KSI+CiAgICAgICAgICAgIDxsaW5lIHgxPSI1IiB5MT0iMCIgeDI9IjUiIHkyPSIxMCIgLz4KICAgICAgICAgICAgPGxpbmUgeDE9IjAiIHkxPSI1IiB4Mj0iMTAiIHkyPSI1IiAvPgogICAgICAgIDwvcGF0dGVybj4KICAgIDwvZGVmcz4KICAgIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiIC8+Cjwvc3ZnPgo=');">Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br>Scroll<br><h4>Bottom</h4></div></div>`);
 let easyScrollEl = new EasyScroll(document.getElementById('easy-scroll-content-element'));
 
 // add button to DOM to scroll content element
