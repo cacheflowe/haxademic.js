@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -13,25 +13,26 @@ var EaseToValueCallback = function () {
 
     _classCallCheck(this, EaseToValueCallback);
 
+    if (typeof EasingFloat === 'undefined') return console.warn('EaseToValueCallback requires EasingFloat');
     this.easingFloat = new EasingFloat(value, easeFactor);
     this.callback = callback;
     this.finishRange = finishRange;
   }
 
   _createClass(EaseToValueCallback, [{
-    key: "setTarget",
+    key: 'setTarget',
     value: function setTarget(value) {
       this.easingFloat.setTarget(value);
       this.easeToTarget();
     }
   }, {
-    key: "easeToTarget",
+    key: 'easeToTarget',
     value: function easeToTarget() {
       var _this = this;
 
       this.callback(this.easingFloat.update());
-      // keep easing if we're not close enough
       if (Math.abs(this.easingFloat.value() - this.easingFloat.target()) > this.finishRange) {
+        // keep easing if we're not close enough
         requestAnimationFrame(function () {
           _this.easeToTarget();
         });

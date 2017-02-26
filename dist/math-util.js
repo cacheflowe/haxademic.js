@@ -12,6 +12,7 @@ var MathUtil = function () {
   _createClass(MathUtil, null, [{
     key: "randRange",
 
+
     /**
      *  Calculates a random number within a minimum and maximum range.
      *  @param  min the value for the bottom range.
@@ -35,6 +36,16 @@ var MathUtil = function () {
     key: "randRangeDecimel",
     value: function randRangeDecimel(min, max) {
       return Math.random() * (max - min) + min;
+    }
+  }, {
+    key: "randBoolean",
+    value: function randBoolean() {
+      return Math.random() > 0.5 ? true : false;
+    }
+  }, {
+    key: "randBooleanWeighted",
+    value: function randBooleanWeighted(likeliness) {
+      return Math.random() < likeliness ? true : false;
     }
 
     /**

@@ -20,12 +20,12 @@ var PixiTextureLoader = function () {
 
       var texture = PIXI.Texture.fromImage(filePath);
       if (texture.width > 10) {
-        texture.baseTexture.scaleMode = PIXI.SCALE_MODES.DEFAULT;
+        texture.baseTexture.scaleMode = PIXI.settings.SCALE_MODE;
         callback(new PIXI.Sprite(texture));
       } else {
         this.numTextures++;
         texture.baseTexture.on('loaded', function () {
-          texture.baseTexture.scaleMode = PIXI.SCALE_MODES.DEFAULT; // NEAREST;
+          texture.baseTexture.scaleMode = PIXI.settings.SCALE_MODE; // NEAREST;
           callback(new PIXI.Sprite(texture));
           _this.numLoaded++;
           if (_this.numLoaded == _this.numTextures) {
@@ -58,6 +58,15 @@ var PixiTextureLoader = function () {
       for (var i = 0; i < filePathsArr.length; i++) {
         _loop(i);
       }
+    }
+  }], [{
+    key: 'svgElToPixiTexture',
+    value: function svgElToPixiTexture(el, callback) {
+      var base64Img = SVGUtil.svgElToBase64(el);
+      var texture = PIXI.Texture.fromImage(base64Img);
+      texture.baseTexture.on('loaded', function () {
+        callback(new PIXI.Sprite(texture));
+      });
     }
   }]);
 

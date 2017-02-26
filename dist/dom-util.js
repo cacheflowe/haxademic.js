@@ -40,6 +40,21 @@ var DOMUtil = function () {
       div.innerHTML = str;
       return div.firstChild;
     }
+  }, {
+    key: 'elementToString',
+    value: function elementToString(el) {
+      return el.outerHTML;
+    }
+  }, {
+    key: 'addLoadedClass',
+    value: function addLoadedClass() {
+      // add class to enable animation a moment after window load
+      window.addEventListener('load', function (e) {
+        setTimeout(function () {
+          document.body.classList.add('ready');
+        }, 1000);
+      });
+    }
   }]);
 
   return DOMUtil;

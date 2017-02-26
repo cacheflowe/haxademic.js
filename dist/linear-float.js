@@ -51,15 +51,15 @@ var LinearFloat = function () {
     key: "update",
     value: function update() {
       if (this.val != this.targetVal) {
-        var switchedSides = false;
+        var reachedTarget = false;
         if (this.val < this.targetVal) {
           this.val += this.inc;
-          if (this.val > this.targetVal) switchedSides = true;
+          if (this.val > this.targetVal) reachedTarget = true;
         } else {
           this.val -= this.inc;
-          if (this.val < this.targetVal) switchedSides = true;
+          if (this.val < this.targetVal) reachedTarget = true;
         }
-        if (switchedSides == true) {
+        if (reachedTarget == true) {
           this.val = this.targetVal;
         }
       }
