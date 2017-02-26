@@ -1,4 +1,6 @@
 class MathUtil {
+
+
   /**
    *  Calculates a random number within a minimum and maximum range.
    *  @param  min the value for the bottom range.
@@ -19,6 +21,14 @@ class MathUtil {
    */
   static randRangeDecimel(min, max) {
     return Math.random() * (max - min) + min;
+  }
+
+  static randBoolean() {
+    return (Math.random() > 0.5 ) ? true : false;
+  }
+
+  static randBooleanWeighted(likeliness) {
+    return (Math.random() < likeliness ) ? true : false;
   }
 
   /**
