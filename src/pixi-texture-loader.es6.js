@@ -9,12 +9,12 @@ class PixiTextureLoader {
   loadTexture(filePath, callback) {
     const texture = PIXI.Texture.fromImage(filePath);
     if(texture.width > 10) {
-      texture.baseTexture.scaleMode = PIXI.SCALE_MODES.DEFAULT;
+      texture.baseTexture.scaleMode = PIXI.settings.SCALE_MODE;
       callback(new PIXI.Sprite(texture));
     } else {
       this.numTextures++;
       texture.baseTexture.on('loaded', () => {
-        texture.baseTexture.scaleMode = PIXI.SCALE_MODES.DEFAULT; // NEAREST;
+        texture.baseTexture.scaleMode = PIXI.settings.SCALE_MODE; // NEAREST;
         callback(new PIXI.Sprite(texture));
         this.numLoaded++
         if(this.numLoaded == this.numTextures) {
@@ -39,6 +39,14 @@ class PixiTextureLoader {
         });
       })();
     }
+  }
+
+  static svgElToPixiTexture(el, callback) {
+    const base64Img = SVGUtil.svgElToBase64(el);
+    const texture = PIXI.Texture.fromImage(base64Img);
+    texture.baseTexture.on('loaded', () => {
+      callback(new PIXI.Sprite(texture));
+    });
   }
 
 }
