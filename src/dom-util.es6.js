@@ -28,4 +28,8 @@ class DOMUtil {
     return div.firstChild;
   }
 
+  static elementToString(el) {
+    return el.outerHTML;
+  }
+
 }
