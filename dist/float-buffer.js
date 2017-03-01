@@ -37,6 +37,18 @@ var FloatBuffer = function () {
       this.buffer[this.sampleIndex] = value;
     }
   }, {
+    key: 'toString',
+    value: function toString() {
+      return this.buffer.reduce(function (acc, val) {
+        return acc + Math.round(val * 10) / 10 + ', ';
+      }, '');
+    }
+  }, {
+    key: 'average',
+    value: function average() {
+      return this.sum() / this.size;
+    }
+  }, {
     key: 'sum',
     value: function sum() {
       return this.buffer.reduce(function (acc, val) {
@@ -58,11 +70,11 @@ var FloatBuffer = function () {
       }, 0);
     }
   }, {
-    key: 'toString',
-    value: function toString() {
+    key: 'sumAbs',
+    value: function sumAbs() {
       return this.buffer.reduce(function (acc, val) {
-        return acc + ', ' + Math.round(val * 10) / 10;
-      }, '');
+        return acc + Math.abs(val);
+      }, 0);
     }
   }, {
     key: 'max',
@@ -83,22 +95,8 @@ var FloatBuffer = function () {
       return min;
     }
   }, {
-    key: 'average',
-    value: function average() {
-      return this.sum / this.size;
-    }
-  }, {
-    key: 'absSum',
-    value: function absSum() {
-      var absSum = 0;
-      for (var i = 0; i < this.size; i++) {
-        absSum += Math.abs(this.buffer[i]);
-      }
-      return absSum;
-    }
-  }, {
-    key: 'absMax',
-    value: function absMax() {
+    key: 'maxAbs',
+    value: function maxAbs() {
       var max = Math.abs(this.buffer[0]);
       for (var i = 1; i < this.size; i++) {
         if (Math.abs(this.buffer[i]) > max) max = Math.abs(this.buffer[i]);
