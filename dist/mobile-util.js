@@ -10,11 +10,15 @@ var MobileUtil = function () {
   }
 
   _createClass(MobileUtil, null, [{
-    key: 'enablePseudoStyles',
+    key: 'isFullscreenApp',
 
 
     // TOUCHSCREEN HELPERS
-
+    value: function isFullscreenApp() {
+      return window.navigator.standalone;
+    }
+  }, {
+    key: 'enablePseudoStyles',
     value: function enablePseudoStyles() {
       document.addEventListener("touchstart", function () {}, false);
     }

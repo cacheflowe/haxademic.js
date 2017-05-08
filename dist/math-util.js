@@ -250,6 +250,12 @@ var MathUtil = function () {
       var b = y1 - y2;
       return Math.abs(Math.sqrt(a * a + b * b));
     }
+  }, {
+    key: "smoothstep",
+    value: function smoothstep(edge0, edge1, x) {
+      x = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+      return x * x * (3 - 2 * x);
+    }
 
     /**
      *  Keep a value between a min & max.
@@ -325,7 +331,8 @@ var MathUtil = function () {
   }, {
     key: "getRadiansToTarget",
     value: function getRadiansToTarget(x1, y1, x2, y2) {
-      return -Math.atan2(x1 - x2, y1 - y2);
+      var twoPi = Math.PI * 2;
+      return (twoPi + -Math.PI / 2 + Math.atan2(x2 - x1, y2 - y1)) % twoPi;
     }
 
     /**

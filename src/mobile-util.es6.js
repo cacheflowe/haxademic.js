@@ -1,6 +1,9 @@
 class MobileUtil {
 
   // TOUCHSCREEN HELPERS
+  static isFullscreenApp() {
+    return window.navigator.standalone;
+  }
 
   static enablePseudoStyles() {
     document.addEventListener("touchstart", function(){}, false);
