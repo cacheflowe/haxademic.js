@@ -55,3 +55,4 @@ class SVGUtil {
 SVGUtil.clearColor = 'rgba(0,0,0,0)';
 SVGUtil.dataImgPrefix = 'data:image/svg+xml;base64,';
 SVGUtil.testSVG = '<svg xmlns="http://www.w3.org/2000/svg" height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"/></svg>';
+SVGUtil.testSVG2 = '<svg xmlns="http://www.w3.org/2000/svg" height="100" width="100"><rect x="10" y="10" width="80" height="80" stroke="black" stroke-width="3" fill="red"/></svg>';

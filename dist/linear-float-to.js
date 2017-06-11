@@ -37,6 +37,7 @@ var LinearFloatTo = function () {
   }, {
     key: "setTarget",
     value: function setTarget(val) {
+      if (val == this.endVal) return;
       this.startVal = this.value();
       this.endVal = val;
       this.progress.setValue(0);
