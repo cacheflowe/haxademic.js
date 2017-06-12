@@ -43,6 +43,17 @@ var LinearFloat = function () {
       return equation(this.val, 0, 1, 1);
     }
   }, {
+    key: "valueMapped",
+    value: function valueMapped(min, max) {
+      // requires an equation from Penner class
+      return this.map(this.val, 0, 1, min, max);
+    }
+  }, {
+    key: "map",
+    value: function map(val, inputMin, inputMax, outputMin, outputMax) {
+      return (outputMax - outputMin) * ((val - inputMin) / (inputMax - inputMin)) + outputMin;
+    }
+  }, {
     key: "target",
     value: function target() {
       return this.targetVal;

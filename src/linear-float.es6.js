@@ -26,6 +26,14 @@ class LinearFloat {
   	return equation(this.val, 0, 1, 1);
   }
 
+  valueMapped(min, max) { // requires an equation from Penner class
+  	return this.map(this.val, 0, 1, min, max);
+  }
+
+  map(val, inputMin, inputMax, outputMin, outputMax) {
+    return (outputMax - outputMin) * ((val - inputMin) / (inputMax - inputMin)) + outputMin;
+  }
+
   target() {
   	return this.targetVal;
   }
