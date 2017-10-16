@@ -37,7 +37,6 @@ class PageVisibility {
       console.log( "Your browser does not support Page Visibility API");
     else {
       document.addEventListener(this.prefix + "visibilitychange", (e) => this.updateState(e));
-      // this.updateState();
     }
   }
 
