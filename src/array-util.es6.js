@@ -5,7 +5,7 @@ class ArrayUtil {
     if (index !== -1) array.splice(index, 1);
   }
 
-  static shuffleArray(array) {
+  static shuffle(array) {
     array.sort(() => {return 0.5 - Math.random()});
   }
 
