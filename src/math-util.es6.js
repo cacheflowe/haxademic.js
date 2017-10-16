@@ -2,6 +2,17 @@ class MathUtil {
 
 
   /**
+   *  Gives you the scale at which to apply to the current value, to reach the target value
+   *  @param  cur The original value.
+   *  @param  target The target value.
+   *  @return The scale to apply to cur to equal target.
+   *  @use    {@code let scale = MathUtil.scaleToTarget( 20, 100 );}
+   */
+  static scaleToTarget(cur, target) {
+    return target / cur;
+  }
+
+  /**
    *  Calculates a random number within a minimum and maximum range.
    *  @param  min the value for the bottom range.
    *  @param  max the value for the upper range.
