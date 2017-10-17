@@ -13,6 +13,17 @@ class MathUtil {
   }
 
   /**
+   *  Gives you the scale at which to apply to the current value, to reach the target value
+   *  @param  distance The distance to travel.
+   *  @param  friction Friction to apply every frame before moving.
+   *  @return The starting speed, after which friction is multplied every frame.
+   *  @use    {@code let speed = MathUtil.speedToReachDestinationWithFriction( 20, 0.9 );}
+   */
+  static speedToReachDestinationWithFriction(distance, friction) {
+    return distance / ( ( friction ) * ( 1 / ( 1 - friction ) ) );
+  }
+
+  /**
    *  Calculates a random number within a minimum and maximum range.
    *  @param  min the value for the bottom range.
    *  @param  max the value for the upper range.
