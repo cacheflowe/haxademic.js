@@ -19,6 +19,15 @@ class MobileUtil {
     }
   }
 
+  static disableZoom() {
+    document.addEventListener('touchmove', function(event) {
+      event = event.originalEvent || event;
+      if(event.scale != 1) {
+        event.preventDefault();
+      }
+    }, false);
+  }
+
   static hideSoftKeyboard() {
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur()
     var inputs = document.querySelectorAll('input');
