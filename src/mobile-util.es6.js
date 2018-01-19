@@ -9,6 +9,11 @@ class MobileUtil {
     document.addEventListener("touchstart", function(){}, false);
   }
 
+  static setDeviceInputClass() {
+    const deviceClass = (MobileUtil.isMobileBrowser()) ? 'mobile' : 'desktop';
+    document.body.classList.add(deviceClass);
+  }
+
   static lockTouchScreen( isLocked ) {
     if( isLocked == false ) {
       document.ontouchmove = null;
@@ -83,6 +88,10 @@ class MobileUtil {
     var isChrome = (userAgent.match(/chrome/i)) ? true : false;
     var isSafari = (userAgent.match(/safari/i)) ? true : false;
     return (isSafari == true && isChrome == false) ? true : false;
+  }
+
+  static isIE11() {
+    return !!window.MSInputMethodContext && !!document.documentMode;
   }
 
   // MOBILE HELPERS

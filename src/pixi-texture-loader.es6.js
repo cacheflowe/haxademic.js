@@ -1,14 +1,15 @@
 class PixiTextureLoader {
 
-  constructor(assetsLoadedCallback) {
+  constructor(assetsLoadedCallback, keepFinalCallback=false) {
     this.assetsLoadedCallback = assetsLoadedCallback;
+    this.keepFinalCallback = keepFinalCallback;
     this.numTextures = 0;
     this.numLoaded = 0;
   }
 
   loadTexture(filePath, callback) {
     const texture = PIXI.Texture.fromImage(filePath);
-    if(texture.width > 10) {
+    if(texture.width >= 2) {
       texture.baseTexture.scaleMode = PIXI.settings.SCALE_MODE;
       callback(new PIXI.Sprite(texture));
     } else {
@@ -19,7 +20,7 @@ class PixiTextureLoader {
         this.numLoaded++
         if(this.numLoaded == this.numTextures) {
           if(this.assetsLoadedCallback) this.assetsLoadedCallback();
-          this.assetsLoadedCallback = null;
+          if(this.keepFinalCallback == false) this.assetsLoadedCallback = null;
         }
       });
     }

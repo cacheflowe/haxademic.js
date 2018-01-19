@@ -14,6 +14,16 @@ class ColorUtil {
   }
 
   /**
+   *  Converts a hex value to a webGL-friendly number.
+   *  @return A hex color string, without the hash.
+   *  @use    {@code CanvasUtil.hexStringToNumberColor('ff00ff');}
+   */
+  static hexStringToNumberColor(hexStr) {
+    return Number("0x"+hexStr.replace('#', ''));
+  }
+
+
+  /**
    *  Converts r, g, b, a values to a css-friendly hexadecimel string.
    *  @return An rgb color string.
    *  @use    {@code CanvasUtil.rgb2hex(0, 255, 0);}

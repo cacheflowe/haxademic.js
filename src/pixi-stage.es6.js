@@ -2,9 +2,10 @@ class PixiStage {
 
   constructor(el, bgColor, id) {
     this.el = el;
+    this.devicePixelRatio = window.devicePixelRatio;
     this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {
       backgroundColor: bgColor,
-      resolution: window.devicePixelRatio
+      resolution: this.devicePixelRatio
     });
     this.renderer.view.classList.add(id);
     this.el.appendChild(this.renderer.view);
@@ -18,11 +19,11 @@ class PixiStage {
   }
 
   width() {
-    return this.renderer.width / window.devicePixelRatio;
+    return this.renderer.width / this.devicePixelRatio;
   }
 
   height() {
-    return this.renderer.height / window.devicePixelRatio;
+    return this.renderer.height / this.devicePixelRatio;
   }
 
   render() {
@@ -33,11 +34,4 @@ class PixiStage {
     this.renderer.resize(window.innerWidth, window.innerHeight);
   }
 
-  static scaleSpriteToFillContainer(sprite, width, height) {
-    const ratioX = width / sprite.texture.width;
-    const ratioY = height / sprite.texture.height;
-    const scale = (ratioX > ratioY) ? ratioX : ratioY;
-    sprite.scale.set(scale, scale);
-    return scale;
-  }
 }

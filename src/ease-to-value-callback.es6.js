@@ -12,6 +12,10 @@ class EaseToValueCallback {
     this.easeToTarget();
   };
 
+  setValue( value ) {
+    this.easingFloat.setValue( value );
+  };
+
   easeToTarget(){
     this.callback(this.easingFloat.update());
     if( Math.abs(this.easingFloat.value() - this.easingFloat.target() ) > this.finishRange) {   // keep easing if we're not close enough

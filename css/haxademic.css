@@ -2,8 +2,66 @@
   filter: drop-shadow( 0 0.1rem 0.6rem rgba(0,0,0,0.5) );
 }
 
+.box-shadow {
+  box-shadow: 0px 3px 4px rgba(0,0,0,0.3);
+}
+
+
 .vertical-center {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+/* Disable text/element selection */
+.nocopy {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+
+input,
+textarea,
+button,
+select,
+label,
+a {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+/* Fade anim */
+
+.fade-anim {
+  transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.fade-anim.show {
+  transition: visibility 0s linear, opacity 0.5s linear;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Portrait lock */
+
+@media (orientation: landscape) {
+  body.mobile.portrait-lock {
+    transform-origin: 0% 0%;
+    transform: rotate(90deg);
+    position: absolute;
+    left: 100%;
+    width: 100vh;
+    height: 100vw;
+  }
 }
