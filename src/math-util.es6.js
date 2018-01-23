@@ -284,8 +284,7 @@ class MathUtil {
    *  @use    {@code let angle = MathUtil.getRadiansToTarget( 0, 0, 5, 5 );}
    */
   static getRadiansToTarget( x1, y1, x2, y2 ) {
-    let twoPi = Math.PI * 2;
-    return (twoPi + -Math.PI / 2 + Math.atan2(x2 - x1, y2 - y1)) % twoPi;
+    return (MathUtil.TWO_PI + -Math.PI / 2 + Math.atan2(x2 - x1, y2 - y1)) % MathUtil.TWO_PI;
   }
 
   /**
