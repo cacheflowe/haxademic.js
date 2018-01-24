@@ -10,7 +10,7 @@ class AppStoreDebug {
   initKeyListener() {
     window.addEventListener('keyup', (e) => {
       var key = e.keyCode ? e.keyCode : e.which;
-      if(key == 191) {
+      if(key == 32) {
         this.showing = !this.showing;
       }
       if(this.showing == false) {
@@ -23,7 +23,7 @@ class AppStoreDebug {
 
   buildElement() {
     this.container = document.createElement( 'div' );
-    this.container.style.cssText = 'position:fixed;top:0;left:0;height:100%;overflow-y:scroll;opacity:0.9;z-index:9999;background:rgba(0,0,0,0.8);color:#000;';
+    this.container.style.cssText = 'position:fixed;top:0;left:0;height:100%;overflow-y:scroll;opacity:0.9;z-index:9999;background:rgba(255,255,255,0.8);color:#000 !important;';
     document.body.appendChild(this.container);
   }
 
