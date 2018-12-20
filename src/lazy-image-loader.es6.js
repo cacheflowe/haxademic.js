@@ -3,65 +3,103 @@ class LazyImageLoader {
   constructor(el) {
     this.el = el;
     this.scrollHandler = null;
-    this.imgQueue = null;
-    this.imgNodes = this.el.querySelectorAll('[data-src]');
-    this.imgs = [];
-    for(let i=0; i < this.imgNodes.length; i++) this.imgs.push(this.imgNodes[i]);
-    this.loadNextImage();
+    // this.imgQueue = null;
+    let imgNodes = this.el.querySelectorAll('[data-src]');
+    this.imageEls = [];
+    for(let i=0; i < imgNodes.length; i++) this.imageEls.push(imgNodes[i]);
+    this.queuedEls = [];
+    this.loading = false;
+    this.queueVisibleImages();
+    this.addScrollHandler();
+  }
+
+  // scroll handling
+
+  addScrollHandler() {
+    this.scrollHandler = this.scrolled.bind(this);
+    window.addEventListener('scroll', this.scrollHandler);
+  }
+
+  removeScrollHandler() {
+    if(this.scrollHandler == null) return;
+    window.removeEventListener('scroll', this.scrollHandler);
+    this.scrollHandler = null;
+  }
+
+  scrolled() {
+    this.queueVisibleImages();
+  }
+
+  // check for visible images & queue them up
+
+  queueVisibleImages() {
+    // queue up visible images - splice in reverse
+    let newVisibleImages = [];
+    for (var i = this.imageEls.length - 1; i >= 0; i--) {
+      if(DOMUtil.isElementVisible(this.imageEls[i])) {
+        let visibleImg = this.imageEls.splice(i, 1)[0];
+        newVisibleImages.push(visibleImg);
+      }
+    }
+    // reverse found images and push into queue
+    newVisibleImages.reverse();
+    newVisibleImages.forEach((el, i) => {
+      this.queuedEls.push(el);
+    });
+    // kick off loading if we're not already loading
+    if(this.loading == false) this.loadNextImage();
+    // clean up if all images are loaded
+    if(this.imageEls.length == 0 && this.queuedEls.length == 0) {
+      this.dispose();
+    }
   }
 
   loadNextImage() {
-    if(this.imgs.length == 0) this.scrollHandler = null;
-    if(this.imgs.length == 0) return;
-    let curImg = this.imgs.shift();
-    // load if on-screen, otherwise queue up and watch for scrolling
-    if(DOMUtil.isElementVisible(curImg) == true) {
+    if(this.queuedEls.length > 0) {
+      let curImg = this.queuedEls.shift();
       this.loadImage(curImg);
-    } else {
-      this.queueImage(curImg);
     }
   }
 
   loadImage(curImg) {
+    this.loading = true;
     let img = new Image();
+    // complete/error callbacks
     img.onload = () => {
-      if(curImg.getAttribute('data-src-bg')) {
-        curImg.style.backgroundImage = `url(${img.src})`;
-      } else {
-        curImg.setAttribute('src', img.src);
-      }
-      curImg.removeAttribute('data-src');
+      this.loading = false;
+      this.cleanUpImg(curImg, img);
       this.loadNextImage();
     };
     img.onerror = () => {
+      this.loading = false;
       this.loadNextImage();
     };
+    // trigger load from image path
     img.src = curImg.getAttribute('data-src');
   }
 
-  queueImage(curImg) {
-    if(this.scrollHandler == null) {
-      this.scrollHandler = this.scrolled.bind(this);
-      window.addEventListener('scroll', this.scrollHandler);
+  cleanUpImg(curImg, img) {
+    if(curImg.getAttribute('data-src-bg')) {
+      curImg.style.backgroundImage = `url(${img.src})`;
+    } else {
+      curImg.setAttribute('src', img.src);
     }
-    this.imgQueue = curImg;
+    curImg.removeAttribute('data-src-bg');
+    curImg.removeAttribute('data-src');
   }
 
-	scrolled() {
-    if(this.scrollHandler != null) {
-      if(this.imgQueue != null) {
-        if(DOMUtil.isElementVisible(this.imgQueue) == true) {
-          this.loadImage(this.imgQueue);
-          this.imgQueue = null;
-        }
-      }
-    } else {
-      this.dispose();
-    }
-	}
+  // array helpers
+
+  clearArray(array) {
+    array.splice(0, array.length);
+  }
+
+  // lifecycle
 
 	dispose() {
-    window.removeEventListener('scroll', this.scrollHandler);
+    this.removeScrollHandler();
+    this.clearArray(this.imageEls);
+    this.clearArray(this.queuedEls);
 	}
 
 }
