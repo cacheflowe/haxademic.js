@@ -319,6 +319,11 @@ class MathUtil {
 
 }
 
+  static saw(rads) {
+    let val = Math.abs((rads % (Math.PI * 2)) - Math.PI);
+    return (val / Math.PI) * 2 - 1;
+  };
+
 MathUtil.TWO_PI = Math.PI * 2;
 
 /*

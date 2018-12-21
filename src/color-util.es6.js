@@ -56,6 +56,15 @@ class ColorUtil {
   }
 
   /**
+   *  Converts a hex string to a THREE/PIXI-friendly hex number.
+   *  @return A hex color string.
+   *  @use    {@code ColorUtil.hexStr2HexNum('#ff0000);}
+   */
+  static hexStr2HexNum(str) {
+    return parseInt(str.replace(/^#/, ''), 16);
+  }
+
+  /**
    *  Converts r, g, b, a values to canvas-friendly rgba string.
    *  @return An rgba color string.
    *  @use    {@code CanvasUtil.rgbToCanvasColor(0, 0, 0, 0.5);}
@@ -70,7 +79,7 @@ class ColorUtil {
    *  @use    {@code CanvasUtil.rgbToBrightness(0, 255, 0);}
    */
   static rgbToBrightness( r, g, b ) {
-    return (r + g + b) / 768; // 768 is r,g,b: 256*3
+    return (r + g + b) / 765; // 765 is r,g,b: 255*3
   }
 
   // from: https://stackoverflow.com/questions/13806483/increase-or-decrease-color-saturation

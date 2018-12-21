@@ -2,11 +2,17 @@ class PixiStage {
 
   constructor(el, bgColor, id) {
     this.el = el;
+    this.elSize = this.el.getBoundingClientRect();
     this.devicePixelRatio = window.devicePixelRatio;
-    this.renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight, {
+    PIXI.settings.PRECISION_FRAGMENT = 'highp'; //this makes text looks better
+    this.renderer = PIXI.autoDetectRenderer(this.elSize.width, this.elSize.height, {
       backgroundColor: bgColor,
+      transparent: false,
       resolution: this.devicePixelRatio
     });
+    // this.renderer.roundPixels = true; //and this too
+    // this.pixiApp = new PIXI.Application(); // alternate/new PIXI app/renderer. info: http://pixijs.download/dev/docs/PIXI.Application.html
+    // this.el.appendChild(app.view);
     this.renderer.view.classList.add(id);
     this.el.appendChild(this.renderer.view);
     this.stage = new PIXI.Container();
@@ -31,7 +37,8 @@ class PixiStage {
   }
 
   resize() {
-    this.renderer.resize(window.innerWidth, window.innerHeight);
+    this.elSize = this.el.getBoundingClientRect();
+    this.renderer.resize(this.elSize.width, this.elSize.height);
   }
 
 }

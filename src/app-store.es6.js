@@ -38,7 +38,8 @@ class AppStore {
     const objs = this.methods[key];
     if(objs) {
       objs.forEach((el) => {
-        el[key](value);
+        if(el[key]) el[key](value);
+        else throw new Error('AppStore listener has no callback: ' + key);
       });
     }
   }

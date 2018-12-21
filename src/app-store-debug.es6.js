@@ -10,6 +10,7 @@ class AppStoreDebug {
   initKeyListener() {
     window.addEventListener('keyup', (e) => {
       var key = e.keyCode ? e.keyCode : e.which;
+      // console.log('key', key);
       if(key == 32) {
         this.showing = !this.showing;
       }
@@ -35,8 +36,7 @@ class AppStoreDebug {
     let htmlStr = '<table>';
     for(let storeKey in _store.state) {
       let val = _store.state[storeKey];
-      // console.log(typeof val);
-      if(typeof val == "object" && val.length > 0) val = `Array(${val.length})`;
+      if(val && typeof val == "object" && val.length && val.length > 0) val = `Array(${val.length})`; // special display for arrays
       htmlStr += `<tr><td>${storeKey}</td><td>${val}</td></tr>`;
     }
     htmlStr += '</table>';

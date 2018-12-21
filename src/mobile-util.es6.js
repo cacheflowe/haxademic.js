@@ -33,6 +33,14 @@ class MobileUtil {
     }, false);
   }
 
+  static disableTrackpadZoom() {
+    window.addEventListener('mousewheel', function(e) {
+      if(e.ctrlKey) {
+        e.preventDefault();
+      }
+    });
+  }
+
   static hideSoftKeyboard() {
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur()
     var inputs = document.querySelectorAll('input');
