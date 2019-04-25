@@ -1,7 +1,7 @@
 class AppStoreDebug {
 
-  constructor() {
-    this.showing = false;
+  constructor(showing=false) {
+    this.showing = showing;
     this.buildElement();
     _store.addListener(this);
     this.initKeyListener();
