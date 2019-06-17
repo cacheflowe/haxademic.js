@@ -25,7 +25,27 @@ class CustomSketch extends P5Sketch {
       this.fft.setInput(this.mic);
     }
 
-    // load shader
+    // load shaders
+    this.lightLeakShader = p.createShader(P5Sketch.defaultVertShader, `
+      // from: http://glslsandbox.com/e#24303.0
+      precision mediump float;
+      varying vec2 vTexCoord;
+      uniform float iTime;
+      const float Pi = 3.14159;
+      void main() {
+      	vec2 p = vTexCoord.xy;
+
+      	for(int i = 1; i < 6; i++) {
+      		vec2 newp = p;
+      		newp.x += 0.6 / float(i) * cos(float(i) * p.y + (iTime * 10.0) / 10.0 + 0.3 * float(i)) + 400. / 20.0;
+      		newp.y += 0.6 / float(i) * cos(float(i) * p.x + (iTime * 10.0) / 10.0 + 0.3 * float(i + 10)) - 400. / 20.0 + 15.0;
+      		p = newp;
+      	}
+      	vec3 col = vec3(0.5 * sin(3.0 * p.x) + 0.5, 0.5 * sin(3.0 * p.y) + 0.5, sin(p.x + p.y));
+      	gl_FragColor = vec4(col, 1.0);
+      }
+    `);
+
     this.lumaShader = p.createShader(P5Sketch.defaultVertShader, `
         precision mediump float;
         varying vec2 vTexCoord;
@@ -55,7 +75,9 @@ class CustomSketch extends P5Sketch {
           return fract(sin(iTime)*1e4);
         }
         void main() {
-          vec2 uv = vTexCoord * 0.5;
+          vec2 uv = vTexCoord;
+          uv.y = 1.0 - uv.y;
+          uv *= 0.5;
           vec4 origColor = texture2D(tex, uv);
           vec2 uvR = uv;
           vec2 uvB = uv;
@@ -84,15 +106,22 @@ class CustomSketch extends P5Sketch {
         }
       `);
 
-      // creat pg for post-processing
+      // create pg for post-processing
       this.pg = this.createGraphics(p.width, p.height);//, p5.prototype.WEBGL, this);
       this.pg.background(0);
   }
 
   draw() {
-    // draw bg & audio
-    p.translate(-p.width/2, -p.height/2);
-    p.background(100 + 55 * Math.sin(p.frameCount * 0.09), 0, 0);
+    // draw background
+    // if(p.frameCount % 15 < 5)
+    p.background(100 + 55 * Math.sin(p.frameCount * 0.09), 0, 0, 0);
+    // p.fill(0, 5);
+    // p.rect(0, 0, this.width, this.height);
+
+    // draw shape
+    p.fill(255);
+    p.noStroke();
+    p.translate(-p.width/2, -p.height/2, 1);
     p.circle(p.width/2 + p.width * 0.25 * Math.sin(p.frameCount * 0.05), p.height/2, 100);
 
     if(this.micInput == true) {
@@ -106,26 +135,27 @@ class CustomSketch extends P5Sketch {
     // this.pg.image(this.drawingContext, 0, 0);
     // this.pg.copy(p, 0, 0, this.pg.width, this.pg.height, 0, 0, this.pg.width, this.pg.height);
 
+    // framerate
+    // p.fill(255);
+    // p.stroke(255);
+    // p.text(p.frameRate+"", 20, 20);
+
     // run shader. rect supplies geometry to affect
     if(this.frameCount % 100 < 50) {
       // test shader
       // this.lumaShader.setUniform('tex', this.pg);
       // p.shader(this.lumaShader);
-      // glitch shader
+      // p.rect(0, 0, this.width, this.height);
+      // p.resetShader();
+
+      // apply glitch shader
       this.glitchShader.setUniform('tex', this.pg);
       this.glitchShader.setUniform('iTime', this.frameCount * 0.1);
-      this.glitchShader.setUniform('amp', 1.5);
+      this.glitchShader.setUniform('amp', 1.);
       p.shader(this.glitchShader);
-
-      // apply shader
       p.rect(0, 0, this.width, this.height);
       p.resetShader();
     }
-
-    // framerate
-    p.fill(255);
-    p.stroke(255);
-    // p.text(p.frameRate+"", 20, 20);
   }
 
   drawAudioSpectrum(spectrum) {
