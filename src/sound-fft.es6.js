@@ -8,6 +8,7 @@ class SoundFFT {
     this.context = context;
     this.audioNode = audioNode;
     this.debug = false;
+
     // send sound node to analyser. the main destination output remains intact
     this.analyser = this.context.createAnalyser();
     this.analyser.fftSize = 512;
