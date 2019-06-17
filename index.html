@@ -22,6 +22,10 @@
       </div>
     </div>
 
+    <!-- Vendor -->
+    <script src="./vendor/pixi.min.js"></script>
+    <script src="./vendor/zora.js"></script>
+
     <!-- Library -->
     <script src="./src/console.es6.js"></script>
     <script src="./src/improved-noise.es6.js"></script>
@@ -40,12 +44,13 @@
     <script src="./src/oscillations.es6.js"></script>
     <script src="./src/page-visibility.es6.js"></script>
     <script src="./src/penner.es6.js"></script>
+    <script src="./src/pixi-sprite-scale.es6.js"></script>
+    <script src="./src/pixi-stage.es6.js"></script>
     <script src="./src/pointer-pos.es6.js"></script>
     <script src="./src/string-formatter.es6.js"></script>
     <script src="./src/svg-util.es6.js"></script>
 
     <!-- Tests -->
-    <script src="./vendor/zora.js"></script>
     <script>
       // insert test results here
       const mainEl = document.getElementById('main');
@@ -65,6 +70,7 @@
       console.todo('Not tested: EasingFloat');
       console.todo('Not tested: LinearFloat');
       console.todo('Not tested: Penner');
+      console.todo('Not tested: PixiStage');
       console.todo('Not tested: ElasticFloat');
       console.todo('Not tested: EaseToValueCallback');
       console.todo('Not tested: PointerPos');
@@ -89,6 +95,7 @@
     <script src="./tests/oscillations-tests.es6.js"></script>
     <script src="./tests/page-visibility-tests.es6.js"></script>
     <script src="./tests/penner-tests.es6.js"></script>
+    <script src="./tests/pixi-stage-tests.es6.js"></script>
     <script src="./tests/pointer-pos-tests.es6.js"></script>
     <script src="./tests/string-formatter-tests.es6.js"></script>
     <script src="./tests/svg-util-tests.es6.js"></script>

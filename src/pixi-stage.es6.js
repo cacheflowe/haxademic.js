@@ -1,44 +1,55 @@
 class PixiStage {
 
-  constructor(el, bgColor, id) {
+  constructor(el=document.body, bgColor=0x000000, id='pixi') {
+    // store elements
     this.el = el;
     this.elSize = this.el.getBoundingClientRect();
-    this.devicePixelRatio = window.devicePixelRatio;
-    PIXI.settings.PRECISION_FRAGMENT = 'highp'; //this makes text looks better
-    this.renderer = PIXI.autoDetectRenderer(this.elSize.width, this.elSize.height, {
-      backgroundColor: bgColor,
-      transparent: false,
-      resolution: this.devicePixelRatio
+    this.devicePixelRatio = window.devicePixelRatio || 1;
+    // PIXI.settings.PRECISION_FRAGMENT = 'highp'; //this makes text looks better
+
+    // create app
+    this.app = new PIXI.Application({
+        width: this.elSize.width,
+        height: this.elSize.height,
+        backgroundColor: bgColor,
+        transparent: false,
+        resizeTo: this.el,
+        autoDensity: true,
+        resolution: this.devicePixelRatio,
     });
-    // this.renderer.roundPixels = true; //and this too
-    // this.pixiApp = new PIXI.Application(); // alternate/new PIXI app/renderer. info: http://pixijs.download/dev/docs/PIXI.Application.html
-    // this.el.appendChild(app.view);
-    this.renderer.view.classList.add(id);
-    this.el.appendChild(this.renderer.view);
-    this.stage = new PIXI.Container();
-    this.stage.interactive = true;
-    this.resize();
+
+    el.appendChild(this.app.view);
+    this.rootContainer = new PIXI.Container();
+    this.app.stage.addChild(this.rootContainer);
+    // this.app.stage.interactive = true;
+  }
+
+  addFrameListener(fn) {
+    this.app.ticker.add(fn);
+  }
+
+  stage() {
+    return this.app.stage;
   }
 
   container() {
-    return this.stage;
+    return this.rootContainer;
   }
 
   width() {
-    return this.renderer.width / this.devicePixelRatio;
+    return this.app.renderer.width / this.devicePixelRatio;
+  }
+
+  widthRenderer() {
+    return this.app.renderer.width;
   }
 
   height() {
-    return this.renderer.height / this.devicePixelRatio;
+    return this.app.renderer.height / this.devicePixelRatio;
   }
 
-  render() {
-    this.renderer.render(this.stage);
-  }
-
-  resize() {
-    this.elSize = this.el.getBoundingClientRect();
-    this.renderer.resize(this.elSize.width, this.elSize.height);
+  heightRenderer() {
+    return this.app.renderer.height;
   }
 
 }
