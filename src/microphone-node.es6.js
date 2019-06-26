@@ -1,14 +1,24 @@
 class MicrophoneNode {
 
-  constructor(context, callback) {
+  constructor(context, callback, errorCallback) {
+    this.context = context || new AudioContext();
     navigator.mediaDevices.getUserMedia({audio: true})
-    .then(function(stream) {
-      let source = context.createMediaStreamSource(stream);
-      window.source = source; // fix for FF bug: https://stackoverflow.com/questions/22860468/html5-microphone-capture-stops-after-5-seconds-in-firefox
-      callback(source);
+    .then((stream) => {
+      this.micNode = this.context.createMediaStreamSource(stream);
+      window.micNode = this.micNode; // fix for FF bug: https://stackoverflow.com/questions/22860468/html5-microphone-capture-stops-after-5-seconds-in-firefox
+      callback(this.micNode);
     })
-    .catch(function(err) {
-      console.log('The following gUM error occured: ' + err);
+    .catch((err) => {
+      if(errorCallback) errorCallback(err);
+      else console.log('The following getUserMedia error occured: ' + err);
     });
   }
+
+  getNode() {
+    return this.micNode;
+  }
+  getContext() {
+    return this.context;
+  }
+
 }

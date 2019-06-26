@@ -161,6 +161,10 @@ class SoundFFT {
     this.ctx.lineWidth = 2;
   }
 
+  getDebugCanvas() {
+    return this.canvas;
+  }
+
   drawDebug() {
     if(this.ctx == null) this.buildDebugCanvas();
 
