@@ -17,7 +17,7 @@ class CustomSketch extends P5Sketch {
     this.mainCanvas = new p5.Element(this.canvas, this);
 
     // load microphone(?)
-    this.micInput = false;
+    this.micInput = true;
     if(this.micInput) {
       this.mic = new p5.AudioIn();
       this.mic.start();
