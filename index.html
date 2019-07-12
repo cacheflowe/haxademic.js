@@ -55,6 +55,7 @@
     <script src="./src/sound-fft.es6.js"></script>
     <script src="./src/string-formatter.es6.js"></script>
     <script src="./src/svg-util.es6.js"></script>
+    <script src="./src/user-interaction-timeout.es6.js"></script>
 
     <!-- Tests -->
     <script>
@@ -70,18 +71,6 @@
 
       // load test runner
       console.important('Running tests:');
-      console.todo('Not tested: MathUtil');
-      console.todo('Not tested: CanvasFilters');
-      console.todo('Not tested: CanvasUtil');
-      console.todo('Not tested: EasingFloat');
-      console.todo('Not tested: LinearFloat');
-      console.todo('Not tested: Penner');
-      console.todo('Not tested: PixiStage');
-      console.todo('Not tested: ElasticFloat');
-      console.todo('Not tested: EaseToValueCallback');
-      console.todo('Not tested: PointerPos');
-      console.todo('Not tested: EasyScroll');
-      console.todo('Not tested: FloatBuffer');
       const zoraTests = Zora();
     </script>
     <script src="./tests/console-tests.es6.js"></script>
@@ -107,6 +96,7 @@
     <script src="./tests/pointer-pos-tests.es6.js"></script>
     <script src="./tests/string-formatter-tests.es6.js"></script>
     <script src="./tests/svg-util-tests.es6.js"></script>
+    <script src="./tests/user-interaction-timeout-tests.es6.js"></script>
     <script>
       // run unit tests
       zoraTests.run();
