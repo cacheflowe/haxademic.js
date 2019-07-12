@@ -5,26 +5,34 @@
 // header
 mainEl.appendChild(DOMUtil.stringToDomElement("<h1>SVGUtil</h1>"));
 
-// add test svg to dom
+// add original test svg to dom as inline svg
+mainEl.appendChild(DOMUtil.stringToDomElement("<span class='svg-test-inline'></span>"));
+let svgTestInline = document.querySelector('.svg-test-inline');
 let svgEl = DOMUtil.stringToDomElement(SVGUtil.testSVG);
+svgTestInline.appendChild(DOMUtil.stringToDomElement(`<div>Original inline svg</div>`));
+svgTestInline.appendChild(svgEl);
 
 // turn it into a png image
+mainEl.appendChild(DOMUtil.stringToDomElement("<span class='svg-test-results-1'></span>"));
+let svgTestResults1 = document.querySelector('.svg-test-results-1');
 SVGUtil.rasterizeSVG(svgEl, (base64Img) => {
-  insertHtmlStr(`<code>SVGUtil.rasterizeSVG(svgEl, (base64Img) => { console.log(base64Img); })</code> (png)`);
+  svgTestResults1.appendChild(DOMUtil.stringToDomElement(`<div><code>SVGUtil.rasterizeSVG(svgEl, (base64Img) => { console.log(base64Img); })</code> (png)</div>`));
   let svgImg = document.createElement('img');
   svgImg.src = base64Img;
-  mainEl.appendChild(svgImg);
+  svgTestResults1.appendChild(svgImg);
 });
 
 // turn it into a jpg image
+mainEl.appendChild(DOMUtil.stringToDomElement("<span class='svg-test-results-2'></span>"));
+let svgTestResults2 = document.querySelector('.svg-test-results-2');
 SVGUtil.rasterizeSVG(svgEl, (base64Img) => {
-  insertHtmlStr(`<code>SVGUtil.rasterizeSVG(svgEl, (base64Img) => { console.log(base64Img); }, 0.8)</code> (jpg, 0.8 quality)`);
+  svgTestResults2.appendChild(DOMUtil.stringToDomElement(`<div><code>SVGUtil.rasterizeSVG(svgEl, (base64Img) => { console.log(base64Img); }, 0.8)</code> (jpg, 0.8 quality)</div>`));
   let svgImg = document.createElement('img');
   svgImg.src = base64Img;
-  mainEl.appendChild(svgImg);
-  insertHtmlStr('<hr/>');
+  svgTestResults2.appendChild(svgImg);
 }, 0.8);
 
+insertHtmlStr('<hr/>');
 
 /////////////////////////////////////////////
 // Unit tests
