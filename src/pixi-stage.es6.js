@@ -15,6 +15,7 @@ class PixiStage {
         transparent: false,
         resizeTo: this.el,
         autoDensity: true,
+        antialias: true,
         resolution: this.devicePixelRatio,
     });
 
@@ -52,4 +53,7 @@ class PixiStage {
     return this.app.renderer.height;
   }
 
+  fps() {
+    return this.app.ticker.FPS;
+  }
 }

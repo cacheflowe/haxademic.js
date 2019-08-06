@@ -16,16 +16,19 @@ class AppStoreDebug {
       }
       if(this.showing == false) {
         this.container.innerHTML = '';
+        this.container.style.display = 'none';
       } else {
         this.printStore();
+        this.container.style.display = 'block';
       }
     });
   }
 
   buildElement() {
     this.container = document.createElement( 'div' );
-    this.container.style.cssText = 'position:fixed;top:0;left:0;height:100%;overflow-y:scroll;opacity:0.9;z-index:9999;background:rgba(255,255,255,0.8);color:#000 !important;';
+    this.container.style.cssText = 'font-family:arial;font-size:12px;position:fixed;top:0;left:0;padding:12px;height:100%;overflow-y:auto;opacity:0.9;z-index:9999;background:rgba(0,0,0,0.8);color:#fff !important;';
     document.body.appendChild(this.container);
+    this.container.style.display = 'none';
   }
 
   storeUpdated(key, value) {

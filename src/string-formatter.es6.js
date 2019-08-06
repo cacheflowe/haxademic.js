@@ -8,7 +8,7 @@ class StringFormatter {
    */
   static formatPhone(str) {
     return (str + '').replace(/[() -]*(?:\d?)[() -.]*(\d{3})[() -.]*(\d{3})[() -.]*(\d{4})[() -]*/, '($1) $2-$3');
-  };
+  }
 
   /**
    *  Returns a standardized social security number string.
@@ -18,7 +18,7 @@ class StringFormatter {
    */
   static formatSSN(str) {
     return (str + '').replace(/(\d{3})[ -]*(\d{2})[ -]*(\d{4})/, '$1-$2-$3');
-  };
+  }
 
   /**
    *  Returns a standardized credit card number string.
@@ -28,7 +28,7 @@ class StringFormatter {
    */
   static formatCreditCard(str) {
     return (str + '').replace(/(\d{4})[ -]*(\d{4})[ -]*(\d{4})[ -]*(\d{4})/, '$1 $2 $3 $4');
-  };
+  }
 
   /**
    *  Returns a number, removing non-numeric characters.
@@ -43,7 +43,7 @@ class StringFormatter {
     } else {
       return str;
     }
-  };
+  }
 
   /**
    *  Returns a number with the traditional US currency format.
@@ -63,7 +63,7 @@ class StringFormatter {
       numParts[1] = numParts[1].substr(0, 2);
     }
     return '$' + numParts.join('.');
-  };
+  }
 
   /**
    *  Returns a string, formatted with commas in between every 3 numbers.
@@ -80,7 +80,7 @@ class StringFormatter {
       x1 = x1.replace(rgx, '$1' + ',' + '$2');
     }
     return x1 + x2;
-  };
+  }
 
   /**
    *  Returns a time as a string, with or without hours.
@@ -89,18 +89,21 @@ class StringFormatter {
    *  @return A formatted time.
    *  @use    {@code var time = StringFormatter.timeFromSeconds(30000, true);}
    */
-  static timeFromSeconds(seconds, showHours) {
-    var h = Math.floor(seconds / 3600);
+  static timeFromSeconds(seconds, showHours=false, showMs=false) {
+    var h = Math.floor(seconds / 60 / 60);
     var m = Math.floor(seconds % 3600 / 60);
-    var s = Math.floor(seconds % 3600 % 60);
+    var ms = Math.floor((seconds % 1) * 100);// * 0.001;
+    var s = Math.floor(seconds % 60);
     var hStr = (h < 10 ? "0" : "") + h;
     var mStr = (m < 10 ? "0" : "") + m;
     var sStr = (s < 10 ? "0" : "") + s;
-    if(showHours == true) {
-      return hStr + ':' + mStr + ':' +sStr;
-    } else {
-      return mStr + ':' +sStr;
-    }
-  };
+    var msStr = (ms < 10 ? "0" : "") + ms;
+    return (
+      ((showHours) ? hStr + ':' : '') +
+      mStr + ':' +
+      sStr +
+      ((showMs) ? ':' + msStr : '')
+    );
+  }
 
 }
