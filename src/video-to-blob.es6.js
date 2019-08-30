@@ -12,8 +12,8 @@ class VideoToBlob {
     xhr.send();
     xhr.onload = function() {
       if (xhr.status !== 200) {
-        alert('Unexpected status code ' + xhr.status + ' for ' + url);
-        return false;
+        console.warn('VideoToBlob.loadFile() :: Unexpected status code ' + xhr.status + ' for ' + url);
+        // return false;
       }
       fileLoadCallback(new Uint8Array(xhr.response));
     };
