@@ -1,7 +1,7 @@
 class URLUtil {
 
   static getHashQueryVariable(variable) {
-    var query = window.location.hash.substring(1);
+    var query = decodeURIComponent(window.location.hash.substring(1)); // decode in case of it being encoded
     var vars = query.split('&');
     for (var i = 0; i < vars.length; i++) {
       var pair = vars[i].split('=');

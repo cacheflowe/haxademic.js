@@ -22,6 +22,11 @@ class DOMUtil {
     return null;
   }
 
+  static stringToElement(str) {
+    let doc = new DOMParser().parseFromString(str, 'text/html');
+    return doc.body.firstElementChild;
+  }
+
   static stringToDomElement(str) {
     let div = document.createElement('div');
     div.innerHTML = str;

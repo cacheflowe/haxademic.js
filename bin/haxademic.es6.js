@@ -875,6 +875,11 @@ class DOMUtil {
     return null;
   }
 
+  static stringToElement(str) {
+    let doc = new DOMParser().parseFromString(str, 'text/html');
+    return doc.body.firstElementChild;
+  }
+
   static stringToDomElement(str) {
     let div = document.createElement('div');
     div.innerHTML = str;
@@ -939,21 +944,24 @@ class EasingFloat {
   constructor(value = 0, easeFactor = 8, completeRange = 0.001) {
     this.val = value;
     this.targetVal = value;
-    this.easeFactor = easeFactor;
+    this.easeFactor = (easeFactor <= 1) ? 1 / easeFactor : easeFactor;
     this.completeRange = completeRange;
     this.speed = 0;
   }
 
   setTarget(value) {
     if(!isNaN(parseFloat(value))) this.targetVal = value;
+    return this;
   }
 
   setValue( value ) {
     this.val = value;
+    return this;
   }
 
   setEaseFactor( value ) {
     this.easeFactor = value;
+    return this;
   }
 
   value() {
@@ -962,6 +970,10 @@ class EasingFloat {
 
   target() {
     return this.targetVal;
+  }
+
+  isComplete() {
+    return this.val == this.targetVal;
   }
 
   update(accelerates=false) {
@@ -1660,14 +1672,17 @@ class LinearFloat {
 
   setValue( value ) {
   	this.val = value;
+    return this;
   }
 
   setTarget( value ) {
   	this.targetVal = value;
+    return this;
   }
 
   setInc( value ) {
   	this.inc = value;
+    return this;
   }
 
   value() {
@@ -1688,6 +1703,10 @@ class LinearFloat {
 
   target() {
   	return this.targetVal;
+  }
+
+  isComplete() {
+    return this.val == this.targetVal;
   }
 
   update() {
@@ -3590,7 +3609,7 @@ class ThreeScene {
 class URLUtil {
 
   static getHashQueryVariable(variable) {
-    var query = window.location.hash.substring(1);
+    var query = decodeURIComponent(window.location.hash.substring(1)); // decode in case of it being encoded
     var vars = query.split('&');
     for (var i = 0; i < vars.length; i++) {
       var pair = vars[i].split('=');
@@ -3644,7 +3663,6 @@ class VideoToBlob {
     xhr.onload = function() {
       if (xhr.status !== 200) {
         console.warn('VideoToBlob.loadFile() :: Unexpected status code ' + xhr.status + ' for ' + url);
-        // return false;
       }
       fileLoadCallback(new Uint8Array(xhr.response));
     };
@@ -3672,13 +3690,12 @@ class VideoToBlob {
       videoEl.volume = 0;
 
       this.callback(videoEl);
-
-      // this.buildVideoTexture();
     });
   }
 
   // buildVideoTexture() {
   //   var texture = PIXI.Texture.from(this.videoEl);
+  //   texture.baseTexture.resource.updateFPS = 30;
   //   this.sprite = new PIXI.Sprite(texture);
   //   this.container.addChild(this.sprite);
   //   this.sprite.mask = this.maskGraphics;

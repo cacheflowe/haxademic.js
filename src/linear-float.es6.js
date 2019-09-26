@@ -8,14 +8,17 @@ class LinearFloat {
 
   setValue( value ) {
   	this.val = value;
+    return this;
   }
 
   setTarget( value ) {
   	this.targetVal = value;
+    return this;
   }
 
   setInc( value ) {
   	this.inc = value;
+    return this;
   }
 
   value() {
@@ -36,6 +39,10 @@ class LinearFloat {
 
   target() {
   	return this.targetVal;
+  }
+
+  isComplete() {
+    return this.val == this.targetVal;
   }
 
   update() {

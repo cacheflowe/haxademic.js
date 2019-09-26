@@ -3,21 +3,24 @@ class EasingFloat {
   constructor(value = 0, easeFactor = 8, completeRange = 0.001) {
     this.val = value;
     this.targetVal = value;
-    this.easeFactor = easeFactor;
+    this.easeFactor = (easeFactor <= 1) ? 1 / easeFactor : easeFactor;
     this.completeRange = completeRange;
     this.speed = 0;
   }
 
   setTarget(value) {
     if(!isNaN(parseFloat(value))) this.targetVal = value;
+    return this;
   }
 
   setValue( value ) {
     this.val = value;
+    return this;
   }
 
   setEaseFactor( value ) {
     this.easeFactor = value;
+    return this;
   }
 
   value() {
@@ -26,6 +29,10 @@ class EasingFloat {
 
   target() {
     return this.targetVal;
+  }
+
+  isComplete() {
+    return this.val == this.targetVal;
   }
 
   update(accelerates=false) {

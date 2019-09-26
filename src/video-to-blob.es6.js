@@ -13,7 +13,6 @@ class VideoToBlob {
     xhr.onload = function() {
       if (xhr.status !== 200) {
         console.warn('VideoToBlob.loadFile() :: Unexpected status code ' + xhr.status + ' for ' + url);
-        // return false;
       }
       fileLoadCallback(new Uint8Array(xhr.response));
     };
@@ -41,13 +40,12 @@ class VideoToBlob {
       videoEl.volume = 0;
 
       this.callback(videoEl);
-
-      // this.buildVideoTexture();
     });
   }
 
   // buildVideoTexture() {
   //   var texture = PIXI.Texture.from(this.videoEl);
+  //   texture.baseTexture.resource.updateFPS = 30;
   //   this.sprite = new PIXI.Sprite(texture);
   //   this.container.addChild(this.sprite);
   //   this.sprite.mask = this.maskGraphics;
