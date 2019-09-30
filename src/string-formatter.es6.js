@@ -106,4 +106,8 @@ class StringFormatter {
     );
   }
 
+  static replaceLineBreaksWithString(inputStr, lineBreakReplacement) {
+    return inputStr.replace(/(\r\n|\n|\r)/gm, lineBreakReplacement);
+  }
+
 }
