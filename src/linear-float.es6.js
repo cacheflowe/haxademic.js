@@ -4,6 +4,7 @@ class LinearFloat {
     this.val = value;
     this.targetVal = value;
     this.inc = inc;
+    this.delay = 0;
   }
 
   setValue( value ) {
@@ -20,6 +21,11 @@ class LinearFloat {
   	this.inc = value;
     return this;
   }
+
+  setDelay(frames) {
+		this.delay = frames;
+		return this;
+	}
 
   value() {
   	return this.val;
@@ -46,6 +52,7 @@ class LinearFloat {
   }
 
   update() {
+    if(this.delay > 0) { this.delay--; return; }
   	if( this.val != this.targetVal ) {
   		var reachedTarget = false;
   		if( this.val < this.targetVal ) {
