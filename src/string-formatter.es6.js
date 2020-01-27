@@ -110,4 +110,10 @@ class StringFormatter {
     return inputStr.replace(/(\r\n|\n|\r)/gm, lineBreakReplacement);
   }
 
+  static removeCharacterAtIndex(str, index) {
+    part1 = str.substring(0, index);
+    part2 = str.substring(index + 1, str.length);
+    return (part1 + part2);
+  }
+
 }
