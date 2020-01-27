@@ -29,6 +29,10 @@ class PixiStage {
     this.app.ticker.add(fn);
   }
 
+  removeFrameListener(fn) {
+    this.app.ticker.remove(fn);
+  }
+
   stage() {
     return this.app.stage;
   }
