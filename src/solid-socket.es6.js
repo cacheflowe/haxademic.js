@@ -76,18 +76,35 @@ class SolidSocket {
   }
 
   checkConnection() {
-    if(this.socket.readyState != WebSocket.OPEN && this.socket.readyState != WebSocket.CONNECTING && Date.now() > this.lastConnectAttemptTime + SolidSocket.RECONNECT_INTERVAL) {
-      // clean up failed socket object
-      this.removeSocketListeners();
-      // initialize a new socket object
-      try{
-        this.socket = new WebSocket(this.wsAddress);
-        this.addSocketListeners();
-      } catch(err) {
-        console.log('Websocket couldn\'t connect: ', err);
-      }
+    let socketOpen = this.socket.readyState == WebSocket.OPEN;
+    let socketConnecting = this.socket.readyState == WebSocket.CONNECTING;
+    let timeForReconnect = Date.now() > this.lastConnectAttemptTime + SolidSocket.RECONNECT_INTERVAL;
+    if(timeForReconnect) {
       this.lastConnectAttemptTime = Date.now();
+
+      // check for disconnected socket
+      if(!socketOpen && !socketConnecting) {
+        // clean up failed socket object
+        this.removeSocketListeners();
+        // initialize a new socket object
+        try{
+          this.socket = new WebSocket(this.wsAddress);
+          this.addSocketListeners();
+        } catch(err) {
+          console.log('Websocket couldn\'t connect: ', err);
+        }
+      }
+
+      // add body class depending on state
+      if(socketOpen) {
+        document.body.classList.add('has-socket');
+        document.body.classList.remove('no-socket');
+      } else {
+        document.body.classList.add('no-socket');
+        document.body.classList.remove('has-socket');
+      }
     }
+    // keep checking connection
     requestAnimationFrame(() => this.checkConnection());
   }
 
