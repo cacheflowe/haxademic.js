@@ -3,13 +3,15 @@ class AppStoreDistributed extends AppStore {
   constructor(socketServerUrl) {
     super();
     // init websock connection
+    this.socketServerUrl = socketServerUrl;
     this.solidSocket = new SolidSocket(socketServerUrl);
     this.solidSocket.setOpenCallback((e) => this.onOpen(e));
     this.solidSocket.setMessageCallback((e) => this.onMessage(e));
   }
 
   onOpen() {
-    console.log('AppStoreDistributed connected!');
+    console.log('AppStoreDistributed connected to ' + this.socketServerUrl);
+    this.set(AppStoreDistributed.CONNECTED, this.socketServerUrl);
   }
 
   onMessage(event) {
@@ -45,3 +47,5 @@ class AppStoreDistributed extends AppStore {
   }
 
 }
+
+AppStoreDistributed.CONNECTED = "AppStoreDistributed_CONNECTED";

@@ -1,6 +1,7 @@
 class SolidSocket {
 
   constructor(wsAddress) {
+    document.body.classList.add('no-socket');
     this.wsAddress = wsAddress;
     this.socket = new WebSocket(wsAddress);
     this.addSocketListeners();
@@ -32,6 +33,8 @@ class SolidSocket {
   // CALLBACKS
 
   onOpen(e) {
+    document.body.classList.add('has-socket');
+    document.body.classList.remove('no-socket');
     if(this.openCallback) this.openCallback(e);
   }
 
