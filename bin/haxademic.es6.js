@@ -111,13 +111,15 @@ class AppStoreDistributed extends AppStore {
   constructor(socketServerUrl) {
     super();
     // init websock connection
+    this.socketServerUrl = socketServerUrl;
     this.solidSocket = new SolidSocket(socketServerUrl);
     this.solidSocket.setOpenCallback((e) => this.onOpen(e));
     this.solidSocket.setMessageCallback((e) => this.onMessage(e));
   }
 
   onOpen() {
-    console.log('AppStoreDistributed connected!');
+    console.log('AppStoreDistributed connected to ' + this.socketServerUrl);
+    this.set(AppStoreDistributed.CONNECTED, this.socketServerUrl);
   }
 
   onMessage(event) {
@@ -154,6 +156,7 @@ class AppStoreDistributed extends AppStore {
 
 }
 
+AppStoreDistributed.CONNECTED = "AppStoreDistributed_CONNECTED";
 class ArrayUtil {
 
   static removeElement(array, element) {
@@ -1138,6 +1141,7 @@ class ElasticFloat {
 class ErrorUtil {
 
   static initErrorCatching() {
+    if(ErrorUtil.INITIALIZED) return;
     window.addEventListener('error', function(error) {
       // get info from error object
       var fileComponents = error.filename.split('/');
@@ -1148,6 +1152,7 @@ class ErrorUtil {
       // write to error panel
       ErrorUtil.showError(`Message: <b>${message}</b><br>File: ${file}<br>Line: ${line}<br>Stack: ${stack}<br>Error message: ${JSON.stringify(error)}<br>`);
     });
+    ErrorUtil.INITIALIZED = true;
   }
 
   static showError(message) {
@@ -1156,7 +1161,7 @@ class ErrorUtil {
     if(!errorContainer) {
       errorContainer = document.createElement('div');
       errorContainer.setAttribute("id", "inline-error");
-      errorContainer.setAttribute("style", "box-sizing: border-box; position: absolute; top: 20px; left: 20px; width: calc(100% - 40px); max-height: calc(100% - 40px); background: rgba(0, 0, 0, 0.7); color: #fff; z-index: 99; font-size: 10px; padding: 10px 20px; overflow: auto;");
+      errorContainer.setAttribute("style", "box-sizing: border-box; position: fixed; top: 20px; left: 20px; width: calc(100% - 40px); max-height: calc(100% - 40px); background: rgba(0, 0, 0, 0.7); color: #fff; z-index: 99; font-size: 10px; padding: 20px 20px 0; overflow: auto;");
       document.body.appendChild(errorContainer);
 
       // click to kill the error alert
@@ -1170,9 +1175,20 @@ class ErrorUtil {
     errorMsgEl.setAttribute("style", "border: 2px solid #ff0000; padding: 20px;");
     errorMsgEl.innerHTML = message;
     errorContainer.appendChild(errorMsgEl);
+
+    // set timeout to delete from dom
+    clearTimeout(ErrorUtil.TIMEOUT);
+    ErrorUtil.TIMEOUT = setTimeout(function() {
+      var errorElDelete = document.querySelector('#inline-error');
+      if(errorElDelete) errorElDelete.parentNode.removeChild(errorElDelete);
+    }, ErrorUtil.TIMEOUT_DURATION);
   }
 
 }
+
+ErrorUtil.INITIALIZED = false;
+ErrorUtil.TIMEOUT = null;
+ErrorUtil.TIMEOUT_DURATION = 60000;
 
 class FloatBuffer {
 
@@ -2715,6 +2731,10 @@ class PixiStage {
     this.app.ticker.add(fn);
   }
 
+  removeFrameListener(fn) {
+    this.app.ticker.remove(fn);
+  }
+
   stage() {
     return this.app.stage;
   }
@@ -3011,6 +3031,7 @@ ShareOut.networkShareDimensions = {
 class SolidSocket {
 
   constructor(wsAddress) {
+    document.body.classList.add('no-socket');
     this.wsAddress = wsAddress;
     this.socket = new WebSocket(wsAddress);
     this.addSocketListeners();
@@ -3042,6 +3063,8 @@ class SolidSocket {
   // CALLBACKS
 
   onOpen(e) {
+    document.body.classList.add('has-socket');
+    document.body.classList.remove('no-socket');
     if(this.openCallback) this.openCallback(e);
   }
 
@@ -3086,18 +3109,35 @@ class SolidSocket {
   }
 
   checkConnection() {
-    if(this.socket.readyState != WebSocket.OPEN && this.socket.readyState != WebSocket.CONNECTING && Date.now() > this.lastConnectAttemptTime + SolidSocket.RECONNECT_INTERVAL) {
-      // clean up failed socket object
-      this.removeSocketListeners();
-      // initialize a new socket object
-      try{
-        this.socket = new WebSocket(this.wsAddress);
-        this.addSocketListeners();
-      } catch(err) {
-        console.log('Websocket couldn\'t connect: ', err);
-      }
+    let socketOpen = this.socket.readyState == WebSocket.OPEN;
+    let socketConnecting = this.socket.readyState == WebSocket.CONNECTING;
+    let timeForReconnect = Date.now() > this.lastConnectAttemptTime + SolidSocket.RECONNECT_INTERVAL;
+    if(timeForReconnect) {
       this.lastConnectAttemptTime = Date.now();
+
+      // check for disconnected socket
+      if(!socketOpen && !socketConnecting) {
+        // clean up failed socket object
+        this.removeSocketListeners();
+        // initialize a new socket object
+        try{
+          this.socket = new WebSocket(this.wsAddress);
+          this.addSocketListeners();
+        } catch(err) {
+          console.log('Websocket couldn\'t connect: ', err);
+        }
+      }
+
+      // add body class depending on state
+      if(socketOpen) {
+        document.body.classList.add('has-socket');
+        document.body.classList.remove('no-socket');
+      } else {
+        document.body.classList.add('no-socket');
+        document.body.classList.remove('has-socket');
+      }
     }
+    // keep checking connection
     requestAnimationFrame(() => this.checkConnection());
   }
 
@@ -3509,6 +3549,12 @@ class StringFormatter {
 
   static replaceLineBreaksWithString(inputStr, lineBreakReplacement) {
     return inputStr.replace(/(\r\n|\n|\r)/gm, lineBreakReplacement);
+  }
+
+  static removeCharacterAtIndex(str, index) {
+    part1 = str.substring(0, index);
+    part2 = str.substring(index + 1, str.length);
+    return (part1 + part2);
   }
 
 }
