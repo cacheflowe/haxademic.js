@@ -40,12 +40,12 @@ function buildSprite(resources) {
   bg.drawRect(0, 0, pixiStage.width(), pixiStage.height());
   pixiStage.container().addChild(bg);
 
-  // build sprite
+  // build image sprite
   sprite = new PIXI.Sprite(resources['cache'].texture);
   sprite.anchor.set(0.5);
   sprite.position.set(pixiStage.width() * 0.5, pixiStage.height() * 0.5);
   PixiSpriteScale.scaleToHeight(sprite, pixiStage.height());
-  pixiStage.container().addChild(sprite);
+  // pixiStage.container().addChild(sprite);
 
   // add a shader. can we load from a text file?
   var shaderFragTint = `
@@ -113,7 +113,7 @@ pixiStage.addFrameListener(function() {
 
     // position & oscillate logo
     sprite.position.set(pixiStage.width() * 0.5, pixiStage.height() * 0.5);
-    PixiSpriteScale.scaleToHeight(sprite, pixiStage.height() * (0.8 + 0.1 * Math.sin(frameCount * 0.01)));
+    PixiSpriteScale.scaleToHeight(sprite, pixiStage.height() * (0.6 + 0.1 * Math.sin(frameCount * 0.01)));
 
     // update shaders
     tint.uniforms.iTime = frameCount * 0.01;

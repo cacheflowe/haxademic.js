@@ -2739,6 +2739,10 @@ class PixiStage {
     return this.app.stage;
   }
 
+  canvas() {
+    return this.app.view;
+  }
+
   container() {
     return this.rootContainer;
   }

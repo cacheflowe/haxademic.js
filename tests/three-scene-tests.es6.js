@@ -33,33 +33,33 @@ class ThreeSceneDemo {
   }
 
   buildCube() {
-    let cubeSize = 100;
-    var materialCube = new THREE.MeshPhongMaterial({
-      color: 0x00ffbb,
-      emissive : 0x000000,
-      specular : 0x111111,
-      shininess : 20,
+    let cubeSize = 200;
+    this.materialCube = new THREE.MeshPhongMaterial({
+      color: 0x00ffbb, // 0x00ffbb
+      emissive : 0x000000, // 0x000000
+      specular : 0x666666,
+      shininess : 10,
       flatShading : false
     });
 
-    this.cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(cubeSize * 0.4, cubeSize, cubeSize), materialCube);
+    this.cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4), this.materialCube);
     this.cubeMesh.castShadow = true;
     this.cubeMesh.position.set(0, 30, 0);
     this.scene.add(this.cubeMesh);
   }
 
   addShadow() {
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     this.scene.add(ambientLight);
-    var pointLight = new THREE.PointLight(0xffffff, 1, 0);
-    pointLight.position.set(-100, 100, 0);
+    var pointLight = new THREE.PointLight(0x444444, 1, 0);
+    pointLight.position.set(-100, 100, 50);
     this.scene.add(pointLight);
 
 		// add shadow plane
     var planeSize = 1000;
 		var plane = new THREE.Mesh(
 			new THREE.PlaneBufferGeometry(planeSize, planeSize),
-      new THREE.MeshLambertMaterial( { color: 0xffffff, emissive: 0x888888, side: THREE.DoubleSide })
+      new THREE.MeshLambertMaterial( { color: 0xffffff, emissive: 0x222222, side: THREE.DoubleSide })
 		);
 		plane.rotation.x = -Math.PI/2;
 		plane.position.set(0, -110, 0);
@@ -94,6 +94,7 @@ class ThreeSceneDemo {
     // cube
     this.cubeMesh.rotation.y += 0.01;
     this.cubeMesh.rotation.x += 0.01;
+    if(this.materialCube.map) this.materialCube.map.needsUpdate = true;
     // lighthelper
     // if(this.lightHelper) this.lightHelper.update();
     // this.spotlight.position.y = this.pointerPos.y() * 10;
@@ -101,9 +102,23 @@ class ThreeSceneDemo {
 
   animate() {
     this.updateObjects();
+    this.checkPixiTexture();
     this.threeScene.render();
     this.frameCount++;
     requestAnimationFrame(() => this.animate());
+  }
+
+  checkPixiTexture() {
+    // lazy create texture map from PIXI demo
+    if(pixiStage && this.textureMapInited != true) {
+      this.textureMapInited = true;
+      // set static size of PIXI stage to avoid THREE continuoulsy converting it to power-of-two size
+      pixiStage.el.style.width = '512px';
+      pixiStage.el.style.height = '256px';
+      window.dispatchEvent(new Event('resize'));  // force PIXI to pick up stage size change
+      // add map to material
+      this.materialCube.map = new THREE.CanvasTexture(pixiStage.canvas());
+    }
   }
 
   resize() {
