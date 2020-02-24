@@ -1,3 +1,9 @@
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
 .shadow {
   filter: drop-shadow( 0 0.1rem 0.6rem rgba(0,0,0,0.5) );
 }

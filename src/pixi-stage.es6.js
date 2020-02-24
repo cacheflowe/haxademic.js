@@ -5,7 +5,7 @@ class PixiStage {
     this.el = el;
     this.elSize = this.el.getBoundingClientRect();
     this.devicePixelRatio = window.devicePixelRatio || 1;
-    // PIXI.settings.PRECISION_FRAGMENT = 'highp'; //this makes text looks better
+    // PIXI.settings.PRECISION_FRAGMENT = 'highp'; // this makes text look better?
 
     // create app
     this.app = new PIXI.Application({

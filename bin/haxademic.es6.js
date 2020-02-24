@@ -2707,7 +2707,7 @@ class PixiStage {
     this.el = el;
     this.elSize = this.el.getBoundingClientRect();
     this.devicePixelRatio = window.devicePixelRatio || 1;
-    // PIXI.settings.PRECISION_FRAGMENT = 'highp'; //this makes text looks better
+    // PIXI.settings.PRECISION_FRAGMENT = 'highp'; // this makes text look better?
 
     // create app
     this.app = new PIXI.Application({
@@ -3620,22 +3620,20 @@ SVGUtil.testSVG2 = '<svg xmlns="http://www.w3.org/2000/svg" height="100" width="
 
 class ThreeScene {
 
-  constructor(el, bgColor = 0xffffff) {
+  constructor(el=document.body, bgColor=0xffffff) {
     this.el = el;
+    this.elSize = this.el.getBoundingClientRect();
     this.bgColor = bgColor;
+    this.devicePixelRatio = window.devicePixelRatio || 1;
     this.buildScene();
-    this.buildCamera();
     this.buildRenderer();
-    this.buildLights();
+    // this.buildLights();
     this.addToDOM();
   }
 
   buildScene() {
     this.scene = new THREE.Scene();
-  }
-
-  buildCamera() {
-    this.getScreenSize();
+    this.getContainerSize();
     this.VIEW_ANGLE = 45;
     this.NEAR = 0.1;
     this.FAR = 20000;
@@ -3646,9 +3644,10 @@ class ThreeScene {
   }
 
   buildRenderer() {
-    this.renderer = new THREE.WebGLRenderer( {antialias:true} );
+    this.renderer = new THREE.WebGLRenderer({antialias:true});
     this.renderer.setClearColor(this.bgColor);
-    this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+		this.renderer.setPixelRatio(this.devicePixelRatio);
+    this.renderer.setSize(this.elSize.width, this.elSize.height);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   }
@@ -3664,23 +3663,30 @@ class ThreeScene {
     this.container.appendChild(this.renderer.domElement);
   }
 
-  update() {
+  getScene() {
+    return this.scene;
+  }
+
+  getCamera() {
+    return this.camera;
+  }
+
+  render() {
     this.renderer.render(this.scene, this.camera);
   }
 
-  getScreenSize() {
-    this.SCREEN_WIDTH = window.innerWidth;
-    this.SCREEN_HEIGHT = window.innerHeight;
-    this.ASPECT = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
+  getContainerSize() {
+    this.elSize = this.el.getBoundingClientRect();
+    this.ASPECT = this.elSize.width / this.elSize.height;
   }
 
   resize() {
-    this.getScreenSize();
-    this.container.style.width = this.SCREEN_WIDTH + 'px';
-    this.container.style.height = this.SCREEN_HEIGHT + 'px';
+    this.getContainerSize();
+    this.container.style.width = this.elSize.width + 'px';
+    this.container.style.height = this.elSize.height + 'px';
     this.camera.aspect = this.ASPECT;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+    this.renderer.setSize(this.elSize.width, this.elSize.height);
   }
 
 }

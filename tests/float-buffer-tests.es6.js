@@ -7,23 +7,23 @@ mainEl.appendChild(DOMUtil.stringToDomElement("<h1>FloatBuffer</h1>"));
 
 // insert title and result holder
 insertHtmlStr(`<code>new FloatBuffer(20)</code>`);
-insertHtmlStr(`<code>FloatBuffer.average()</code> <span class="float-buffer-average"></span>`);
+insertHtmlStr(`<code>FloatBuffer.average()</code> <span style="white-space:nowrap;" class="float-buffer-average"></span>`);
 let bufferAverage = document.querySelector('.float-buffer-average');
-insertHtmlStr(`<code>FloatBuffer.sum()</code> <span class="float-buffer-sum"></span>`);
+insertHtmlStr(`<code>FloatBuffer.sum()</code> <span style="white-space:nowrap;" class="float-buffer-sum"></span>`);
 let bufferSum = document.querySelector('.float-buffer-sum');
-insertHtmlStr(`<code>FloatBuffer.sumPositive()</code> <span class="float-buffer-sum-positive"></span>`);
+insertHtmlStr(`<code>FloatBuffer.sumPositive()</code> <span style="white-space:nowrap;" class="float-buffer-sum-positive"></span>`);
 let bufferSumPositive = document.querySelector('.float-buffer-sum-positive');
-insertHtmlStr(`<code>FloatBuffer.sumNegative()</code> <span class="float-buffer-sum-negative"></span>`);
+insertHtmlStr(`<code>FloatBuffer.sumNegative()</code> <span style="white-space:nowrap;" class="float-buffer-sum-negative"></span>`);
 let bufferSumNegative = document.querySelector('.float-buffer-sum-negative');
-insertHtmlStr(`<code>FloatBuffer.sumAbs()</code> <span class="float-buffer-sum-abs"></span>`);
+insertHtmlStr(`<code>FloatBuffer.sumAbs()</code> <span style="white-space:nowrap;" class="float-buffer-sum-abs"></span>`);
 let bufferSumAbs = document.querySelector('.float-buffer-sum-abs');
-insertHtmlStr(`<code>FloatBuffer.max()</code> <span class="float-buffer-sum-max"></span>`);
+insertHtmlStr(`<code>FloatBuffer.max()</code> <span style="white-space:nowrap;" class="float-buffer-sum-max"></span>`);
 let bufferMax = document.querySelector('.float-buffer-sum-max');
-insertHtmlStr(`<code>FloatBuffer.min()</code> <span class="float-buffer-sum-min"></span>`);
+insertHtmlStr(`<code>FloatBuffer.min()</code> <span style="white-space:nowrap;" class="float-buffer-sum-min"></span>`);
 let bufferMin = document.querySelector('.float-buffer-sum-min');
-insertHtmlStr(`<code>FloatBuffer.maxAbs()</code> <span class="float-buffer-sum-max-abs"></span>`);
+insertHtmlStr(`<code>FloatBuffer.maxAbs()</code> <span style="white-space:nowrap;" class="float-buffer-sum-max-abs"></span>`);
 let bufferMaxAbs = document.querySelector('.float-buffer-sum-max-abs');
-insertHtmlStr(`<code>FloatBuffer.toString()</code> <span class="float-buffer-tostring"></span>`);
+insertHtmlStr(`<code>FloatBuffer.toString()</code><br><span style="white-space:nowrap;" class="float-buffer-tostring"></span>`);
 let bufferToString = document.querySelector('.float-buffer-tostring');
 
 // animate noise
