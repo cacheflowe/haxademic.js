@@ -1,5 +1,5 @@
 // insert test results here
-const mainEl = document.getElementById('main');
+let mainEl = document.getElementById('main');
 
 // insert code
 function insertHtmlStr(str) {
