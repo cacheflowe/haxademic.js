@@ -11,6 +11,7 @@ let pixiEl = document.getElementById('pixi-stage');
 
 // create PIXI stage object
 let pixiStage = new PixiStage(pixiEl);
+window.pixiStage = pixiStage;
 
 // let sprite = PIXI.Sprite.from('images/cacheflowe-logo-trans-white.png');
 // global vars

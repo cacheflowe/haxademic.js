@@ -3,7 +3,7 @@
 /////////////////////////////////////////////
 
 // header
-mainEl.appendChild(DOMUtil.stringToDomElement("<h1>ThreeScene</h1>"));
+mainEl.appendChild(DOMUtil.stringToDomElement("<h1>ThreeScene - GLTFLoader</h1>"));
 
 // create log output element
 insertHtmlStr(`<div id="three-scene" style="height: 400px;"></div>`);
@@ -18,6 +18,7 @@ class ThreeSceneDemo {
     this.buildCube();
     this.addShadow();
     this.startAnimation();
+    this.loadModel();
   }
 
   setupScene() {
@@ -45,7 +46,7 @@ class ThreeSceneDemo {
     this.cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4), this.materialCube);
     this.cubeMesh.castShadow = true;
     this.cubeMesh.position.set(0, 30, 0);
-    this.scene.add(this.cubeMesh);
+    // this.scene.add(this.cubeMesh);
   }
 
   addShadow() {
@@ -57,12 +58,13 @@ class ThreeSceneDemo {
 
 		// add shadow plane
     var planeSize = 1000;
+    this.floorY = -110;
 		var plane = new THREE.Mesh(
 			new THREE.PlaneBufferGeometry(planeSize, planeSize),
       new THREE.ShadowMaterial({ opacity: 0.5 })
 		);
 		plane.rotation.x = -Math.PI/2;
-		plane.position.set(0, -110, 0);
+		plane.position.set(0, this.floorY, 0);
 		plane.receiveShadow = true;
 		this.scene.add(plane);
 
@@ -90,11 +92,51 @@ class ThreeSceneDemo {
 		}
   }
 
+  loadModel() {
+    // Instantiate a GLTF loader
+    var loader = new GLTFLoader();
+    loader.load(
+      // resource URL
+      // '../data/BBall_Test.gltf',
+      '../data/Goddess_UltraLow1.gltf',
+      // called when the resource is loaded
+      (gltf) => {
+        // add gltf model to scene
+        let scaleDown = 0.06;
+        this.model = gltf.scene.children[0];
+        this.model.castShadow = true;
+        this.model.scale.set(scaleDown ,scaleDown ,scaleDown);
+        this.model.position.set(this.model.position.x, this.model.position.y + this.floorY, this.model.position.z);
+        this.model.material.wireframe = true;
+        var modelSize = this.model.geometry.boundingBox.min.sub(this.model.geometry.boundingBox.max);
+        modelSize.set(Math.abs(modelSize.x), Math.abs(modelSize.y), Math.abs(modelSize.z));
+        // this.model.geometry.translate(0, 70, 0);
+        this.scene.add(this.model);
+        console.log(this.model);
+
+        // gltf.animations; // Array<THREE.AnimationClip>
+        // gltf.scene; // THREE.Group
+        // gltf.scenes; // Array<THREE.Group>
+        // gltf.cameras; // Array<THREE.Camera>
+        // gltf.asset; // Object
+      },
+      // called while loading is progressing
+      (xhr) => {
+        console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+      },
+      // called when loading has errors
+      (error) => {
+        console.log( 'GLTF load error' , error);
+      }
+    );
+  }
+
   updateObjects() {
     // cube
-    this.cubeMesh.rotation.y = -0.5 + this.pointerPos.xPercent(threeEl);
-    this.cubeMesh.rotation.x = -0.5 + this.pointerPos.yPercent(threeEl);
+    this.cubeMesh.rotation.y += 0.01;
+    this.cubeMesh.rotation.x += 0.01;
     if(this.materialCube.map) this.materialCube.map.needsUpdate = true;
+    if(this.model) this.model.rotation.y += 0.01;
     // lighthelper
     // if(this.lightHelper) this.lightHelper.update();
     // this.spotlight.position.y = this.pointerPos.y() * 10;
@@ -102,23 +144,9 @@ class ThreeSceneDemo {
 
   animate() {
     this.updateObjects();
-    this.checkPixiTexture();
     this.threeScene.render();
     this.frameCount++;
     requestAnimationFrame(() => this.animate());
-  }
-
-  checkPixiTexture() {
-    // lazy create texture map from PIXI demo
-    if(window.pixiStage && this.textureMapInited != true) {
-      this.textureMapInited = true;
-      // set static size of PIXI stage to avoid THREE continuoulsy converting it to power-of-two size
-      pixiStage.el.style.width = '512px';
-      pixiStage.el.style.height = '256px';
-      window.dispatchEvent(new Event('resize'));  // force PIXI to pick up stage size change
-      // add map to material
-      this.materialCube.map = new THREE.CanvasTexture(pixiStage.canvas());
-    }
   }
 
   resize() {

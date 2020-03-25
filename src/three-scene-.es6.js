@@ -1,9 +1,10 @@
 class ThreeScene {
 
-  constructor(el=document.body, bgColor=0xffffff) {
+  constructor(el=document.body, bgColor=0xffffff, transparent=false) {
     this.el = el;
     this.elSize = this.el.getBoundingClientRect();
     this.bgColor = bgColor;
+    this.transparent = transparent;
     this.devicePixelRatio = window.devicePixelRatio || 1;
     this.buildScene();
     this.buildRenderer();
@@ -24,8 +25,10 @@ class ThreeScene {
   }
 
   buildRenderer() {
-    this.renderer = new THREE.WebGLRenderer({antialias:true});
-    this.renderer.setClearColor(this.bgColor);
+    let options = {antialias: true};
+    if(this.transparent) options.alpha = true;
+    this.renderer = new THREE.WebGLRenderer(options);
+    this.renderer.setClearColor(this.bgColor, (this.transparent) ? 0 : 1);
 		this.renderer.setPixelRatio(this.devicePixelRatio);
     this.renderer.setSize(this.elSize.width, this.elSize.height);
     this.renderer.shadowMap.enabled = true;
@@ -61,12 +64,16 @@ class ThreeScene {
   }
 
   resize() {
+    this.fitToHtmlContainer();
+    this.camera.aspect = this.ASPECT;
+    this.camera.updateProjectionMatrix();
+  }
+
+  fitToHtmlContainer() {
     this.getContainerSize();
     this.container.style.width = this.elSize.width + 'px';
     this.container.style.height = this.elSize.height + 'px';
-    this.camera.aspect = this.ASPECT;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.elSize.width, this.elSize.height);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
 }
