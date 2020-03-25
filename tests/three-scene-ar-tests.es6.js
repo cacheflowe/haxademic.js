@@ -18,6 +18,22 @@ class ThreeSceneArDemo {
       arCameraData: '../vendor/ar.js/data/camera_para.dat',
       arMarkerPatt: '../vendor/ar.js/data/hiro.patt',
       markerActiveCallback: this.arActive.bind(this),
+      lighting: {
+        ambientColor: 0xcccccc,
+        ambientIntensity: 0.65,
+        lightHemiSkyColor: 0xffffff,
+        lightHemiGroundColor: 0xffffff,
+        lightHemiIntensity: 0.65,
+        lightDirectionalColor: 0xaaaaaa,
+        lightDirectionalIntensity: 0.5,
+        lightDirectionalX: 2,
+        lightDirectionalY: 3,
+        lightDirectionalZ: 1,
+        shadowOpacity: 0.5,
+        shadowLightX: 1,
+        shadowLightY: 6,
+        shadowLightZ: 0,
+      }
     }, false);
     this.scene = this.threeScene.getScene();
     this.arRoot = this.threeScene.getArRoot();
@@ -56,6 +72,7 @@ class ThreeSceneArDemo {
         // add gltf model to scene
         this.model = gltf.scene.children[0];
         this.model.castShadow = true;
+        this.model.receiveShadow = true;
         this.model.scale.set(this.baseScale ,this.baseScale ,this.baseScale);
         // this.model.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
         this.model.material.wireframe = false;

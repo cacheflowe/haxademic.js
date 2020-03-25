@@ -1,8 +1,8 @@
 class ThreeSceneAr extends ThreeScene {
 
   // TODO:
-  // - Add a way to show a link to the jpg marker file for testing/printing
   // - Extend THREEx.ArSmoothedControls controls to lerp scale down to hide
+  // - Add a way to show a link to the jpg marker file for testing/printing
   // - Instructions if someone declines camera permission
   //   - Instructions behind camera permission popup?
   // - [Nice-to-have] Whats up with the aspect ratio bug?? Only does it on static test
@@ -15,6 +15,7 @@ class ThreeSceneAr extends ThreeScene {
     this.arCameraData = arJsOptions.arCameraData;
     this.arMarkerPatt = arJsOptions.arMarkerPatt;
     this.markerActiveCallback = arJsOptions.markerActiveCallback || null;
+    this.lighting = arJsOptions.lighting || {};
     this.debug = debug;
     // set state
     this.active = false;
@@ -107,30 +108,36 @@ class ThreeSceneAr extends ThreeScene {
 
   buildLights() {
     // ambient light
-    let ambientLight = new THREE.AmbientLight( 0x888888, 0.5 );
+    const ambientColor = (this.lighting.ambientColor) ? this.lighting.ambientColor : 0xcccccc;
+    const ambientIntensity = (this.lighting.ambientIntensity) ? this.lighting.ambientIntensity : 0.65;
+    let ambientLight = new THREE.AmbientLight(ambientColor, ambientIntensity);
     this.scene.add(ambientLight);
 
     // hemisphere light
-    const skyColor = 0x999999;
-    const groundColor = 0xffffff;
-    const intensity = 0.5;
-    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-    this.scene.add(light);
+    const lightHemiSkyColor = (this.lighting.lightHemiSkyColor) ? this.lighting.lightHemiSkyColor : 0x999999;
+    const lightHemiGroundColor = (this.lighting.lightHemiGroundColor) ? this.lighting.lightHemiGroundColor : 0xffffff;
+    const lightHemiIntensity = (this.lighting.lightHemiIntensity) ? this.lighting.lightHemiIntensity : 0.65;
+    this.lightHemisphere = new THREE.HemisphereLight(lightHemiSkyColor, lightHemiGroundColor, lightHemiIntensity);
+    this.scene.add(this.lightHemisphere);
 
     // directional light
-    const color = 0xFFFFFF;
-    const dirIntensity = 0.5;
-    const lightDir = new THREE.DirectionalLight(color, dirIntensity);
-    lightDir.position.set(5, 20, 2);
-    this.scene.add(lightDir);
+    const lightDirectionalColor = (this.lighting.lightDirectionalColor) ? this.lighting.lightDirectionalColor : 0xffffff;
+    const lightDirectionalIntensity = (this.lighting.lightDirectionalIntensity) ? this.lighting.lightDirectionalIntensity : 0.5;
+    const lightDirectionalX = (this.lighting.lightDirectionalX) ? this.lighting.lightDirectionalX : 2;
+    const lightDirectionalY = (this.lighting.lightDirectionalY) ? this.lighting.lightDirectionalY : 3;
+    const lightDirectionalZ = (this.lighting.lightDirectionalZ) ? this.lighting.lightDirectionalZ : 1;
+    this.lightDirectional = new THREE.DirectionalLight(lightDirectionalColor, lightDirectionalIntensity);
+    this.lightDirectional.position.set(lightDirectionalX, lightDirectionalY, lightDirectionalZ);
+    this.scene.add(this.lightDirectional);
   }
 
   buildShadowPlane() {
     // add shadow plane
-    var planeSize = 15; // 1 is the size of the AR marker
+    const planeSize = 15; // 1 is the size of the AR marker
+    const shadowOpacity = (this.lighting.shadowOpacity) ? this.lighting.shadowOpacity : 0.5;
     this.shadowPlane = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(planeSize, planeSize),
-      new THREE.ShadowMaterial({ opacity: 0.5 })
+      new THREE.ShadowMaterial({ opacity: shadowOpacity })
     );
     this.shadowPlane.rotation.x = -Math.PI/2;
     this.shadowPlane.receiveShadow = true;
@@ -139,8 +146,11 @@ class ThreeSceneAr extends ThreeScene {
     this.arRoot.add(this.shadowPlane);
 
     // add shadow spotlight
+    const shadowLightX = (this.lighting.shadowLightX) ? this.lighting.shadowLightX : 1;
+    const shadowLightY = (this.lighting.shadowLightY) ? this.lighting.shadowLightY : 6;
+    const shadowLightZ = (this.lighting.shadowLightZ) ? this.lighting.shadowLightZ : 0;
     this.spotlight = new THREE.SpotLight(0xffffff);
-    this.spotlight.position.set(1, 6, 0);   // light is above and just off to a side
+    this.spotlight.position.set(shadowLightX, shadowLightY, shadowLightZ);   // light is above and just off to a side
     this.spotlight.target = this.shadowPlane;
     this.spotlight.castShadow = true;
     this.spotlight.shadow.mapSize.width = 1024;
