@@ -29,10 +29,13 @@ class ThreeSceneArDemo {
         lightDirectionalX: 2,
         lightDirectionalY: 3,
         lightDirectionalZ: 1,
+        shadowPlaneSize: 15,
         shadowOpacity: 0.5,
+        shadowSpotlightAngle: 0.5,
+        shadowMapSize: 1024,
         shadowLightX: 1,
-        shadowLightY: 6,
-        shadowLightZ: 0,
+        shadowLightY: 12,
+        shadowLightZ: 1,
       }
     }, false);
     this.scene = this.threeScene.getScene();

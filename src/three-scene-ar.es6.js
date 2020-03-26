@@ -133,10 +133,10 @@ class ThreeSceneAr extends ThreeScene {
 
   buildShadowPlane() {
     // add shadow plane
-    const planeSize = 15; // 1 is the size of the AR marker
+    const shadowPlaneSize = (this.lighting.shadowPlaneSize) ? this.lighting.shadowPlaneSize : 15; // 1 is the size of the AR marker
     const shadowOpacity = (this.lighting.shadowOpacity) ? this.lighting.shadowOpacity : 0.5;
     this.shadowPlane = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(planeSize, planeSize),
+      new THREE.PlaneBufferGeometry(shadowPlaneSize, shadowPlaneSize),
       new THREE.ShadowMaterial({ opacity: shadowOpacity })
     );
     this.shadowPlane.rotation.x = -Math.PI/2;
@@ -149,20 +149,22 @@ class ThreeSceneAr extends ThreeScene {
     const shadowLightX = (this.lighting.shadowLightX) ? this.lighting.shadowLightX : 1;
     const shadowLightY = (this.lighting.shadowLightY) ? this.lighting.shadowLightY : 6;
     const shadowLightZ = (this.lighting.shadowLightZ) ? this.lighting.shadowLightZ : 0;
+    const shadowSpotlightAngle = (this.lighting.shadowSpotlightAngle) ? this.lighting.shadowSpotlightAngle : 0.5;
+    const shadowMapSize = (this.lighting.shadowMapSize) ? this.lighting.shadowMapSize : 1024;
     this.spotlight = new THREE.SpotLight(0xffffff);
     this.spotlight.position.set(shadowLightX, shadowLightY, shadowLightZ);   // light is above and just off to a side
     this.spotlight.target = this.shadowPlane;
     this.spotlight.castShadow = true;
-    this.spotlight.shadow.mapSize.width = 1024;
-    this.spotlight.shadow.mapSize.height = 1024;
+    this.spotlight.shadow.mapSize.width = shadowMapSize;
+    this.spotlight.shadow.mapSize.height = shadowMapSize;
     // this.spotlight.shadow.camera.near = 500;
     // this.spotlight.shadow.camera.far = 4000;
     // this.spotlight.shadow.camera.fov = 30;
     // this.spotlight.shadow.radius = 80;
     this.spotlight.penumbra = 0.01;
     this.spotlight.decay = 1;
-    this.spotlight.angle = 0.5;
-    this.spotlight.distance = 7;
+    this.spotlight.angle = shadowSpotlightAngle;
+    this.spotlight.distance = shadowLightY + 1;
     this.arRoot.add(this.spotlight);
 
     // add light helper
