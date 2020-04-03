@@ -1,18 +1,22 @@
-/////////////////////////////////////////////
-// DOM tests
-/////////////////////////////////////////////
+class ThreeSceneGltfDemo extends DemoBase {
 
-// header
-mainEl.appendChild(DOMUtil.stringToDomElement("<h1>ThreeScene - GLTFLoader</h1>"));
+  constructor(parentEl) {
+    super(parentEl, [
+      "../vendor/three/three.min.js",
+      "../vendor/three/GLTFLoader.js",
+      "../src/pointer-pos.es6.js",
+      "../src/three-scene-.es6.js",
+    ], `
+      <div class="container">
+        <h1>ThreeScene glTF</h1>
+        <div id="three-scene-gltf" style="width: 100%; height: 400px;"></div>
+      </div>
+    `);
+  }
 
-// create log output element
-insertHtmlStr(`<div id="three-scene" style="height: 400px;"></div>`);
-let threeEl = document.getElementById('three-scene');
-
-// demo class
-class ThreeSceneDemo {
-
-  constructor() {
+  init() {
+    // setup
+    this.el = document.getElementById('three-scene-gltf');
     this.pointerPos = new PointerPos();
     this.setupScene();
     this.buildCube();
@@ -22,7 +26,7 @@ class ThreeSceneDemo {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(threeEl, 0xffffff);
+    this.threeScene = new ThreeScene(this.el, 0xffffff);
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
     this.frameCount = 0;
@@ -154,11 +158,5 @@ class ThreeSceneDemo {
   }
 
 }
-new ThreeSceneDemo();
 
-// break
-insertHtmlStr('<hr/>');
-
-/////////////////////////////////////////////
-// Unit tests
-/////////////////////////////////////////////
+if(window.autoInitDemo) new ThreeSceneGltfDemo(document.body);

@@ -16,4 +16,4 @@ function wrapPage(url) {
       console.warn('Something went wrong.', error);
     });
 }
-wrapPage('_demo-wrapper.html');
+wrapPage('index.html');

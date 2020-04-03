@@ -53,4 +53,15 @@ class DOMUtil {
         rect.top < (window.innerHeight || document.documentElement.clientHeight);
   }
 
+  static dispatchResize() {
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  static loadJavascript(url) {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = url;
+    document.head.appendChild(script);
+    return script;
+  }
 }

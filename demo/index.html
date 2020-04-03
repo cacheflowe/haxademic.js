@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <title>Haxademic.js</title>
+    <link rel="stylesheet" href="../css/normalize.css">
+    <link rel="stylesheet" href="../css/barebones.css">
+    <link rel="stylesheet" href="../css/haxademic.css">
+    <script src="../src/dom-util.es6.js"></script>
+    <script src="../src/url-util.es6.js"></script>
+    <script src="_demo-base.es6.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      // demos should auto-init to append to <body>
+      window.autoInitDemo = true;
+
+      // get demo name & turn into javascript include
+      let demo = document.location.hash;// URLUtil.getHashQueryVariable('demo');
+      // let demoJsFile = `./demo-${demo}.es6.js`;
+      let demoJsFile = `./demo-${demo.substring(1)}.es6.js`;
+      if(demo) {
+        console.log("Loading demo: ", demoJsFile);
+        DOMUtil.loadJavascript(demoJsFile);
+      } else {
+        document.body.innerHTML = `
+          <div class="container">
+            <h1>Haxademic.js Demos</h1>
+            <div>
+              <ul>
+                <li><a href="#microphone-node">MicrophoneNode</a></li>
+                <li><a href="#p5-sketch-audio">P5SketchAudio</a></li>
+                <li><a href="#speech-recognizer">SpeechRecognizer</a></li>
+                <li><a href="#three-scene">ThreeScene</a></li>
+                <li><a href="#three-scene-ar">ThreeSceneAr</a></li>
+                <li><a href="#three-scene-gltf">ThreeScene glTF</a></li>
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+
+      // listen for hash changes
+      window.addEventListener('popstate', () => document.location.reload());  // reload page on browser back button
+    </script>
+  </body>
+</html>

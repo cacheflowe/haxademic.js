@@ -11,21 +11,19 @@
   </head>
   <body>
     <script type="text/javascript">
-      function loadPage(url, parent=document.body) {
-        fetch(url)
-          .then((response) => {
-            return response.text();
-          }).then((html) => {
-            console.log(html);
-            parent.innerHTML = html;
-          }).catch((error) => {
-            console.warn('Something went wrong.', error);
-          });
-      }
-
-      loadPage('speech-recognition-api-snip.html');
+      // function loadPage(url, parent=document.body) {
+      //   fetch(url)
+      //     .then((response) => {
+      //       return response.text();
+      //     }).then((html) => {
+      //       console.log(html);
+      //       parent.innerHTML = html;
+      //     }).catch((error) => {
+      //       console.warn('Something went wrong.', error);
+      //     });
+      // }
+      //
+      // loadPage('speech-recognition-api-snip.html');
     </script>
-    <!-- Tests -->
-    <!-- <script src="../tests/three-scene-tests.es6.js"></script> -->
   </body>
 </html>

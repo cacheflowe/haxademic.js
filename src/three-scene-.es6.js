@@ -73,7 +73,7 @@ class ThreeScene {
     this.getContainerSize();
     this.container.style.width = this.elSize.width + 'px';
     this.container.style.height = this.elSize.height + 'px';
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this.elSize.width, this.elSize.height);
   }
 
 }
