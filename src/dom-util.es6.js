@@ -59,7 +59,7 @@ class DOMUtil {
 
   static loadJavascript(url) {
     var script = document.createElement("script");
-    script.type = "text/javascript";
+    // script.type = "text/javascript";
     script.src = url;
     document.head.appendChild(script);
     return script;
