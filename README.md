@@ -13,6 +13,9 @@ A personal front-end JavaScript toolkit
   * pointer-pos
   * did-drag repos
   * imagexpander
+  * cacheflowe.com music player!
+    * make inline version in addition to global player
+* Bring in Howler.js & Tone.js & wavesurfer.js
 * Integrate with SimpleSite?
 
 # Demo / Tests

@@ -27,10 +27,10 @@ class ThreeSceneDemo extends DemoBase {
     this.threeScene = new ThreeScene(this.el, 0xffffff);
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
-    this.frameCount = 0;
   }
 
   startAnimation() {
+    this.frameCount = 0;
     this.animate();
     window.addEventListener('resize', () => this.resize());
     setTimeout(() => {
