@@ -39,7 +39,7 @@ class DemoBase {
   loadNextScript() {
     if(this.jsFiles.length > 0) {
       let nextJsFile = this.jsFiles.shift();
-      if(nextJsFile.indexOf('dom-util.es6') != -1) {
+      if(nextJsFile.indexOf('dom-util.es6') != -1) {  // don't reload dom-util (TODO: check any others that might overlap)
         this.loadNextScript();
       } else {
         let script = DOMUtil.loadJavascript(nextJsFile);  // load from front of array

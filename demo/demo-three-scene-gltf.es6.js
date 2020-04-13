@@ -101,20 +101,26 @@ class ThreeSceneGltfDemo extends DemoBase {
     var loader = new GLTFLoader();
     loader.load(
       // resource URL
-      // '../data/BBall_Test.gltf',
-      '../data/Goddess_UltraLow1.gltf',
+      '../data/duck.gltf',
       // called when the resource is loaded
       (gltf) => {
-        // add gltf model to scene
-        let scaleDown = 0.06;
-        this.model = gltf.scene.children[0];
+        // add gltf model to scene - extract specific child of gltf scene to add to our ThreeScene
+        this.model = gltf.scene.children[0].children[1];
         this.model.castShadow = true;
-        this.model.scale.set(scaleDown ,scaleDown ,scaleDown);
-        this.model.position.set(this.model.position.x, this.model.position.y + this.floorY, this.model.position.z);
+        this.model.receiveShadow = true;
         this.model.material.wireframe = true;
+
+        // calc scale
         var modelSize = this.model.geometry.boundingBox.min.sub(this.model.geometry.boundingBox.max);
         modelSize.set(Math.abs(modelSize.x), Math.abs(modelSize.y), Math.abs(modelSize.z));
-        // this.model.geometry.translate(0, 70, 0);
+        this.modelH = 200;
+        this.baseScale = (1 / modelSize.y) * this.modelH; // normalize to 1 and scale to size in AR world
+        this.model.scale.set(this.baseScale, this.baseScale ,this.baseScale);
+
+        // set position
+        this.model.position.set(this.model.position.x, this.model.position.y + this.floorY, this.model.position.z);
+
+        // add model to scene
         this.scene.add(this.model);
         console.log(this.model);
 

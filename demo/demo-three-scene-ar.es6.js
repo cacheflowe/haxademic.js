@@ -80,38 +80,36 @@ class ThreeSceneArDemo extends DemoBase {
 
   loadModel() {
     this.scale = new LinearFloat(0, 0.025);
-    this.baseScale = 0.001;
+    this.baseScale = 0.01;
     // Instantiate a GLTF loader
     var loader = new GLTFLoader();
     loader.load(
       // resource URL
-      // '../data/BBall_Test.gltf',
-      '../data/HiPoly_MarbleIMGtexture_2.gltf',
+      '../data/duck.gltf',
       // called when the resource is loaded
       (gltf) => {
-        // add gltf model to scene
-        this.model = gltf.scene.children[0];
+        // add gltf model to scene - extract specific child of gltf scene to add to our ThreeScene
+        this.model = gltf.scene.children[0].children[1];
         this.model.castShadow = true;
         this.model.receiveShadow = true;
-        this.model.scale.set(this.baseScale ,this.baseScale ,this.baseScale);
-        // this.model.position.set(this.model.position.x, this.model.position.y, this.model.position.z);
         this.model.material.wireframe = false;
+
+        // calc scale
         var modelSize = this.model.geometry.boundingBox.min.sub(this.model.geometry.boundingBox.max);
         modelSize.set(Math.abs(modelSize.x), Math.abs(modelSize.y), Math.abs(modelSize.z));
-        // this.model.geometry.translate(0, 70, 0);
-        // this.model.verticesNeedUpdate = this.model.normalsNeedUpdate = this.model.colorsNeedUpdate = this.model.uvsNeedUpdate = this.model.groupsNeedUpdate = true;
-        // debugger
-        console.log('modelSize', modelSize);
-        // debugger
-        // this.model.material.
+        this.modelH = 1;
+        this.baseScale = (1 / modelSize.y) * this.modelH; // normalize to 1 and scale to size in AR world
+        this.model.scale.set(this.baseScale, this.baseScale ,this.baseScale);
+        // console.log('modelSizeOrig', modelSize);
+        // console.log('modelSizeScaled', this.modelH);
+
+        // set position & rotation
+        // this.model.rotation.x = -Math.PI/2;
+        // this.model.position.set(0, this.modelH * 1.2, this.modelH/2);
+
+        // add to three scene
         this.arRoot.add(this.model);
         console.log(this.model);
-
-        // gltf.animations; // Array<THREE.AnimationClip>
-        // gltf.scene; // THREE.Group
-        // gltf.scenes; // Array<THREE.Group>
-        // gltf.cameras; // Array<THREE.Camera>
-        // gltf.asset; // Object
       },
       // called while loading is progressing
       (xhr) => {

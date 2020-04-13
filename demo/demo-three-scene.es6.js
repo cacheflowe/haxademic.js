@@ -8,7 +8,7 @@ class ThreeSceneDemo extends DemoBase {
     ], `
       <div class="container">
         <h1>ThreeScene</h1>
-        <div id="three-scene" style="width: 100%; height: 400px;"></div>
+        <div id="three-scene" style="width: 100%; height: 500px;"></div>
       </div>
     `);
   }
@@ -39,7 +39,7 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   buildCube() {
-    let cubeSize = 200;
+    let cubeSize = 150;
     this.materialCube = new THREE.MeshPhongMaterial({
       color: 0x00ffbb, // 0x00ffbb
       emissive : 0x000000, // 0x000000
