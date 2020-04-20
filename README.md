@@ -18,4 +18,38 @@ A personal front-end JavaScript toolkit
     * make inline version in addition to global player
 * Bring in Howler.js & Tone.js & wavesurfer.js
 * Integrate with SimpleSite? Probably not...
-* Investigate peer.js & WebRTC
+* Investigate:
+  * New html features
+    * ResizeObserver: https://webkit.org/blog/9997/resizeobserver-in-webkit/
+  * Touchless interfaces
+    * peer.js & WebRTC: 
+      * https://webrtc.github.io/samples/
+      * https://blog.bitsrc.io/build-a-webcam-communication-app-using-webrtc-9737384e84be
+      * https://www.html5rocks.com/en/tutorials/webrtc/basics/
+      * https://gabrieltanner.org/blog/webrtc-video-broadcast
+      * https://bloggeek.me/media-server-for-webrtc-broadcast/
+      * https://jitsi.org/projects/
+      * https://github.com/jitsi/jitsi-meet/blob/master/doc/api.md
+      * https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/
+      * http://rdmedia.bbc.co.uk/dash/ondemand/bbb/
+      * http://rdmedia.bbc.co.uk/
+    * Websocket negotiation & private channels:
+      * https://www.npmjs.com/package/websocket
+      * https://medium.com/@martin.sikora/node-js-websocket-simple-chat-tutorial-2def3a841b61 / https://gist.github.com/martinsik/2031681
+      * https://github.com/rustigano/node-websocket-chatserver
+    * Virtual scrollwheel on a touchscreen to scroll a 2nd screen
+    * Hand gestures! (use that new (tensorflow?) hand-tracking library)
+    * Voice recognition via browser & Sphinx4
+    * Depth & Web cameras
+      * Computer vision tools
+      * Kinect Blob to segment and then calculate hand from gradient depth data
+    * LeapMotion
+    * Adruino sensors
+      * https://www.adafruit.com/product/3317
+        * https://github.com/leonyuhanov/VL530l0X_ESP8266
+      * https://www.maxbotix.com/Ultrasonic_Sensors/MB1000.htm
+    * LIDAR (test OFX w/RPLidar)
+  * Video live streaming VJ app
+    * https://flussonic.com/post/html5-streaming
+    * https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/Live_streaming_web_audio_and_video
+    * https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/

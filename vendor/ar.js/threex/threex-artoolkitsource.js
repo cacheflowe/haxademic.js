@@ -74,6 +74,7 @@ ARjs.Source.prototype.init = function (onReady, onError) {
     this.domElement.style.left = '0px'
     this.domElement.style.zIndex = '-2'
     this.domElement.setAttribute('id', 'arjs-video');
+    this.domElement.setAttribute('alt', 'arjs-video-bg'); // added by @cacheflowe
 
     return this
     function onSourceReady() {

@@ -71,3 +71,12 @@ a {
     height: 100vw;
   }
 }
+
+/* Multiline text overflow ellipsis */
+
+.multiline-ellipsis {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
