@@ -14,6 +14,8 @@ class ThreeSceneAr extends ThreeScene {
     this.cameraSource = arJsOptions.cameraSource;
     this.arCameraData = arJsOptions.arCameraData;
     this.arMarkerPatt = arJsOptions.arMarkerPatt;
+    this.sourceReadyCallback = arJsOptions.sourceReadyCallback || null;
+    this.sourceErrorCallback = arJsOptions.sourceErrorCallback || null;
     this.markerActiveCallback = arJsOptions.markerActiveCallback || null;
     this.lighting = arJsOptions.lighting || {};
     this.debug = debug;
@@ -40,11 +42,22 @@ class ThreeSceneAr extends ThreeScene {
     this.arToolkitSource = new THREEx.ArToolkitSource(sourceOptions);
 
     // init source listener
-    this.arToolkitSource.init(() => {
-      if(this.debug) console.log("AR.js ready!");
-      this.resize();
-      setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 200);
-    });
+    this.arToolkitSource.init(
+      () => this.cameraSourceReady(), 
+      (e) => this.cameraSourceError(e)
+    );
+  }
+
+  cameraSourceReady() {
+    if(this.debug) console.log("AR.js ready");
+    this.resize();
+    setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 200);
+    if(this.sourceReadyCallback) this.sourceReadyCallback();
+  }
+
+  cameraSourceError() {
+    if(this.debug) console.log("AR.js source access denied");
+    if(this.sourceErrorCallback) this.sourceErrorCallback();
   }
 
   buildArCV() {

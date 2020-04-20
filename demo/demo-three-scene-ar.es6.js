@@ -34,6 +34,8 @@ class ThreeSceneArDemo extends DemoBase {
       cameraSource: webcamMode ? ThreeSceneAr.WEBCAM : '../vendor/ar.js/data/hiro-environment-test.jpg',
       arCameraData: '../vendor/ar.js/data/camera_para.dat',
       arMarkerPatt: '../vendor/ar.js/data/hiro.patt',
+      sourceReadyCallback: this.arSourceReady.bind(this),
+      sourceErrorCallback: this.arSourceError.bind(this),
       markerActiveCallback: this.arActive.bind(this),
       lighting: {
         ambientColor: 0xcccccc,
@@ -61,6 +63,16 @@ class ThreeSceneArDemo extends DemoBase {
     this.frameCount = 0;
   }
 
+  // callbacks
+
+  arSourceReady() {
+    console.log('ThreeSceneAR source ready!');
+  }
+
+  arSourceError() {
+    console.log('ThreeSceneAR source error!');
+  }
+
   arActive(isActive) {
     // set lerping scale here?
     // TODO: we need a 'willHide' type event to shrink
@@ -73,10 +85,21 @@ class ThreeSceneArDemo extends DemoBase {
     // console.log('ThreeSceneArDemo.arActive()', isActive);
   }
 
+  // animation loop
+
   startAnimation() {
     this.animate();
     window.addEventListener('resize', () => this.resize());
   }
+
+  animate() {
+    this.updateObjects();
+    this.threeScene.render();
+    this.frameCount++;
+    requestAnimationFrame(() => this.animate());
+  }
+
+  // model loading
 
   loadModel() {
     this.scale = new LinearFloat(0, 0.025);
@@ -131,13 +154,6 @@ class ThreeSceneArDemo extends DemoBase {
       this.model.scale.set(curScale, curScale, curScale);
       this.model.rotation.y += 0.01;
     }
-  }
-
-  animate() {
-    this.updateObjects();
-    this.threeScene.render();
-    this.frameCount++;
-    requestAnimationFrame(() => this.animate());
   }
 
   resize() {
