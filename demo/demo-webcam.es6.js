@@ -10,22 +10,13 @@ class WebcamDemo extends DemoBase {
     // setup
     this.webcamContainer = document.getElementById('webcam-container');
 
-    // init microphone
+    // init webcam
     this.webcam = new Webcam((videoEl) => {
+      // attach to DOM and flip to mirror the video
       this.webcamContainer.appendChild(videoEl);
       Webcam.flipH(videoEl);
     }, (error) => {
       this.webcamContainer.innerHTML = '[Webcam ERROR] :: ' + error;
-    });
-
-    // kick off sound updates & debug animation
-    this.animate();
-  }
-
-    // animate fft debug canvas
-  animate() {
-    requestAnimationFrame(() => {
-      this.animate();
     });
   }
 
