@@ -22,7 +22,8 @@ A personal front-end JavaScript toolkit
   * New html features
     * ResizeObserver: https://webkit.org/blog/9997/resizeobserver-in-webkit/
   * Touchless interfaces
-    * peer.js & WebRTC: 
+    * WebRTC: 
+      * https://peerjs.com/
       * https://webrtc.org/getting-started/media-devices
       * https://webrtc.github.io/samples/
       * https://blog.bitsrc.io/build-a-webcam-communication-app-using-webrtc-9737384e84be
@@ -35,13 +36,14 @@ A personal front-end JavaScript toolkit
       * http://rdmedia.bbc.co.uk/dash/ondemand/bbb/
       * http://rdmedia.bbc.co.uk/
       * https://github.com/pipe/bookclub/blob/master/index.html
+      * https://bloggeek.me/webrtc-js-library-to-use/
+      * https://www.callstats.io/blog/2017/10/26/turn-webrtc-products
     * Websocket negotiation & private channels:
       * https://www.npmjs.com/package/websocket
       * https://medium.com/@martin.sikora/node-js-websocket-simple-chat-tutorial-2def3a841b61 * https://gist.github.com/martinsik/2031681
       * https://github.com/rustigano/node-websocket-chatserver
     * Accelerometer for TV remote cursor demo
-    * Mobile touchscreen as mouse cursor
-      * document.elementFromPoint(x, y).click();
+    * Mobile touchscreen as mouse cursor - added to PointerUtil
     * Lip-reading/presence to kick off voice recognition listening
     * Virtual scrollwheel on a touchscreen to scroll a 2nd screen
     * Hand gestures! (use that new (tensorflow?) hand-tracking library)

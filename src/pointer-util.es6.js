@@ -17,6 +17,10 @@ class PointerUtil {
     });
   }
 
+  static clickDocumentAtPoint(x, y) {
+    document.elementFromPoint(x, y).click();
+  }
+
   static disableRightClick(el) {
     el.oncontextmenu = function(e){ return false; };
   }

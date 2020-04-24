@@ -23,7 +23,7 @@ class SpeechRecognizerSolidSocketDemo extends DemoBase {
   // SOCKET
 
   initSocket() {
-    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001');
+    this.solidSocket = new SolidSocket('ws://localhost:3001');
     this.solidSocket.setOpenCallback(() => console.log('Socket [OPEN]'));
     this.solidSocket.setMessageCallback((msg) => console.log('Socket [MESSAGE]', msg));
     this.solidSocket.setErrorCallback(() => console.log('Socket [ERROR]'));
