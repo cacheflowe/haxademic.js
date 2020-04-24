@@ -1,11 +1,12 @@
-class SpeechRecognizerDemo extends DemoBase {
+class SpeechRecognizerSolidSocketDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
+      "../src/solid-socket.es6.js",
       "../src/speech-recognizer.es6.js",
     ], `
     <div class="container">
-      <h1>SpeechRecognizer</h1>
+      <h1>SpeechRecognizer + SolidSocket</h1>
       <div>
         <button id="startMic">Start mic</button>
         <button id="stopMic">Stop mic</button>
@@ -15,6 +16,23 @@ class SpeechRecognizerDemo extends DemoBase {
   }
 
   init() {
+    this.initSocket();
+    this.initSpeechRecognizer();
+  }
+
+  // SOCKET
+
+  initSocket() {
+    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001');
+    this.solidSocket.setOpenCallback(() => console.log('Socket [OPEN]'));
+    this.solidSocket.setMessageCallback((msg) => console.log('Socket [MESSAGE]', msg));
+    this.solidSocket.setErrorCallback(() => console.log('Socket [ERROR]'));
+    this.solidSocket.setCloseCallback(() => console.log('Socket [CLOSE]'));
+  }
+
+  // SPEECH
+
+  initSpeechRecognizer() {
     this.el = document.querySelector('.container');
     this.el.addEventListener('click', (e) => {
       if(e.target.id == "startMic") this.startRecognizer();
@@ -33,7 +51,7 @@ class SpeechRecognizerDemo extends DemoBase {
   }
 
   wordCallback(newWord) {
-    console.log('new word: ', newWord);
+    this.solidSocket.sendJSON({'word':newWord});
   }
 
   stopRecognizer() {
@@ -42,4 +60,4 @@ class SpeechRecognizerDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new SpeechRecognizerDemo(document.body);
+if(window.autoInitDemo) new SpeechRecognizerSolidSocketDemo(document.body);

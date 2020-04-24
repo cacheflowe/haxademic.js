@@ -7,8 +7,15 @@ class SpeechRecognizer {
   // - https://www.google.com/intl/en/chrome/demos/speech.html
   // - https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/continuous
 
-  constructor(debugEl=null) {
+  // Right now we're sending back all potential matches
+  // to cast a wider net. Another mode could watch the current 
+  // `transcript` and return the confirmed sentences as they build
+
+  constructor(wordCallback=null, debugEl=null) {
+    this.wordCallback = wordCallback;
     this.debugEl = debugEl;
+    this.recentWords = [];
+    this.recentWordCap = 20;
     // setup - must be called from a button click
     if (!('webkitSpeechRecognition' in window)) alert("Browser doesn't support SpeechRecognition");
     else {
@@ -68,32 +75,49 @@ class SpeechRecognizer {
   }
 
   onRecognitionResult(e) {
-    console.log('SpeechRecognition.result()');
-    // if (typeof(event.results) == 'undefined') {
-    //   this.recognition.onend = null;
-    //   this.recognition.stop();
-    //   upgrade();
-    //   return;
-    // }
     if(!!e) {
       for (var i = e.resultIndex; i < e.results.length; ++i) {
         if (e.results[i].isFinal) {
-          console.log('Final:', e.results[i][0].transcript);
+          // when the talking stops for long enough, we get a final result:
+          // console.log('Final:', e.results[i][0].transcript);
         } else {
-          // console.log('Interim:', e.results[i][0].transcript);
-          // console.log(e.results[i]);
-          // add last word to the log
+          // otherwise, while talking, we get the realtime sentence added to as words are recognized
           // interim results is the entire paragraph until a long break signals the recognizer to give a 'final' result
-          let wordsArr = e.results[i][0].transcript.split(' ');
-          if(this.debugEl != null && wordsArr.length > 0) this.debugEl.innerHTML += `<div>${wordsArr[wordsArr.length - 1]}</div>`;
-          // truncate log
-          while(this.debugEl.childNodes.length > 20) {
-            var el = this.debugEl.childNodes[0];
-            el.parentNode.removeChild(el);
+          let confidence = e.results[i][0].confidence;  // seems to not really work
+          let curSentence = e.results[i][0].transcript;
+          // grab last word in sentence
+          let lastIndexOfSpace = curSentence.lastIndexOf(' ');
+          let lastWord = curSentence.substring(lastIndexOfSpace + 1).toLowerCase();
+          // check if new word is in the most recent words array, and if so, store it
+          if(this.hasWord(lastWord) == false) {
+            if(this.wordCallback) this.wordCallback(lastWord);
+            this.recentWords.push(lastWord);
+            this.logWord(lastWord);
           }
-
+          // truncate recent word list, FIFO
+          if(this.recentWords.length > this.recentWordCap) {
+            let removedWord = this.recentWords.shift();
+          }
         }
       }
+    }
+  }
+
+  hasWord(newWord) {
+    for (let i = 0; i < this.recentWords.length; i++) {
+      let word = this.recentWords[i];
+      if(newWord == word) return true;
+    }
+    return false;
+  }
+
+  logWord(newWord) {
+    // add last word to the log
+    if(this.debugEl && newWord) this.debugEl.innerHTML += `<div>${newWord}</div>`;
+    // truncate log
+    while(this.debugEl.childNodes.length > 20) {
+      var el = this.debugEl.childNodes[0];
+      el.parentNode.removeChild(el);
     }
   }
 
@@ -103,18 +127,3 @@ class SpeechRecognizer {
   }
 
 }
-
-/*
-
-var two_line = /\n\n/g;
-var one_line = /\n/g;
-function linebreak(s) {
-  return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-}
-
-var first_char = /\S/;
-function capitalize(s) {
-  return s.replace(first_char, function(m) { return m.toUpperCase(); });
-}
-
-*/

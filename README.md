@@ -23,6 +23,7 @@ A personal front-end JavaScript toolkit
     * ResizeObserver: https://webkit.org/blog/9997/resizeobserver-in-webkit/
   * Touchless interfaces
     * peer.js & WebRTC: 
+      * https://webrtc.org/getting-started/media-devices
       * https://webrtc.github.io/samples/
       * https://blog.bitsrc.io/build-a-webcam-communication-app-using-webrtc-9737384e84be
       * https://www.html5rocks.com/en/tutorials/webrtc/basics/
@@ -33,13 +34,21 @@ A personal front-end JavaScript toolkit
       * https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/
       * http://rdmedia.bbc.co.uk/dash/ondemand/bbb/
       * http://rdmedia.bbc.co.uk/
+      * https://github.com/pipe/bookclub/blob/master/index.html
     * Websocket negotiation & private channels:
       * https://www.npmjs.com/package/websocket
-      * https://medium.com/@martin.sikora/node-js-websocket-simple-chat-tutorial-2def3a841b61 / https://gist.github.com/martinsik/2031681
+      * https://medium.com/@martin.sikora/node-js-websocket-simple-chat-tutorial-2def3a841b61 * https://gist.github.com/martinsik/2031681
       * https://github.com/rustigano/node-websocket-chatserver
+    * Accelerometer for TV remote cursor demo
+    * Mobile touchscreen as mouse cursor
+      * document.elementFromPoint(x, y).click();
+    * Lip-reading/presence to kick off voice recognition listening
     * Virtual scrollwheel on a touchscreen to scroll a 2nd screen
     * Hand gestures! (use that new (tensorflow?) hand-tracking library)
-    * Voice recognition via browser & Sphinx4
+    * Voice recognition
+      * https://syl22-00.github.io/pocketsphinx.js/
+      * Sphinx4
+      * Web SpeechRecognition API
     * Depth & Web cameras
       * Computer vision tools
       * Kinect Blob to segment and then calculate hand from gradient depth data

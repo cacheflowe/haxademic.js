@@ -72,6 +72,10 @@ class SolidSocket {
     this.socket.send(message);
   }
 
+  sendJSON(data) {
+    this.sendMessage(JSON.stringify(data));
+  }
+
   // MONITORING & RECONNECTION
 
   startMonitoringConnection() {
