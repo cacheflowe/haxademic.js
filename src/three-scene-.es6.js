@@ -54,6 +54,10 @@ class ThreeScene {
     return this.camera;
   }
 
+  canvasEl() {
+    return this.renderer.domElement;
+  }
+
   render() {
     this.renderer.render(this.scene, this.camera);
   }

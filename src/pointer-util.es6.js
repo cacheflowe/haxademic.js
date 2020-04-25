@@ -1,12 +1,12 @@
 class PointerUtil {
 
   // TODO: finish converting this !
-  static multipleClickHandler() {
+  static multipleClickHandler(el) {
     // require quintuple-click
     var clickStream = [];
     var numClicks = 5;
     var timeWindow = 3000;
-    cameraInput.addEventListener(window.tapEvent, function(e){
+    el.addEventListener(window.tapEvent, function(e){
       clickStream.push(Date.now());
       while(clickStream.length > numClicks) clickStream.shift();
       var recentClicks = clickStream.filter(function(clickTime) {
@@ -19,6 +19,11 @@ class PointerUtil {
 
   static clickDocumentAtPoint(x, y) {
     document.elementFromPoint(x, y).click();
+  }
+
+  static clickElement(el) {
+    const clickEvent = new MouseEvent("click");
+    el.dispatchEvent(clickEvent);
   }
 
   static disableRightClick(el) {

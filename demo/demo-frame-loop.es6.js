@@ -19,6 +19,7 @@ class FrameLoopDemo extends DemoBase {
       <div>osc = ${_frameLoop.osc(0.01, 0, 100)}</div>
       <div>frameMod (200) = ${_frameLoop.frameMod(200)}</div>
       <div>frameModSeconds = ${_frameLoop.frameModSeconds(1)}</div>
+      <div>getLoopFrames = ${_frameLoop.getLoopFrames()}</div>
       <div>getLoopCurFrame = ${_frameLoop.getLoopCurFrame()}</div>
       <div>getProgress = ${_frameLoop.getProgress()}</div>
       <div>getProgressRads = ${_frameLoop.getProgressRads()}</div>

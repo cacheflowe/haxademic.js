@@ -16,6 +16,7 @@ A personal front-end JavaScript toolkit
   * imagexpander
   * cacheflowe.com music player!
     * make inline version in addition to global player
+* Someday convert class constants to static fields: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Browser_compatibility
 * Bring in Howler.js & Tone.js & wavesurfer.js
 * Integrate with SimpleSite? Probably not...
 * Investigate:

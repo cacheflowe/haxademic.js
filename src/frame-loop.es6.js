@@ -75,6 +75,10 @@ class FrameLoop {
 		return this.frame % Math.round(hours * 216000) == 1;		// 60 frames * 60 seconds * 60 minutes
 	}
 
+  getLoopFrames() {
+		return this.loopFrames;
+	}
+
   getLoopCurFrame() {
 		return this.loopCurFrame;
 	}
