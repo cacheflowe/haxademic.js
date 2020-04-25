@@ -14,17 +14,17 @@ class FrameLoopDemo extends DemoBase {
 
   frameLoop(frameCount) {
     this.el.innerHTML = `
-      <div>frameCount = ${frameCount}</div>
-      <div>frameCount = ${_frameLoop.count()}</div>
-      <div>osc = ${_frameLoop.osc(0.01, 0, 100)}</div>
-      <div>frameMod (200) = ${_frameLoop.frameMod(200)}</div>
-      <div>frameModSeconds = ${_frameLoop.frameModSeconds(1)}</div>
-      <div>getLoopFrames = ${_frameLoop.getLoopFrames()}</div>
-      <div>getLoopCurFrame = ${_frameLoop.getLoopCurFrame()}</div>
-      <div>getProgress = ${_frameLoop.getProgress()}</div>
-      <div>getProgressRads = ${_frameLoop.getProgressRads()}</div>
-      <div>getCurTick = ${_frameLoop.getCurTick()}</div>
-      <div>getIsTick = ${_frameLoop.getIsTick()}</div>
+      <div><code>frameCount</code> = ${frameCount}</div>
+      <div><code>frameCount</code> = ${_frameLoop.count()}</div>
+      <div><code>osc</code> = ${_frameLoop.osc(0.01, 0, 100)}</div>
+      <div><code>frameMod</code> (200) = ${_frameLoop.frameMod(200)}</div>
+      <div><code>frameModSeconds</code> = ${_frameLoop.frameModSeconds(1)}</div>
+      <div><code>getLoopFrames</code> = ${_frameLoop.getLoopFrames()}</div>
+      <div><code>getLoopCurFrame</code> = ${_frameLoop.getLoopCurFrame()}</div>
+      <div><code>getProgress</code> = ${_frameLoop.getProgress()}</div>
+      <div><code>getProgressRads</code> = ${_frameLoop.getProgressRads()}</div>
+      <div><code>getCurTick</code> = ${_frameLoop.getCurTick()}</div>
+      <div><code>getIsTick</code> = ${_frameLoop.getIsTick()}</div>
     `;
   }
 

@@ -4,13 +4,23 @@ class DateUtil {
     return (new Date()).getTime();
   }
 
-  static getTodayTimeStamp() {
-    let today = new Date();
-    return (today.getYear() + 1900) + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+  static getDateTimeStamp() {
+    const date = new Date();
+    // return (date.getYear() + 1900) + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+    return date.toISOString().slice(0, 10);
+  }
+
+  static getClockTimeStamp() {
+    const date = new Date();
+    return date.toTimeString().slice(0, 8).replace(/:/g, "-");
+  }
+
+  static getTimeStamp() {
+    return DateUtil.getDateTimeStamp() + '-' + DateUtil.getClockTimeStamp();
   }
 
   static datesAreEqual(date1, date2) {
-    return date1.getTime() == date2.getTime()
+    return date1.getTime() == date2.getTime();
   }
 
 }
