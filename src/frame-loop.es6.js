@@ -1,7 +1,9 @@
 class FrameLoop {
 
-  constructor(frames=60, ticks=4) {
+  constructor(frames=60, ticks=4, frameThrottle=0) {
 	  this.frame = 1;
+	  this.frameThrottle = frameThrottle;
+		this.lastFrameTime = 0;
 	  this.loopFrames = frames;
 	  this.loopCurFrame = 1;
 	  this.progress = 0;
@@ -29,7 +31,20 @@ class FrameLoop {
   animate() {
     // animate loop
     requestAnimationFrame(() => this.animate());
-    this.listeners.forEach((el) => {
+		if(this.frameThrottle != 0) {
+			let curTime = Date.now();
+			// console.log(curTime, this.lastFrameTime, this.frameThrottle * 16);
+			if(curTime > this.lastFrameTime + this.frameThrottle * 16) {
+				this.lastFrameTime = curTime;
+				this.updateObjects();
+			}
+		} else {
+			this.updateObjects();
+		}
+  }
+
+	updateObjects() {
+		this.listeners.forEach((el) => {
       if(el.frameLoop) el.frameLoop(this.frame);
       else throw new Error('FrameLoop listener has no frameLoop()');
     });
@@ -45,7 +60,7 @@ class FrameLoop {
 			this.isTick = (this.curTick != newTick);
 			this.curTick = newTick;
 		}
-  }
+	}
 
   // getters
 

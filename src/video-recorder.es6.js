@@ -4,6 +4,7 @@ class VideoRecorder {
   // Uses es6 options/override method: https://gist.github.com/ericelliott/f3c2a53a1d4100539f71
   // see also: https://w3c.github.io/mediacapture-fromelement/#dom-htmlmediaelement-capturestream
   // and: https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/MediaRecorder
+  // more here: https://mozdevs.github.io/MediaRecorder-examples/
 
   constructor(canvas, {
       fileType = 'mkv',   // can choose `webm` too, but mkv has higher quality output potential. mp4 doesn't seem supported yet
@@ -54,6 +55,7 @@ class VideoRecorder {
   start() {
     console.log('- VideoRecorder started -----------');
     console.log('- fileType:', this.fileType);
+    console.log('- fps:', this.frameRate);
     console.log('- audioBitsPerSecond:', this.audioBitsPerSecond);
     console.log('- videoBitsPerSecond:', this.videoBitsPerSecond);
     console.log('-----------------------------------');

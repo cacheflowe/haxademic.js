@@ -5,7 +5,7 @@ class VideoRecorderDemo extends DemoBase {
       "../vendor/three/three.min.js",
       "../src/frame-loop.es6.js",
       "../src/three-scene-.es6.js",
-      "../src/video-recorder.es6.js",
+      // "../src/video-recorder.es6.js", // imported for DemoBase class in index.html
     ], 'VideoRecorder', 'webgl-container');
   }
 
@@ -17,7 +17,7 @@ class VideoRecorderDemo extends DemoBase {
     this.buildCube();
     this.addLights();
     this.addResizeListener();
-    this.initRecording();
+    super.initRecording(this.threeScene.canvasEl(), 300, 50);
     this.initAnimation();
   }
 
@@ -26,26 +26,6 @@ class VideoRecorderDemo extends DemoBase {
   initAnimation() {
     window._frameLoop = new FrameLoop(this.loopFrames);
     _frameLoop.addListener(this);
-  }
-
-  initRecording() {
-    this.recordEl = this.threeScene.canvasEl();
-    const optionsOverride = {
-      // fileType: 'webm',
-      audioKBPS: 320,
-      videoMBPS: 20,
-      callback: (aLink) => {
-        aLink.setAttribute('class', 'button');
-        this.el.appendChild(aLink);
-      },
-    };
-    this.videoRecorder = new VideoRecorder(this.recordEl, optionsOverride);
-
-    // frame recording config
-    this.loopFrames = 300;
-    this.startFrame = 50 + this.loopFrames + 1;
-    this.endFrame = 50 + this.loopFrames * 2 + 1;
-    this.numFramesRecorded = 0;
   }
 
   // ANIMATE
@@ -58,25 +38,6 @@ class VideoRecorderDemo extends DemoBase {
     // render THREE scene and record to disk
     this.threeScene.render();
     this.renderVideo();
-  }
-
-  // RECORD
-
-  renderVideo() {
-    let frameCount = _frameLoop.count();
-    if(frameCount == this.startFrame) {
-      this.videoRecorder.start();
-      console.log('VideoRecorder :: start frame :: ', frameCount);
-    }
-    if(this.videoRecorder.recording()) {
-      this.numFramesRecorded++;
-      this.videoRecorder.addFrame(); // record frames!
-    }
-    if(_frameLoop.count() == this.endFrame) {
-      this.videoRecorder.finish();
-      console.log('VideoRecorder :: finish frame ::', frameCount);
-      console.log('VideoRecorder :: total frames recorded:: ', this.numFramesRecorded);
-    }
   }
 
   // THREE.js

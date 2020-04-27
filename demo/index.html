@@ -4,12 +4,15 @@
     <meta charset="utf-8">
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Haxademic.js</title>
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/barebones.css">
     <link rel="stylesheet" href="../css/haxademic.css">
     <script src="../src/dom-util.es6.js"></script>
+    <script src="../src/error-util.es6.js"></script>
     <script src="../src/url-util.es6.js"></script>
+    <script src="../src/video-recorder.es6.js"></script>
     <script src="./demo--base.es6.js"></script>
   </head>
   <body>
@@ -23,6 +26,7 @@
       let demoJsFile = `./demo-${demo.substring(1)}.es6.js`;
       if(demo) {
         console.log("Loading demo: ", demoJsFile);
+        ErrorUtil.initErrorCatching();
         DOMUtil.loadJavascript(demoJsFile);
       } else {
         document.body.innerHTML = `
@@ -39,9 +43,10 @@
                 <li><a href="#speech-recognizer">SpeechRecognizer</a></li>
                 <li><a href="#speech-recognizer-solid-socket">SpeechRecognizer SolidSocket</a></li>
                 <li><a href="#three-scene">ThreeScene</a></li>
-                <li><a href="#three-scene-custom-textured-shape">ThreeScene | Custom textured shape</a></li>
+                <li><a href="#three-scene-text-texture">ThreeScene | Canvas text texture</a></li>
+                <li><a href="#three-scene-gltf">ThreeScene | glTF</a></li>
+                <li><a href="#three-scene-custom-textured-shape">ThreeScene | Textured shape UV animation</a></li>
                 <li><a href="#three-scene-ar">ThreeSceneAr</a></li>
-                <li><a href="#three-scene-gltf">ThreeScene glTF</a></li>
                 <li><a href="#ui-control-panel">UIControlPanel</a></li>
                 <li><a href="#video-recorder">VideoRecorder</a></li>
                 <li><a href="#webcam">Webcam</a></li>

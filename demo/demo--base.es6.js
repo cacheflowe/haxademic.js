@@ -10,6 +10,7 @@ class DemoBase {
     }
   }
 
+  /*
   loadJsDependencies(jsFiles) {
     if(jsFiles == null || jsFiles.length == 0) return this.init();
     this.numScripts = 0;
@@ -29,6 +30,7 @@ class DemoBase {
       }
     });
   }
+  */
 
   loadJsDependenciesSerial(jsFiles) {
     if(jsFiles == null || jsFiles.length == 0) return this.init();
@@ -70,4 +72,44 @@ class DemoBase {
     // please override
   }
 
+
+  // RECORD
+
+  initRecording(el, loopFrames, startFrame, extraFrames=1) {
+    this.recordEl = el;
+    const optionsOverride = {
+      fileType: 'webm',
+      audioKBPS: 320,
+      videoMBPS: 20,
+      callback: (aLink) => {
+        aLink.setAttribute('class', 'button');
+        this.el.appendChild(aLink);
+      },
+    };
+    this.videoRecorder = new VideoRecorder(this.recordEl, optionsOverride);
+
+    // frame recording config
+    this.loopFrames = loopFrames;
+    this.startFrame = startFrame + loopFrames + 1;
+    this.endFrame = startFrame + loopFrames * 2 + extraFrames;
+    this.numFramesRecorded = 0;
+  }
+
+  renderVideo() {
+    if(!this.videoRecorder) return;
+    let frameCount = _frameLoop.count();
+    if(this.videoRecorder.recording()) {
+      this.numFramesRecorded++;
+      this.videoRecorder.addFrame(); // record frames!
+    }
+    if(_frameLoop.count() == this.endFrame) {
+      this.videoRecorder.finish();
+      console.log('VideoRecorder :: finish frame ::', frameCount);
+      console.log('VideoRecorder :: total frames recorded:: ', this.numFramesRecorded);
+    }
+    if(frameCount == this.startFrame - 1) {
+      this.videoRecorder.start();
+      console.log('VideoRecorder :: start frame :: ', frameCount);
+    }
+  }
 }

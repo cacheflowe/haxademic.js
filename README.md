@@ -45,6 +45,7 @@ A personal front-end JavaScript toolkit
       * https://github.com/rustigano/node-websocket-chatserver
     * Accelerometer for TV remote cursor demo
     * Mobile touchscreen as mouse cursor - added to PointerUtil
+      * Also, transparent Java app version!?
     * Lip-reading/presence to kick off voice recognition listening
     * Virtual scrollwheel on a touchscreen to scroll a 2nd screen
     * Hand gestures! (use that new (tensorflow?) hand-tracking library)

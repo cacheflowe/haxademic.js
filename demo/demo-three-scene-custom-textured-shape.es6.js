@@ -22,7 +22,7 @@ class ThreeSceneDemo extends DemoBase {
     this.setupScene();
     this.addLights();
     this.buildCube();
-    this.buildPlane();
+    this.buildShape();
     this.startAnimation();
   }
 
@@ -68,7 +68,7 @@ class ThreeSceneDemo extends DemoBase {
     // this.scene.add(this.cubeMesh);
   }
 
-  buildPlane() {
+  buildShape() {
     // build shape
     this.planeGeometry = new THREE.PlaneGeometry(2000, 260, 800, 1);
     this.planeGeometry = new THREE.CylinderGeometry(100, 100, 180, 200, 1, true);
