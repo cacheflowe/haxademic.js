@@ -10,6 +10,7 @@ A personal front-end JavaScript toolkit
 # TODO
 
 * Begin integrating html-experiments repo?
+* Switch to dat.gui. whoops
 * Assimilate & kill:
   * pointer-pos
   * did-drag repos
@@ -18,6 +19,7 @@ A personal front-end JavaScript toolkit
     * make inline version in addition to global player
 * Someday convert class constants to static fields: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Browser_compatibility
 * Bring in Howler.js & Tone.js & wavesurfer.js
+* Add a tiny shader example for: http://twgljs.org/#examples - would be nice to have lightweight shader views inline
 * Integrate with SimpleSite? Probably not...
 * Investigate:
   * New html features
