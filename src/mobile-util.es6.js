@@ -1,6 +1,5 @@
 class MobileUtil {
 
-  // TOUCHSCREEN HELPERS
   static isFullscreenApp() {
     return window.navigator.standalone;
   }
@@ -18,8 +17,10 @@ class MobileUtil {
     if(isLocked == false) {
       document.ontouchmove = null;
       document.body.style.removeProperty('touch-action');
+      document.body.style.removeProperty('overflow');
     } else {
       document.body.style.setProperty('touch-action', 'none');
+      document.body.style.setProperty('overflow', 'hidden');
       document.ontouchmove = function(e) { e.preventDefault(); };
     }
   }
@@ -39,6 +40,24 @@ class MobileUtil {
         e.preventDefault();
       }
     });
+  }
+
+  static addFullScreenEl(el) {
+    // use in conjunction with addFullscreenListener()
+    // helps stick an element to fullscreen, no matter where mobile Safari's browser bars are
+    el.style.setProperty('height', 'calc(var(--vh, 1vh) * 100)');
+  }
+
+  static addFullscreenListener() {
+    if(MobileUtil.FULLSCREEN_LISTENING) return;
+    MobileUtil.FULLSCREEN_LISTENING = true;
+    // from: https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
+    // look into `viewport-fit=cover` in the future. also: `min-height: -webkit-fill-available`
+    window.addEventListener('resize', () => {
+      let vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    });
+    DOMUtil.dispatchResize();
   }
 
   static hideSoftKeyboard() {
@@ -128,3 +147,5 @@ class MobileUtil {
   }
 
 }
+
+MobileUtil.FULLSCREEN_LISTENING = false;
