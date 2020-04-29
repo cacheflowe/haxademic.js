@@ -19,9 +19,11 @@ const querystring = require('querystring');
 // Config
 /////////////////////
 
-var wssPort = 3001;
-let rooms = {};
-let DEFAULT_ROOM = 'default_room';
+const args = process.argv.slice(2);
+const wssPort = 3001;
+const rooms = {};
+const DEFAULT_ROOM = 'default_room';
+const debug = args.indexOf('--debug') != -1;
 
 function bigLog(msg) {
   console.log('===================================');
@@ -55,7 +57,9 @@ wsServer.on('connection', function connection(connection, request, client) {
   connection.on('message', function incoming(message) {
     // parse json
     message = JSON.parse(message);
-    console.log(`[${roomId}] received:`, JSON.stringify(message));
+    if(debug) {
+      console.log(`[${roomId}] received:`, JSON.stringify(message));
+    }
 
     // relay it back out to room, ignore self if: `client !== connection
     roomClients.forEach(function each(client) {   // relay to all clients: `wsServer.clients.forEach()`
