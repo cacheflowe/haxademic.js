@@ -14,13 +14,13 @@ class MobileUtil {
     document.body.classList.add(deviceClass);
   }
 
-  static lockTouchScreen( isLocked ) {
-    if( isLocked == false ) {
+  static lockTouchScreen(isLocked) {
+    if(isLocked == false) {
       document.ontouchmove = null;
+      document.body.style.removeProperty('touch-action');
     } else {
-      document.ontouchmove = function( event ) {
-        event.preventDefault();
-      };
+      document.body.style.setProperty('touch-action', 'none');
+      document.ontouchmove = function(e) { e.preventDefault(); };
     }
   }
 
