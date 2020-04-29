@@ -42,7 +42,7 @@ class MobileUtil {
     });
   }
 
-  static addFullScreenEl(el) {
+  static addFullscreenEl(el) {
     // use in conjunction with addFullscreenListener()
     // helps stick an element to fullscreen, no matter where mobile Safari's browser bars are
     el.style.setProperty('height', 'calc(var(--vh, 1vh) * 100)');
