@@ -57,7 +57,7 @@ class MobileUtil {
       let vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
     });
-    DOMUtil.dispatchResize();
+    window.dispatchEvent(new Event('resize'));
   }
 
   static hideSoftKeyboard() {
