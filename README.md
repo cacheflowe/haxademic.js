@@ -9,6 +9,12 @@ A personal front-end JavaScript toolkit
 
 # TODO
 
+* MobileUtil + PointerPos + SolidSocket - lock screen & turn to remote cursor & stream position. add click
+* <video> to SoundFFT test/demo -  https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaElementSource
+* MIDI learn - work into dat.gui refactor from old gui library
+* Field trip video textures w/UIControlPanel & LED mapping
+
+
 * Begin integrating html-experiments repo?
 * Switch to dat.gui. whoops
 * Assimilate & kill:
@@ -21,6 +27,12 @@ A personal front-end JavaScript toolkit
 * Bring in Howler.js & Tone.js & wavesurfer.js
 * Add a tiny shader example for: http://twgljs.org/#examples - would be nice to have lightweight shader views inline
 * Integrate with SimpleSite? Probably not...
+* QR code generator for peer connections
+* VJ stream
+  * Video to pixi canvas
+  * Look at audio node from <video> source for FFT on video: https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaElementSource
+  * MIDI learn
+  * PIXI shader swapping & particles
 * Investigate:
   * New html features
     * ResizeObserver: https://webkit.org/blog/9997/resizeobserver-in-webkit/

@@ -1,7 +1,7 @@
 // install:
 // - npm install ws
 // run:
-// - node ws-chatroom.js
+// - node ws-chatroom.js [--debug]
 // from:
 // - https://github.com/websockets/ws
 

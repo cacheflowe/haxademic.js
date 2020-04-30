@@ -1,6 +1,7 @@
 class PointerPos {
 
-  constructor() {
+  constructor(callback) {
+    this.callback = callback;
     this.curX = -1;
     this.curY = -1;
     this.lastX = -1;
@@ -33,9 +34,10 @@ class PointerPos {
     this.lastY = this.curY;
     this.curX = x;
     this.curY = y;
+    if(this.callback) this.callback(this.curX, this.curY);
   }
 
-  x(el = null) {
+  x(el=null) {
     if(el) {
       var offset = el.getBoundingClientRect();
       return this.curX - offset.left;
@@ -43,7 +45,7 @@ class PointerPos {
     return this.curX;
   };
 
-  y(el = null) {
+  y(el=null) {
     if(el) {
       var offset = el.getBoundingClientRect();
       return this.curY - offset.top;
@@ -52,7 +54,7 @@ class PointerPos {
   };
 
   xPercent(el) {
-    if(el != null) {
+    if(el) {
       var offset = el.getBoundingClientRect();
       var relativeX = this.curX - offset.left;
       return relativeX / offset.width;
@@ -61,7 +63,7 @@ class PointerPos {
   };
 
   yPercent(el) {
-    if(el != null) {
+    if(el) {
       var offset = el.getBoundingClientRect();
       var relativeY = this.curY - offset.top;
       return relativeY / offset.height;
