@@ -74,7 +74,7 @@ class SolidSocketDemo extends DemoBase {
   }
 
   onMessage(msg) {
-    console.log(msg.data);
+    // console.log(msg.data);
     this.log.log(JSON.stringify(msg.data));
   }
 
