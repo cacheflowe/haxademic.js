@@ -25,6 +25,22 @@ class MobileUtil {
     }
   }
 
+  static disableTextSelect(el, isDisabled) {
+    if(isDisabled == false) {
+      el.style.removeProperty('user-select');
+      el.style.removeProperty('-moz-user-select');
+      el.style.removeProperty('-ms-user-select');
+      el.style.removeProperty('-webkit-user-select');
+      el.style.removeProperty('-webkit-touch-callout');
+    } else {
+      el.style.setProperty('user-select', 'none');
+      el.style.setProperty('-moz-user-select', 'none');
+      el.style.setProperty('-ms-user-select', 'none');
+      el.style.setProperty('-webkit-user-select', 'none');
+      el.style.setProperty('-webkit-touch-callout', 'none');
+    }
+  }
+
   static disableZoom() {
     document.addEventListener('touchmove', function(event) {
       event = event.originalEvent || event;

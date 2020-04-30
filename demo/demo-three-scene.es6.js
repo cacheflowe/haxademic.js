@@ -27,6 +27,7 @@ class ThreeSceneDemo extends DemoBase {
   setupInput() {
     this.pointerPos = new PointerPos();
     MobileUtil.lockTouchScreen(true);
+    MobileUtil.disableTextSelect(document.body, true);
   }
 
   setupScene() {
@@ -104,8 +105,8 @@ class ThreeSceneDemo extends DemoBase {
 
   updateObjects() {
     // cube
-    this.cubeMesh.rotation.y = -0.5 + this.pointerPos.xPercent(this.el);
-    this.cubeMesh.rotation.x = -0.5 + this.pointerPos.yPercent(this.el);
+    this.cubeMesh.rotation.y = -1 + 2 * this.pointerPos.xPercent(this.el);
+    this.cubeMesh.rotation.x = -1 + 2 * this.pointerPos.yPercent(this.el);
     if(this.materialCube.map) this.materialCube.map.needsUpdate = true;
     // lighthelper
     // if(this.lightHelper) this.lightHelper.update();
