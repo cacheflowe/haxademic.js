@@ -9,7 +9,6 @@ A personal front-end JavaScript toolkit
 
 # TODO
 
-* MobileUtil + PointerPos + SolidSocket - lock screen & turn to remote cursor & stream position. add click
 * <video> to SoundFFT test/demo -  https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaElementSource
 * MIDI learn - work into dat.gui refactor from old gui library
 * Field trip video textures w/UIControlPanel & LED mapping

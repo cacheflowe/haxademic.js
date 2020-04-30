@@ -1,5 +1,7 @@
 // install:
 // - npm install ws
+// - npm install querystring
+// - npm install express
 // run:
 // - node ws-chatroom.js [--debug]
 // from:
@@ -7,6 +9,18 @@
 
 "use strict";
 process.title = 'node-ws';
+
+/////////////////////
+// Express HTTP server
+/////////////////////
+
+const express = require('express');
+const PORT = process.env.PORT || 3000;
+const INDEX = '/index.html';
+
+const server = express()
+  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+  .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 /////////////////////
 // Imports
@@ -36,8 +50,7 @@ function bigLog(msg) {
 /////////////////////
 
 // start server
-const wsServer = new WebSocket.Server({ port: wssPort });
-// console.log(wsServer);
+const wsServer = new WebSocket.Server({server: server, port: wssPort});   // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
 bigLog('Running WebSocket server: ' + wsServer.url + ':' + wssPort);
 
 // listen for new connections
@@ -45,7 +58,6 @@ wsServer.on('connection', function connection(connection, request, client) {
   // check for room id
   let queryObj = querystring.decode(request.url.replace('/?', ''));
   let roomId = (!!queryObj.roomId) ? queryObj.roomId : DEFAULT_ROOM;
-  // connection.roomId = roomId; // attach roomId to connection. not being used right now
 
   // add connection to room. lazy-init array of clients per room
   if(!rooms[roomId]) rooms[roomId] = [];
