@@ -69,7 +69,11 @@ class SolidSocket {
   // SEND
 
   sendMessage(message) {
-    this.socket.send(message);
+    if(this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(message);
+    } else {
+      console.warn('SolidSocket.sendMessage() failed - not connected!');
+    }
   }
 
   sendJSON(data) {
