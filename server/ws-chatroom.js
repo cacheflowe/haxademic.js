@@ -11,23 +11,12 @@
 process.title = 'node-ws';
 
 /////////////////////
-// Express HTTP server
-/////////////////////
-
-const express = require('express');
-const PORT = process.env.PORT || 3000;
-const INDEX = '/index.html';
-
-const server = express()
-  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-  .listen(PORT, () => console.log(`Listening on ${PORT}`));
-
-/////////////////////
 // Imports
 /////////////////////
 
 const WebSocket = require('ws');
 const querystring = require('querystring');
+const express = require('express');
 
 /////////////////////
 // Config
@@ -35,8 +24,9 @@ const querystring = require('querystring');
 
 const args = process.argv.slice(2);
 const wssPort = 3001;
+const httpPort = process.env.httpPort || 3000;
 const rooms = {};
-const DEFAULT_ROOM = 'default_room';
+const DEFAULT_ROOM = 'DEFAULT';
 const debug = args.indexOf('--debug') != -1;
 
 function bigLog(msg) {
@@ -46,31 +36,41 @@ function bigLog(msg) {
 }
 
 /////////////////////
-// BUILD SERVER
+// BUILD HTTP server
+/////////////////////
+
+const INDEX = '/index.html';
+const server = express()
+  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+  .listen(httpPort, () => console.log(`Listening on ${httpPort}`));
+
+
+/////////////////////
+// BUILD WS SERVER
 /////////////////////
 
 // start server
 const wsServer = new WebSocket.Server({server: server, port: wssPort});   // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
-bigLog('Running WebSocket server: ' + wsServer.url + ':' + wssPort);
+bigLog('Running WebSocket server at port:' + wssPort);
 
 // listen for new connections
 wsServer.on('connection', function connection(connection, request, client) {
   // check for room id
   let queryObj = querystring.decode(request.url.replace('/?', ''));
-  let roomId = (!!queryObj.roomId) ? queryObj.roomId : DEFAULT_ROOM;
+  let room = (!!queryObj.room) ? queryObj.room : DEFAULT_ROOM;
 
   // add connection to room. lazy-init array of clients per room
-  if(!rooms[roomId]) rooms[roomId] = [];
-  let roomClients = rooms[roomId];
+  if(!rooms[room]) rooms[room] = [];
+  let roomClients = rooms[room];
   roomClients.push(connection);
-  bigLog('Client joined room: ' + roomId + ' - Room has ' + roomClients.length + ' users.');
+  bigLog('Client joined room: ' + room + ' - Room has ' + roomClients.length + ' users');
 
   // response to incoming messages
   connection.on('message', function incoming(message) {
     // parse json
     message = JSON.parse(message);
     if(debug) {
-      console.log(`[${roomId}] received:`, JSON.stringify(message));
+      console.log(`[${room}] received:`, JSON.stringify(message));
     }
 
     // relay it back out to room, ignore self if: `client !== connection
@@ -86,7 +86,7 @@ wsServer.on('connection', function connection(connection, request, client) {
       const conn = roomClients[i];
       if(conn == connection) {
         roomClients.splice(i, 1);
-        bigLog('Client left room: ' + roomId + ' - Room has ' + roomClients.length + ' users.');
+        bigLog('Client left room: ' + room + ' - Room has ' + roomClients.length + ' users');
       }
     }
   });
