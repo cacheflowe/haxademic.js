@@ -3,6 +3,7 @@ class ThreeSceneDemo extends DemoBase {
   constructor(parentEl) {
     super(parentEl, [
       "../vendor/three/three.min.js",
+      "../src/mobile-util.es6.js",
       "../src/pointer-pos.es6.js",
       "../src/three-scene-.es6.js",
     ], `
@@ -16,11 +17,16 @@ class ThreeSceneDemo extends DemoBase {
   init() {
     // setup
     this.el = document.getElementById('three-scene');
-    this.pointerPos = new PointerPos();
+    this.setupInput();
     this.setupScene();
     this.buildCube();
     this.addShadow();
     this.startAnimation();
+  }
+
+  setupInput() {
+    this.pointerPos = new PointerPos();
+    MobileUtil.lockTouchScreen(true);
   }
 
   setupScene() {
