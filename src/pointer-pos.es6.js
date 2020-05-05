@@ -1,24 +1,36 @@
 class PointerPos {
 
-  constructor(callback) {
-    this.callback = callback;
+  constructor(callbackMove, callbackStart, callbackEnd) {
+    this.callbackMove = callbackMove;
+    this.callbackStart = callbackStart;
+    this.callbackEnd = callbackEnd;
     this.curX = -1;
     this.curY = -1;
     this.lastX = -1;
     this.lastY = -1;
+    this.totalDeltaX = 0;
+    this.totalDeltaY = 0;
 
     // add mouse/touch listeners
     document.addEventListener('mousedown', (e) => {
-      this.pointerMoved(e.clientX, e.clientY);
+      this.pointerMoved(e.clientX, e.clientY, true);
+      if(this.callbackStart) this.callbackStart();
     });
     document.addEventListener('mousemove', (e) => {
       this.pointerMoved(e.clientX, e.clientY);
     });
+    document.addEventListener('mouseup', (e) => {
+      if(this.callbackEnd) this.callbackEnd();
+    });
     document.addEventListener('touchstart', (e) => {
-      this.pointerMoved(e.touches[0].clientX, e.touches[0].clientY);
+      this.pointerMoved(e.touches[0].clientX, e.touches[0].clientY, true);
+      if(this.callbackStart) this.callbackStart();
     });
     document.addEventListener('touchmove', (e) => {
       this.pointerMoved(e.touches[0].clientX, e.touches[0].clientY);
+    });
+    document.addEventListener('touchend', (e) => {
+      if(this.callbackEnd) this.callbackEnd();
     });
   }
 
@@ -29,12 +41,20 @@ class PointerPos {
     this.lastY = -1;
   }
 
-  pointerMoved(x, y) {
+  pointerMoved(x, y, started=false) {
+    if(started) {
+      this.curX = x;
+      this.curY = y;
+    }
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.curX = x;
     this.curY = y;
-    if(this.callback) this.callback(this.curX, this.curY);
+    let deltaX = this.curX - this.lastX;
+    let deltaY = this.curY - this.lastY;
+    this.totalDeltaX += Math.abs(deltaX);
+    this.totalDeltaY += Math.abs(deltaY);
+    if(this.callbackMove) this.callbackMove(this.curX, this.curY, deltaX, deltaY);
   }
 
   x(el=null) {
@@ -77,6 +97,14 @@ class PointerPos {
 
   yDelta() {
     return (this.lastY == -1) ? 0 : this.curY - this.lastY;
+  };
+
+  xDeltaTotal() {
+    return this.totalDeltaX;
+  };
+
+  yDeltaTotal() {
+    return this.totalDeltaY;
   };
 
 }
