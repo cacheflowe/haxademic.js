@@ -28,6 +28,10 @@ class SolidSocketDemo extends DemoBase {
         #pointer svg {
           width: 100%;
           height: 100%;
+          transition: fill 0.15s linear;
+        }
+        #pointer.touching svg {
+          fill: #009900;
         }
         #buttons {
           display: grid;
@@ -66,8 +70,11 @@ class SolidSocketDemo extends DemoBase {
     this.addClicks();
     window._frameLoop = new FrameLoop();
     _frameLoop.addListener(this);
-    this.mouseX = new EasingFloat(0.5, 5);
-    this.mouseY = new EasingFloat(0.5, 5);
+    this.pointerXNorm = new EasingFloat(0.5, 5);
+    this.pointerYNorm = new EasingFloat(0.5, 5);
+    this.pointerX = new EasingFloat(window.innerWidth * 0.5, 5);
+    this.pointerY = new EasingFloat(window.innerHeight * 0.5, 5);
+    this.pointerScale = new EasingFloat(0, 5);
     this.pointerEl = document.getElementById('pointer');
     this.log = new EventLog(document.getElementById('results'), 1);
 
@@ -87,14 +94,17 @@ class SolidSocketDemo extends DemoBase {
       document.getElementById('buttons').innerHTML += `<button id="button${i+1}">Button ${i+1}</button>`;
     }
 
-    // listen for button clicks & log them
+    // listen for button & input clicks & log them
     this.el = document.querySelector('.container');
     this.el.addEventListener('click', (e) => {
+      // log when buttons are clicked, just for demo
       if(e.target.hasAttribute('id')) this.log.log('Clicked: ' + e.target.id);
+      // highlight/focus textfield when clicked, then blur when clicked elsewhere to we stop accepting keystrokes from abroad
       if(e.target.nodeName.toLowerCase() == 'input') {
         this.inputEl = e.target;
         e.target.focus();
       } else {
+        if(this.inputEl) this.inputEl.blur();
         this.inputEl = null;
       }
     });
@@ -103,18 +113,14 @@ class SolidSocketDemo extends DemoBase {
   // POINTER
 
   remoteClick() {
-    let pointerX = this.mouseX.value() * window.innerWidth;
-    let pointerY = this.mouseY.value() * window.innerHeight;
-    PointerUtil.clickDocumentAtPoint(pointerX, pointerY);
+    PointerUtil.clickDocumentAtPoint(this.pointerX.value(), this.pointerY.value());
   }
 
   frameLoop(frameCount) {
-    this.mouseX.update();
-    this.mouseY.update();
-
-    let pointerX = this.mouseX.value() * window.innerWidth;
-    let pointerY = this.mouseY.value() * window.innerHeight;
-    this.pointerEl.style.setProperty('transform', `translate3d(${pointerX}px, ${pointerY}px, 0)`);
+    this.pointerX.update();
+    this.pointerY.update();
+    this.pointerScale.update();
+    this.pointerEl.style.setProperty('transform', `translate3d(${this.pointerX.value()}px, ${this.pointerY.value()}px, 0) scale(${this.pointerScale.value()})`);
   }
 
   // textfield
@@ -133,19 +139,45 @@ class SolidSocketDemo extends DemoBase {
 
   socketOpen(e) {
     this.log.log('socketOpen!');
-    this.solidSocket.sendJSON({'hello':'connect!'});
+    this.solidSocket.sendJSON({'role': 'kiosk'});
   }
 
   onMessage(msg) {
-    // console.log(msg.data);
+    // get incoming data
     let json = JSON.parse(msg.data);
+    // handle normalize pointer mode
+    if(json.pointerXNorm && json.pointerYNorm) {
+      this.pointerX.setTarget(json.pointerXNorm * window.innerWidth);
+      this.pointerY.setTarget(json.pointerYNorm * window.innerHeight);
+    }
+    // handle delta opinter mode
+    else if(json.pointerXDelta || json.pointerYDelta) {
+      this.pointerX.setTarget(this.pointerX.target() + json.pointerXDelta);
+      this.pointerY.setTarget(this.pointerY.target() + json.pointerYDelta);
+      this.pointerEl.classList.add('touching');
+    }
+    // handle pointer states
+    if(json.pointerStateStart) {
+      this.pointerEl.classList.add('touching');
+      // document.elementFromPoint(this.pointerX.value(), this.pointerY.value()).dispatchEvent(new MouseEvent("mousedown"));
+    }
+    if(json.pointerStateEnd) {
+      this.pointerEl.classList.remove('touching');
+      // document.elementFromPoint(this.pointerX.value(), this.pointerY.value()).dispatchEvent(new MouseEvent("mouseup"));
+    }
+    if(json.pointerStateConnected) {
+      this.pointerScale.setTarget(1);
+    }
+    if(json.pointerStateDisconnected) {
+      this.pointerScale.setTarget(0);
+    }
+    // handle clicks
     if(json.click) {
       this.remoteClick();
-      // this.log.log('Remote click');
     }
-    if(json.pointerX) this.mouseX.setTarget(json.pointerX);
-    if(json.pointerY) this.mouseY.setTarget(json.pointerY);
+    // handle text input
     if(json.keyCode) {
+      this.log.log(JSON.stringify(json));
       if(this.inputEl) {
         KeyboardUtil.keyPressSimulateOnTextfield(this.inputEl, json.keyCode, json.character);
       }
