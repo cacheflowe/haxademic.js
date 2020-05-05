@@ -36,6 +36,7 @@ class SolidSocket {
     document.body.classList.add('has-socket');
     document.body.classList.remove('no-socket');
     if(this.openCallback) this.openCallback(e);
+    if(this.connectionCallback) this.connectionCallback(true);
   }
 
   setOpenCallback(callback) {
@@ -66,6 +67,11 @@ class SolidSocket {
     this.closeCallback = callback;
   }
 
+  setConnectionCallback(callback) {
+    this.connectionCallback = callback;
+    console.log('setConnectionCallback', callback);
+  }
+
   // SEND
 
   sendMessage(message) {
@@ -93,12 +99,12 @@ class SolidSocket {
     if(timeForReconnect) {
       this.lastConnectAttemptTime = Date.now();
 
-      // check for disconnected socket
+      // check for disconnected socket & reinitialize if needed
       if(!socketOpen && !socketConnecting) {
         // clean up failed socket object
         this.removeSocketListeners();
         // initialize a new socket object
-        try{
+        try {
           this.socket = new WebSocket(this.wsAddress);
           this.addSocketListeners();
         } catch(err) {
@@ -110,9 +116,11 @@ class SolidSocket {
       if(socketOpen) {
         document.body.classList.add('has-socket');
         document.body.classList.remove('no-socket');
+        if(this.connectionCallback) this.connectionCallback(true);
       } else {
         document.body.classList.add('no-socket');
         document.body.classList.remove('has-socket');
+        if(this.connectionCallback) this.connectionCallback(false);
       }
     }
     // keep checking connection

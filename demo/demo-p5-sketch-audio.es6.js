@@ -208,4 +208,4 @@ class P5SketchAudioDemo extends DemoBase {
 }
 
 
-if(window.autoInitDemo) new P5SketchAudioDemo(document.body);
+if(window.autoInitDemo) window.demo = new P5SketchAudioDemo(document.body);

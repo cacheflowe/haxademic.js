@@ -22,4 +22,4 @@ class WebcamDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new WebcamDemo(document.body);
+if(window.autoInitDemo) window.demo = new WebcamDemo(document.body);

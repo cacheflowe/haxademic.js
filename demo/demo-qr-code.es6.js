@@ -19,4 +19,4 @@ class QRCodeDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new QRCodeDemo(document.body);
+if(window.autoInitDemo) window.demo = new QRCodeDemo(document.body);

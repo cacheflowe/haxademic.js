@@ -22,4 +22,4 @@ class ScreenCaptureDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new ScreenCaptureDemo(document.body);
+if(window.autoInitDemo) window.demo = new ScreenCaptureDemo(document.body);

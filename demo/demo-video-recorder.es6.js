@@ -87,4 +87,4 @@ class VideoRecorderDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new VideoRecorderDemo(document.body);
+if(window.autoInitDemo) window.demo = new VideoRecorderDemo(document.body);

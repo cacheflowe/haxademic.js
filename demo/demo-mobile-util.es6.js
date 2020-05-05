@@ -84,4 +84,4 @@ class MobileUtilDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new MobileUtilDemo(document.body);
+if(window.autoInitDemo) window.demo = new MobileUtilDemo(document.body);

@@ -56,7 +56,6 @@ bigLog('Running WebSocket server at port:' + wssPort);
 // listen for new connections
 wsServer.on('connection', function connection(connection, request, client) {
   // check for room id
-  console.log('request.url', request.url);
   let queryObj = querystring.decode(request.url.replace('/?', ''));
   let roomId = (!!queryObj.roomId) ? queryObj.roomId : DEFAULT_ROOM;
 
@@ -66,7 +65,7 @@ wsServer.on('connection', function connection(connection, request, client) {
   roomClients.push(connection);
   bigLog('Client joined roomId: ' + roomId + ' - Room has ' + roomClients.length + ' users');
 
-  // response to incoming messages
+  // handle incoming messages
   connection.on('message', function incoming(message) {
     // parse json
     message = JSON.parse(message);
@@ -82,6 +81,7 @@ wsServer.on('connection', function connection(connection, request, client) {
     });
   });
 
+  // handle client disconnect
   connection.on('close', function() {
     for (let i = 0; i < roomClients.length; i++) {
       const conn = roomClients[i];

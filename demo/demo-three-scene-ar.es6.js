@@ -162,4 +162,4 @@ class ThreeSceneArDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new ThreeSceneArDemo(document.body);
+if(window.autoInitDemo) window.demo = new ThreeSceneArDemo(document.body);

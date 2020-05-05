@@ -68,4 +68,4 @@ class SoundFFTVideoDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new SoundFFTVideoDemo(document.body);
+if(window.autoInitDemo) window.demo = new SoundFFTVideoDemo(document.body);

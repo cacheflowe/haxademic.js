@@ -18,4 +18,4 @@ class DateUtilDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new DateUtilDemo(document.body);
+if(window.autoInitDemo) window.demo = new DateUtilDemo(document.body);

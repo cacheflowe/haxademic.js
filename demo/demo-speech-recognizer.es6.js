@@ -42,4 +42,4 @@ class SpeechRecognizerDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new SpeechRecognizerDemo(document.body);
+if(window.autoInitDemo) window.demo = new SpeechRecognizerDemo(document.body);

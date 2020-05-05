@@ -165,4 +165,4 @@ class ThreeSceneGltfDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new ThreeSceneGltfDemo(document.body);
+if(window.autoInitDemo) window.demo = new ThreeSceneGltfDemo(document.body);

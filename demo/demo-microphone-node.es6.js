@@ -49,4 +49,4 @@ class MicrophoneNodeDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new MicrophoneNodeDemo(document.body);
+if(window.autoInitDemo) window.demo = new MicrophoneNodeDemo(document.body);

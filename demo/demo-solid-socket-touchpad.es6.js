@@ -50,6 +50,29 @@ class SolidSocketTouchpadDemo extends DemoBase {
           margin-top: 20px;
           margin-left: 20px;
         }
+        #session-closed {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 100; 
+          background-color: rgba(0,0,0,0.5);
+        }
+        #session-closed-message {
+          position: absolute;
+          top: 160px;
+          margin-left: -25%;
+          left: 50%;
+          width: 50%;
+          background-color: rgba(1,1,1,0.5);
+          text-align: center;
+          padding: 2rem 0;
+          text-transform: uppercase;
+          font-size: 1.8rem;
+          color: #fff;
+          border-radius: 1rem;
+        }
       </style>
       <header>
         <input type="text" id="text-input" placeholder="Type here" />
@@ -60,6 +83,9 @@ class SolidSocketTouchpadDemo extends DemoBase {
       <footer>
         <button id="click-button">CLICK</button>
       </footer>
+      <div id="session-closed" class="fade-anim">
+        <div id="session-closed-message">Your Session<br>Has Ended</div>
+      </div>
     </div>`);
   }
 
@@ -71,6 +97,7 @@ class SolidSocketTouchpadDemo extends DemoBase {
     MobileUtil.addFullscreenEl(this.el);
     MobileUtil.disableTextSelect(document.body, true);
 
+    this.addSessionCloseMessage();
     this.initSocket();
     this.initTouchpad();
     this.addClicks();
@@ -80,7 +107,6 @@ class SolidSocketTouchpadDemo extends DemoBase {
   }
 
   addClicks() {
-    
     this.el.addEventListener('click', (e) => {
       if(e.target.id == "click-button") this.solidSocket.sendJSON({'click':true});
       if(e.target.id == "touchpad") this.solidSocket.sendJSON({'click':true});
@@ -168,8 +194,9 @@ class SolidSocketTouchpadDemo extends DemoBase {
     // this.solidSocket = new SolidSocket('ws://localhost:3001?roomId=987654321');
     this.solidSocket.setOpenCallback(this.socketOpen.bind(this));
     this.solidSocket.setMessageCallback(this.onMessage.bind(this));
-    this.solidSocket.setErrorCallback(() => console.log('Socket [ERROR]'));
-    this.solidSocket.setCloseCallback(() => this.socketClose.bind(this));
+    this.solidSocket.setErrorCallback(this.socketError.bind(this));
+    this.solidSocket.setCloseCallback(this.socketClose.bind(this));
+    this.solidSocket.setConnectionCallback(this.socketIsActive.bind(this));
   }
 
   socketOpen(e) {
@@ -181,10 +208,17 @@ class SolidSocketTouchpadDemo extends DemoBase {
   }
 
   socketClose(e) {
-    this.log.log('socketOpen!');
+    // this probably won't do anything.. disconnected needs to come from ws:// server
+    // only gets triggered if the websocket server disappears. can this be the mechanism to kick people off and say session is over?
+    this.showSessionEnded();
+    this.log.log('socketClose!');
     this.solidSocket.sendJSON({
       'pointerStateDisconnected': true,
     });
+  }
+
+  socketError(e) {
+    this.log.log('socketError(e)');
   }
 
   onMessage(msg) {
@@ -192,6 +226,22 @@ class SolidSocketTouchpadDemo extends DemoBase {
     this.log.log(JSON.stringify(msg.data));
   }
 
+  socketIsActive(isActive) {
+    console.log('socketActive', isActive);
+    if(isActive == false) this.showSessionEnded();
+  }
+
+  showSessionEnded() {
+    this.sessionEndEl.classList.add('show');
+  }
+
+  // SESSION 
+
+  addSessionCloseMessage() {
+    this.sessionEndEl = this.el.querySelector('#session-closed');
+    console.log('this.sessionEndEl', this.sessionEndEl);
+  }
+
 }
 
-if(window.autoInitDemo) new SolidSocketTouchpadDemo(document.body);
+if(window.autoInitDemo) window.demo = new SolidSocketTouchpadDemo(document.body);

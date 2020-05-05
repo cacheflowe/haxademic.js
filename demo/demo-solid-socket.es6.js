@@ -80,4 +80,4 @@ class SolidSocketDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new SolidSocketDemo(document.body);
+if(window.autoInitDemo) window.demo = new SolidSocketDemo(document.body);

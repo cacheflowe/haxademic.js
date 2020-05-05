@@ -85,4 +85,4 @@ class UIControlPanelDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new UIControlPanelDemo(document.body);
+if(window.autoInitDemo) window.demo = new UIControlPanelDemo(document.body);

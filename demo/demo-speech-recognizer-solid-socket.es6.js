@@ -60,4 +60,4 @@ class SpeechRecognizerSolidSocketDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new SpeechRecognizerSolidSocketDemo(document.body);
+if(window.autoInitDemo) window.demo = new SpeechRecognizerSolidSocketDemo(document.body);

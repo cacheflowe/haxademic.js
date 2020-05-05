@@ -30,4 +30,4 @@ class FrameLoopDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) new FrameLoopDemo(document.body);
+if(window.autoInitDemo) window.demo = new FrameLoopDemo(document.body);

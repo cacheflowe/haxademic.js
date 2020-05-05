@@ -195,4 +195,4 @@ class TextCylinder {
 
 }
 
-if(window.autoInitDemo) new ThreeSceneDemo(document.body);
+if(window.autoInitDemo) window.demo = new ThreeSceneDemo(document.body);
