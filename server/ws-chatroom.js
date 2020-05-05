@@ -56,21 +56,22 @@ bigLog('Running WebSocket server at port:' + wssPort);
 // listen for new connections
 wsServer.on('connection', function connection(connection, request, client) {
   // check for room id
+  console.log('request.url', request.url);
   let queryObj = querystring.decode(request.url.replace('/?', ''));
-  let room = (!!queryObj.room) ? queryObj.room : DEFAULT_ROOM;
+  let roomId = (!!queryObj.roomId) ? queryObj.roomId : DEFAULT_ROOM;
 
-  // add connection to room. lazy-init array of clients per room
-  if(!rooms[room]) rooms[room] = [];
-  let roomClients = rooms[room];
+  // add connection to room. lazy-init array of clients per roomId
+  if(!rooms[roomId]) rooms[roomId] = [];
+  let roomClients = rooms[roomId];
   roomClients.push(connection);
-  bigLog('Client joined room: ' + room + ' - Room has ' + roomClients.length + ' users');
+  bigLog('Client joined roomId: ' + roomId + ' - Room has ' + roomClients.length + ' users');
 
   // response to incoming messages
   connection.on('message', function incoming(message) {
     // parse json
     message = JSON.parse(message);
     if(debug) {
-      console.log(`[${room}] received:`, JSON.stringify(message));
+      console.log(`[Room ${roomId}] received:`, JSON.stringify(message));
     }
 
     // relay it back out to room, ignore self if: `client !== connection
@@ -86,7 +87,7 @@ wsServer.on('connection', function connection(connection, request, client) {
       const conn = roomClients[i];
       if(conn == connection) {
         roomClients.splice(i, 1);
-        bigLog('Client left room: ' + room + ' - Room has ' + roomClients.length + ' users');
+        bigLog('Client left roomId: ' + roomId + ' - Room has ' + roomClients.length + ' users');
       }
     }
   });
