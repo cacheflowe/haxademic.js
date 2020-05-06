@@ -103,9 +103,13 @@ class SolidSocketDemo extends DemoBase {
       if(e.target.nodeName.toLowerCase() == 'input') {
         this.inputEl = e.target;
         e.target.focus();
+        this.solidSocket.sendJSON({'kioskInputFocus': e.target.value}); // send current textfield contents to touchpad
       } else {
-        if(this.inputEl) this.inputEl.blur();
-        this.inputEl = null;
+        if(this.inputEl) {
+          this.inputEl.blur();
+          this.inputEl = null;
+          this.solidSocket.sendJSON({'kioskInputBlur': e.target.value}); // send current textfield contents to touchpad
+        }
       }
     });
   }
@@ -130,7 +134,7 @@ class SolidSocketDemo extends DemoBase {
   // SOCKET
 
   initSocket() {
-    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001?roomId=987654321');
+    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001?roomId=987654321&clientType=kiosk');
     this.solidSocket.setOpenCallback(this.socketOpen.bind(this));
     this.solidSocket.setMessageCallback(this.onMessage.bind(this));
     this.solidSocket.setErrorCallback(() => console.log('Socket [ERROR]'));
@@ -150,11 +154,13 @@ class SolidSocketDemo extends DemoBase {
       this.pointerX.setTarget(json.pointerXNorm * window.innerWidth);
       this.pointerY.setTarget(json.pointerYNorm * window.innerHeight);
     }
-    // handle delta opinter mode
+    // handle delta pointer mode
     else if(json.pointerXDelta || json.pointerYDelta) {
       this.pointerX.setTarget(this.pointerX.target() + json.pointerXDelta);
       this.pointerY.setTarget(this.pointerY.target() + json.pointerYDelta);
+      // if pointerStateStart wasn't triggers, show pointer with interaction
       this.pointerEl.classList.add('touching');
+      this.pointerScale.setTarget(1);
     }
     // handle pointer states
     if(json.pointerStateStart) {
