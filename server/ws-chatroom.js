@@ -2,6 +2,7 @@
 // - npm install ws
 // - npm install querystring
 // - npm install express
+// - ...or just npm install once package.json exists
 // run:
 // - node ws-chatroom.js [--debug]
 // from:
