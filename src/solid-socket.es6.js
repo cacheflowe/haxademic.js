@@ -2,6 +2,7 @@ class SolidSocket {
 
   constructor(wsAddress) {
     document.body.classList.add('no-socket');
+    this.active = true;
     this.wsAddress = wsAddress;
     this.socket = new WebSocket(wsAddress);
     this.addSocketListeners();
@@ -69,7 +70,6 @@ class SolidSocket {
 
   setConnectionCallback(callback) {
     this.connectionCallback = callback;
-    console.log('setConnectionCallback', callback);
   }
 
   // SEND
@@ -124,7 +124,16 @@ class SolidSocket {
       }
     }
     // keep checking connection
-    requestAnimationFrame(() => this.checkConnection());
+    if(this.active == true) {
+      requestAnimationFrame(() => this.checkConnection());
+    }
+  }
+
+  // CLEANUP
+
+  dispose() {
+    this.active = false;
+    this.socket.close();
   }
 
 }

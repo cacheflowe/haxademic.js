@@ -42,7 +42,7 @@ function bigLog(msg) {
 const INDEX = '/index.html';
 const server = express()
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-  .listen(httpPort, () => console.log(`Listening on ${httpPort}`));
+  .listen(httpPort, () => bigLog(`Running Web server at port: ${httpPort}`));
 
 
 /////////////////////
@@ -51,13 +51,18 @@ const server = express()
 
 // start server
 const wsServer = new WebSocket.Server({server: server, port: wssPort});   // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
-bigLog('Running WebSocket server at port:' + wssPort);
+bigLog(`Running WebSocket server at port: ${wssPort}`);
 
 // listen for new connections
 wsServer.on('connection', function connection(connection, request, client) {
+
   // check for room id
   let queryObj = querystring.decode(request.url.replace('/?', ''));
   let roomId = (!!queryObj.roomId) ? queryObj.roomId : DEFAULT_ROOM;
+
+  // check client type. if none, kill the connection
+  let clientType = (!!queryObj.clientType) ? queryObj.clientType : null;
+  // if(clientType == null) connection.close();
 
   // add connection to room. lazy-init array of clients per roomId
   if(!rooms[roomId]) rooms[roomId] = [];

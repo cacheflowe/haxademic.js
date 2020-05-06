@@ -10,6 +10,7 @@ class PointerPos {
     this.lastY = -1;
     this.totalDeltaX = 0;
     this.totalDeltaY = 0;
+    this.pointerActive = false;;
 
     // add mouse/touch listeners
     document.addEventListener('mousedown', (e) => {
@@ -20,6 +21,7 @@ class PointerPos {
       this.pointerMoved(e.clientX, e.clientY);
     });
     document.addEventListener('mouseup', (e) => {
+      this.pointerActive = false;
       if(this.callbackEnd) this.callbackEnd();
     });
     document.addEventListener('touchstart', (e) => {
@@ -30,6 +32,7 @@ class PointerPos {
       this.pointerMoved(e.touches[0].clientX, e.touches[0].clientY);
     });
     document.addEventListener('touchend', (e) => {
+      this.pointerActive = false;
       if(this.callbackEnd) this.callbackEnd();
     });
   }
@@ -45,6 +48,9 @@ class PointerPos {
     if(started) {
       this.curX = x;
       this.curY = y;
+      this.totalDeltaX = 0;
+      this.totalDeltaY = 0;
+      this.pointerActive = true;
     }
     this.lastX = this.curX;
     this.lastY = this.curY;
@@ -54,7 +60,7 @@ class PointerPos {
     let deltaY = this.curY - this.lastY;
     this.totalDeltaX += Math.abs(deltaX);
     this.totalDeltaY += Math.abs(deltaY);
-    if(this.callbackMove) this.callbackMove(this.curX, this.curY, deltaX, deltaY);
+    if(this.callbackMove && this.pointerActive) this.callbackMove(this.curX, this.curY, deltaX, deltaY);
   }
 
   x(el=null) {

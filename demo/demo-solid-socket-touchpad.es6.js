@@ -35,6 +35,10 @@ class SolidSocketTouchpadDemo extends DemoBase {
         button#click-button {
           border-radius: 20px;
         }
+        .text-input-waiting input[type="text"] {
+          border-color: #090;
+          background-color: #99FF99;
+        }
         #touchpad-outer {
           padding: 20px;
           height: calc(100% - 160px);
@@ -108,18 +112,20 @@ class SolidSocketTouchpadDemo extends DemoBase {
 
   addClicks() {
     this.el.addEventListener('click', (e) => {
-      if(e.target.id == "click-button") this.solidSocket.sendJSON({'click':true});
-      if(e.target.id == "touchpad") this.solidSocket.sendJSON({'click':true});
+      if(e.target.id == "click-button" || e.target.id == "touchpad") {
+        if(this.pointerPos.xDeltaTotal() < 8 && this.pointerPos.yDeltaTotal() < 8) {
+          this.solidSocket.sendJSON({'click':true});
+        }
+      }
     });
   }
 
   addTextInput() {
-    let textInputEl = document.getElementById('text-input');
-    textInputEl.addEventListener('keydown', (e) => {
-      console.log("TODO: make sure text length has changed before sending new character");
+    this.textInputEl = document.getElementById('text-input');
+    this.textInputEl.addEventListener('keydown', (e) => {
       setTimeout(() => { // can't use `input` event because it doesn't register keyCode, so we have to debounce to have the updated textfield length
         var key = e.keyCode ? e.keyCode : e.which;
-        let character = (key != 8) ? textInputEl.value.substring(textInputEl.value.length - 1) : "";
+        let character = (key != 8) ? this.textInputEl.value.substring(this.textInputEl.value.length - 1) : "";
         let jsonOut = {
           'keyCode': key, 
           // 'shift': e.shift, 
@@ -130,6 +136,18 @@ class SolidSocketTouchpadDemo extends DemoBase {
       }, 50);
     });
 
+  }
+
+  inputFocused(remoteTextVal) {
+    this.el.classList.add('text-input-waiting');
+    this.textInputEl.focus();
+    this.textInputEl.value = remoteTextVal;
+  }
+
+  inputBlur() {
+    this.el.classList.remove('text-input-waiting');
+    this.textInputEl.blur();
+    MobileUtil.hideSoftKeyboard();
   }
 
   // POINTER
@@ -179,7 +197,7 @@ class SolidSocketTouchpadDemo extends DemoBase {
 
   sendPointerDelta(deltaX, deltaY) {
     if(this.pointerInsideTouchpad() == false) return;
-    if(this.pointerPos.xDeltaTotal() > 8 || this.pointerPos.yDeltaTotal() > 8) {
+    if(this.pointerPos.xDeltaTotal() > 8 || this.pointerPos.yDeltaTotal() > 8) {  // minimum movement before sending touch. this allows clicks to be less wiggly
       this.solidSocket.sendJSON({
         'pointerXDelta': deltaX,
         'pointerYDelta': deltaY,
@@ -190,8 +208,8 @@ class SolidSocketTouchpadDemo extends DemoBase {
   // SOCKET
 
   initSocket() {
-    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001?roomId=987654321');
-    // this.solidSocket = new SolidSocket('ws://localhost:3001?roomId=987654321');
+    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001?roomId=987654321&clientType=touchpad');
+    // this.solidSocket = new SolidSocket('ws://localhost:3001?roomId=987654321&clientType=touchpad');
     this.solidSocket.setOpenCallback(this.socketOpen.bind(this));
     this.solidSocket.setMessageCallback(this.onMessage.bind(this));
     this.solidSocket.setErrorCallback(this.socketError.bind(this));
@@ -222,24 +240,27 @@ class SolidSocketTouchpadDemo extends DemoBase {
   }
 
   onMessage(msg) {
-    // console.log(msg.data);
+    let jsonData = JSON.parse(msg.data);
+    // receive data from the kiosk
+    if(typeof jsonData.kioskInputFocus == "string") this.inputFocused(jsonData.kioskInputFocus);
+    if(typeof jsonData.kioskInputBlur == "string") this.inputBlur(jsonData.kioskInputBlur);
     this.log.log(JSON.stringify(msg.data));
   }
 
   socketIsActive(isActive) {
-    console.log('socketActive', isActive);
     if(isActive == false) this.showSessionEnded();
   }
 
   showSessionEnded() {
     this.sessionEndEl.classList.add('show');
+    this.solidSocket.dispose();
+    MobileUtil.hideSoftKeyboard();
   }
 
   // SESSION 
 
   addSessionCloseMessage() {
     this.sessionEndEl = this.el.querySelector('#session-closed');
-    console.log('this.sessionEndEl', this.sessionEndEl);
   }
 
 }

@@ -18,7 +18,8 @@ class PointerUtil {
   }
 
   static clickDocumentAtPoint(x, y) {
-    document.elementFromPoint(x, y).click();
+    let el = document.elementFromPoint(x, y);
+    if(el) el.click();
   }
 
   static clickElement(el) {
