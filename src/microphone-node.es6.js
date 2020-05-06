@@ -1,6 +1,7 @@
 class MicrophoneNode {
 
   constructor(context, callback, errorCallback) {
+    if(window.webkitAudioContext) window.AudioContext = window.webkitAudioContext;  // mobile safari fix
     this.context = context || new AudioContext();
     navigator.mediaDevices.getUserMedia({audio: true})
     .then((stream) => {

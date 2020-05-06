@@ -16,6 +16,19 @@ class MicrophoneNodeDemo extends DemoBase {
     this.fftEl = document.getElementById('fft-container');
     this.fftAttached = false;
 
+    // add button to start everything
+    this.startButton = document.createElement('button');
+    this.startButton.innerText = 'Start';
+    this.fftEl.appendChild(this.startButton);
+
+    // click video to add audio response
+    this.startButton.addEventListener('click', (e) => {
+      this.startButton.parentNode.removeChild(this.startButton);
+      this.startMic();
+    });
+  }
+
+  startMic() {
     // init microphone
     this.soundFFT = null;
     this.mic = new MicrophoneNode(null, () => {
@@ -28,7 +41,7 @@ class MicrophoneNodeDemo extends DemoBase {
     this.animateFFT();
   }
 
-    // animate fft debug canvas
+  // animate fft debug canvas
   animateFFT() {
     requestAnimationFrame(() => {
       this.animateFFT();
