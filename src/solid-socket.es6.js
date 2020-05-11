@@ -1,13 +1,18 @@
 class SolidSocket {
 
-  constructor(wsAddress) {
+  constructor(wsURL) {
     document.body.classList.add('no-socket');
     this.active = true;
-    this.wsAddress = wsAddress;
-    this.socket = new WebSocket(wsAddress);
+    this.wsURL = wsURL;
+    this.socket = new WebSocket(wsURL);
     this.addSocketListeners();
     this.lastConnectAttemptTime = Date.now();
     this.startMonitoringConnection();
+  }
+
+  setURL(wsURL) {
+    this.wsURL = wsURL;
+    if(this.socket) this.socket.close();
   }
 
   // WebSocket LISTENERS
@@ -105,7 +110,7 @@ class SolidSocket {
         this.removeSocketListeners();
         // initialize a new socket object
         try {
-          this.socket = new WebSocket(this.wsAddress);
+          this.socket = new WebSocket(this.wsURL);
           this.addSocketListeners();
         } catch(err) {
           console.log('Websocket couldn\'t connect: ', err);
