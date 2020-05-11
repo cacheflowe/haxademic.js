@@ -42,7 +42,7 @@ class SolidSocket {
     document.body.classList.add('has-socket');
     document.body.classList.remove('no-socket');
     if(this.openCallback) this.openCallback(e);
-    if(this.connectionCallback) this.connectionCallback(true);
+    if(this.connectionActiveCallback) this.connectionActiveCallback(true);
   }
 
   setOpenCallback(callback) {
@@ -73,8 +73,8 @@ class SolidSocket {
     this.closeCallback = callback;
   }
 
-  setConnectionCallback(callback) {
-    this.connectionCallback = callback;
+  setConnectionActiveCallback(callback) {
+    this.connectionActiveCallback = callback;
   }
 
   // SEND
@@ -121,11 +121,11 @@ class SolidSocket {
       if(socketOpen) {
         document.body.classList.add('has-socket');
         document.body.classList.remove('no-socket');
-        if(this.connectionCallback) this.connectionCallback(true);
+        if(this.connectionActiveCallback) this.connectionActiveCallback(true);
       } else {
         document.body.classList.add('no-socket');
         document.body.classList.remove('has-socket');
-        if(this.connectionCallback) this.connectionCallback(false);
+        if(this.connectionActiveCallback) this.connectionActiveCallback(false);
       }
     }
     // keep checking connection
