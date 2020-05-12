@@ -133,7 +133,7 @@ class Particle {
     // update props
     this.x += this.speedX;
     this.y += this.speedY;
-    this.scale -= 0.1;
+    this.scale -= 0.08;
     if(this.scale <= 0) {
       this.active = false;
       this.container.removeChild(this.el);

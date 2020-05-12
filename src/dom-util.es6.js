@@ -58,10 +58,18 @@ class DOMUtil {
   }
 
   static loadJavascript(url, callback) {
-    var script = document.createElement("script");
+    const script = document.createElement("script");
     if(callback) script.addEventListener('load', callback);
     script.src = url;
     document.head.appendChild(script);
     return script;
   }
+
+  static injectCSS(cssString) {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = cssString;
+    document.head.append(styleEl);
+    return styleEl;
+  }
+  
 }
