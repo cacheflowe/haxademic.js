@@ -179,8 +179,8 @@ class SolidSocketTouchpadDemo extends DemoBase {
   }
 
   sendPointerNormalized() {
-    let xNorm = this.pointerPos.xPercent(this.touchpadEl);
-    let yNorm = this.pointerPos.yPercent(this.touchpadEl);
+    let xNorm = this.pointerPos.xNorm(this.touchpadEl);
+    let yNorm = this.pointerPos.yNorm(this.touchpadEl);
     if(xNorm >= 0 && xNorm <= 1 && yNorm >= 0 && yNorm <= 1) {
       this.solidSocket.sendJSON({
         'pointerXNorm': xNorm,
@@ -190,8 +190,8 @@ class SolidSocketTouchpadDemo extends DemoBase {
   }
 
   pointerInsideTouchpad() {
-    let xNorm = this.pointerPos.xPercent(this.touchpadEl);
-    let yNorm = this.pointerPos.yPercent(this.touchpadEl);
+    let xNorm = this.pointerPos.xNorm(this.touchpadEl);
+    let yNorm = this.pointerPos.yNorm(this.touchpadEl);
     return (xNorm >= 0 && xNorm <= 1 && yNorm >= 0 && yNorm <= 1);
   }
 

@@ -78,8 +78,7 @@ class ThreeSceneDemo extends DemoBase {
   startAnimation() {
     let frames = 200;
     // super.initRecording(this.threeScene.canvasEl(), frames, 1, 30);
-    window._frameLoop = new FrameLoop(frames, 4);
-    _frameLoop.addListener(this);
+    window._frameLoop = (new FrameLoop(frames, 4)).addListener(this);
   }
 
   frameLoop(frameCount) {
@@ -111,8 +110,8 @@ class TextCylinder {
 
   update() {
     // update shape
-    // this.mesh.rotation.y = -0.5 + this.pointerPos.xPercent(this.el);
-    // this.mesh.rotation.x = -0.5 + this.pointerPos.yPercent(this.el);
+    // this.mesh.rotation.y = -0.5 + this.pointerPos.xNorm(this.el);
+    // this.mesh.rotation.x = -0.5 + this.pointerPos.yNorm(this.el);
     this.updateUVs();
   }
 

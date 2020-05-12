@@ -24,8 +24,7 @@ class VideoRecorderDemo extends DemoBase {
   // recording setup
 
   initAnimation() {
-    window._frameLoop = new FrameLoop(this.loopFrames);
-    _frameLoop.addListener(this);
+    window._frameLoop = (new FrameLoop(this.loopFrames)).addListener(this);
   }
 
   // ANIMATE

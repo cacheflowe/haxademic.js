@@ -19,11 +19,13 @@ class FrameLoop {
 
   addListener(obj) {
     this.listeners.push(obj);
+		return this;
   }
 
   removeListener(obj) {
     const index = this.listeners.indexOf(obj);
     if (index !== -1) this.listeners.splice(index, 1);
+		return this;
   }
 
   // requestAnimationFrame

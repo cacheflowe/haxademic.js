@@ -68,8 +68,7 @@ class SolidSocketDemo extends DemoBase {
   init() {
     this.initSocket();
     this.addClicks();
-    window._frameLoop = new FrameLoop();
-    _frameLoop.addListener(this);
+    window._frameLoop = (new FrameLoop()).addListener(this);
     this.pointerXNorm = new EasingFloat(0.5, 5);
     this.pointerYNorm = new EasingFloat(0.5, 5);
     this.pointerX = new EasingFloat(window.innerWidth * 0.5, 5);

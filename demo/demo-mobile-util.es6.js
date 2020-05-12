@@ -39,8 +39,7 @@ class MobileUtilDemo extends DemoBase {
         }
       </style>
       <h1>MobileUtil</h1>
-      <div id="info">
-      </div>
+      <div id="info"></div>
     </div>`);
   }
 

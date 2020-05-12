@@ -42,8 +42,8 @@ class SolidSocketDemo extends DemoBase {
     });
     document.body.addEventListener('click', (e) => {
       this.solidSocket.sendJSON({
-        'pointerX': this.pointerPos.xPercent(),
-        'pointerY': this.pointerPos.yPercent(),
+        'pointerX': this.pointerPos.xNorm(),
+        'pointerY': this.pointerPos.yNorm(),
         'click': true,
       });
     });
@@ -53,8 +53,8 @@ class SolidSocketDemo extends DemoBase {
 
   pointerMoved(x, y) {
     this.solidSocket.sendJSON({
-      'pointerX': this.pointerPos.xPercent(),
-      'pointerY': this.pointerPos.yPercent(),
+      'pointerX': this.pointerPos.xNorm(),
+      'pointerY': this.pointerPos.yNorm(),
     });
   }
 

@@ -173,8 +173,8 @@ class ThreeSceneDemo extends DemoBase {
 
   updateObjects() {
     // cube
-    this.plane.rotation.y = this.cubeMesh.rotation.y = -0.5 + this.pointerPos.xPercent(this.el);
-    this.plane.rotation.x = this.cubeMesh.rotation.x = -0.5 + this.pointerPos.yPercent(this.el);
+    this.plane.rotation.y = this.cubeMesh.rotation.y = -0.5 + this.pointerPos.xNorm(this.el);
+    this.plane.rotation.x = this.cubeMesh.rotation.x = -0.5 + this.pointerPos.yNorm(this.el);
     // if(this.materialCube.map) this.materialCube.map.needsUpdate = true;
 
     // update plane props

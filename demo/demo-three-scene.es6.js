@@ -105,8 +105,8 @@ class ThreeSceneDemo extends DemoBase {
 
   updateObjects() {
     // cube
-    this.cubeMesh.rotation.y = -1 + 2 * this.pointerPos.xPercent(this.el);
-    this.cubeMesh.rotation.x = -1 + 2 * this.pointerPos.yPercent(this.el);
+    this.cubeMesh.rotation.y = -1 + 2 * this.pointerPos.xNorm(this.el);
+    this.cubeMesh.rotation.x = -1 + 2 * this.pointerPos.yNorm(this.el);
     if(this.materialCube.map) this.materialCube.map.needsUpdate = true;
     // lighthelper
     // if(this.lightHelper) this.lightHelper.update();

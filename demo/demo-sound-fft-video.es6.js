@@ -12,8 +12,7 @@ class SoundFFTVideoDemo extends DemoBase {
 
   init() {
     // animation loop
-    window._frameLoop = new FrameLoop(180, 4);
-    _frameLoop.addListener(this);
+    window._frameLoop = (new FrameLoop()).addListener(this);
 
     // setup
     this.el = document.getElementById('video-fft-container');
