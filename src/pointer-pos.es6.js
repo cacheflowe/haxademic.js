@@ -1,6 +1,7 @@
 class PointerPos {
 
   constructor(callbackMove, callbackStart, callbackEnd) {
+    // store options
     this.callbackMove = callbackMove;
     this.callbackStart = callbackStart;
     this.callbackEnd = callbackEnd;
@@ -10,58 +11,83 @@ class PointerPos {
     this.lastY = -1;
     this.totalDeltaX = 0;
     this.totalDeltaY = 0;
-    this.pointerActive = false;;
+    this.pointerActive = false;
+    this.cancelClickThresh = 8;
+    this.isTouchEvents = false;
+    this.hasCheckedTouchEvents = false;
+    this.addListeners();
+  }
 
+  // listeners
+
+  addListeners() {
     // add mouse/touch listeners
-    document.addEventListener('mousedown', (e) => {
-      this.pointerMoved(e.clientX, e.clientY, true);
-      if(this.callbackStart) this.callbackStart();
-    });
-    document.addEventListener('mousemove', (e) => {
-      this.pointerMoved(e.clientX, e.clientY);
-    });
-    document.addEventListener('mouseup', (e) => {
-      this.pointerActive = false;
-      if(this.callbackEnd) this.callbackEnd();
-    });
-    document.addEventListener('touchstart', (e) => {
-      this.pointerMoved(e.touches[0].clientX, e.touches[0].clientY, true);
-      if(this.callbackStart) this.callbackStart();
-    });
-    document.addEventListener('touchmove', (e) => {
-      this.pointerMoved(e.touches[0].clientX, e.touches[0].clientY);
-    });
-    document.addEventListener('touchend', (e) => {
-      this.pointerActive = false;
-      if(this.callbackEnd) this.callbackEnd();
-    });
+    this.startListener = this.pointerStart.bind(this);
+    this.moveListener = this.pointerMove.bind(this);
+    this.endListener = this.pointerEnd.bind(this);
+    document.addEventListener('mousedown', this.startListener);
+    document.addEventListener('mousemove', this.moveListener);
+    document.addEventListener('mouseup', this.endListener);
+    document.addEventListener('touchstart', this.startListener);
+    document.addEventListener('touchmove', this.moveListener);
+    document.addEventListener('touchend', this.endListener);
   }
 
-  reset() {
-    this.curX = -1;
-    this.curY = -1;
-    this.lastX = -1;
-    this.lastY = -1;
+  removeTouchListeners() {
+    document.removeEventListener('touchstart', this.startListener);
+    document.removeEventListener('touchmove', this.moveListener);
+    document.removeEventListener('touchend', this.endListener);
   }
 
-  pointerMoved(x, y, started=false) {
-    if(started) {
-      this.curX = x;
-      this.curY = y;
-      this.totalDeltaX = 0;
-      this.totalDeltaY = 0;
-      this.pointerActive = true;
+  removeMouseListeners() {
+    document.removeEventListener('mousedown', this.startListener);
+    document.removeEventListener('mousemove', this.moveListener);
+    document.removeEventListener('mouseup', this.endListener);
+  }
+
+  checkInputType(e) {
+    if(this.hasCheckedTouchEvents) return;
+    this.isTouchEvents = (e.type == "touchstart");
+    if(this.isTouchEvents) {
+      this.removeMouseListeners();
+    } else {
+      this.removeTouchListeners();
     }
+    this.hasCheckedTouchEvents = true;
+  }
+
+  pointerStart(e) {
+    this.checkInputType(e);
+    this.curX = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
+    this.curY = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
+    this.totalDeltaX = 0;
+    this.totalDeltaY = 0;
+    this.pointerActive = true;
+    if(this.callbackStart) this.callbackStart();
+  }
+
+  pointerMove(e) {
+    let x = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
+    let y = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.curX = x;
     this.curY = y;
     let deltaX = this.curX - this.lastX;
     let deltaY = this.curY - this.lastY;
-    this.totalDeltaX += Math.abs(deltaX);
-    this.totalDeltaY += Math.abs(deltaY);
+    if(this.pointerActive) {
+      this.totalDeltaX += Math.abs(deltaX);
+      this.totalDeltaY += Math.abs(deltaY);
+    }
     if(this.callbackMove && this.pointerActive) this.callbackMove(this.curX, this.curY, deltaX, deltaY);
   }
+
+  pointerEnd(x, y) {
+    this.pointerActive = false;
+    if(this.callbackEnd) this.callbackEnd();
+  }
+
+  // position
 
   x(el=null) {
     if(el) {
@@ -79,7 +105,7 @@ class PointerPos {
     return this.curY;
   };
 
-  xPercent(el) {
+  xNorm(el) {
     if(el) {
       var offset = el.getBoundingClientRect();
       var relativeX = this.curX - offset.left;
@@ -88,7 +114,7 @@ class PointerPos {
     return this.curX / window.innerWidth;
   };
 
-  yPercent(el) {
+  yNorm(el) {
     if(el) {
       var offset = el.getBoundingClientRect();
       var relativeY = this.curY - offset.top;
@@ -98,11 +124,11 @@ class PointerPos {
   };
 
   xDelta() {
-    return (this.lastX == -1) ? 0 : this.curX - this.lastX;
+    return this.curX - this.lastX;
   };
 
   yDelta() {
-    return (this.lastY == -1) ? 0 : this.curY - this.lastY;
+    return this.curY - this.lastY;
   };
 
   xDeltaTotal() {
@@ -112,5 +138,42 @@ class PointerPos {
   yDeltaTotal() {
     return this.totalDeltaY;
   };
+
+  // state
+
+  isTouchInput() {
+    return this.isTouchEvents;
+  }
+
+  isTouching() {
+    return this.pointerActive;
+  }
+
+  setCancelClickThresh(thresh) {
+    this.cancelClickThresh = thresh;
+  }
+
+  pastDragThreshold() {
+    return this.totalDeltaX + this.totalDeltaY > this.cancelClickThresh;
+  }
+
+  insideEl(el) {
+    let x = this.xNorm(el);
+    let y = this.yNorm(el);
+    return (x >= 0 && x <= 1 && y >= 0 && y <= 1);
+  }
+
+  dispose() {
+    this.removeMouseListeners();
+    this.removeTouchListeners();
+    this.pointerActive = false;
+    this.pointerActive = false;
+    this.curX = -1;
+    this.curY = -1;
+    this.lastX = -1;
+    this.lastY = -1;
+    this.totalDeltaX = 0;
+    this.totalDeltaY = 0;
+  }
 
 }

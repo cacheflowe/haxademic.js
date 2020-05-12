@@ -13,10 +13,10 @@ var pointerPosHTML = `<div>
   </div>
   <div class="row">
     <div class="six columns">
-      <p><code>PointerPos.xPercent()</code>: <span id="pos-x-percent"></span></p>
+      <p><code>PointerPos.xNorm()</code>: <span id="pos-x-percent"></span></p>
     </div>
     <div class="six columns">
-      <p><code>PointerPos.yPercent()</code>: <span id="pos-y-percent"></span></p>
+      <p><code>PointerPos.yNorm()</code>: <span id="pos-y-percent"></span></p>
     </div>
   </div>
   <div class="row">
@@ -52,8 +52,8 @@ var specificEntered = false;
 // log dragged state & distance
 var outputTextPosX = document.getElementById('pos-x');
 var outputTextPosY = document.getElementById('pos-y');
-var outputTextPosXPercent = document.getElementById('pos-x-percent');
-var outputTextPosYPercent = document.getElementById('pos-y-percent');
+var outputTextPosxNorm = document.getElementById('pos-x-percent');
+var outputTextPosyNorm = document.getElementById('pos-y-percent');
 var outputTextXDelta = document.getElementById('drag-x-delta');
 var outputTextYDelta = document.getElementById('drag-y-delta');
 // var crossHairX = document.querySelector('body > .crosshair-h');
@@ -61,24 +61,24 @@ var outputTextYDelta = document.getElementById('drag-y-delta');
 
 var outputTextSpecificPosX = document.getElementById('specific-pos-x');
 var outputTextSpecificPosY = document.getElementById('specific-pos-y');
-var outputTextSpecificPosXPercent = document.getElementById('specific-pos-x-percent');
-var outputTextSpecificPosYPercent = document.getElementById('specific-pos-y-percent');
+var outputTextSpecificPosxNorm = document.getElementById('specific-pos-x-percent');
+var outputTextSpecificPosyNorm = document.getElementById('specific-pos-y-percent');
 
 function logUpdates() {
   requestAnimationFrame(() => {
     outputTextPosX.innerHTML = pointerPos.x();
     outputTextPosY.innerHTML = pointerPos.y();
-    outputTextPosXPercent.innerHTML = (pointerPos.xPercent()+"").substr(0,4);
-    outputTextPosYPercent.innerHTML = (pointerPos.yPercent()+"").substr(0,4);
+    outputTextPosxNorm.innerHTML = (pointerPos.xNorm()+"").substr(0,4);
+    outputTextPosyNorm.innerHTML = (pointerPos.yNorm()+"").substr(0,4);
     outputTextXDelta.innerHTML = pointerPos.xDelta();
     outputTextYDelta.innerHTML = pointerPos.yDelta();
 
     outputTextSpecificPosX.innerHTML = pointerPos.x(specificEl);
     outputTextSpecificPosY.innerHTML = pointerPos.y(specificEl);
-    outputTextSpecificPosXPercent.innerHTML = (pointerPos.xPercent(specificEl)+"").substr(0,4);
-    outputTextSpecificPosYPercent.innerHTML = (pointerPos.yPercent(specificEl)+"").substr(0,4);
+    outputTextSpecificPosxNorm.innerHTML = (pointerPos.xNorm(specificEl)+"").substr(0,4);
+    outputTextSpecificPosyNorm.innerHTML = (pointerPos.yNorm(specificEl)+"").substr(0,4);
 
-    if(pointerPos.xPercent(specificEl) >= 0 && pointerPos.xPercent(specificEl) <= 1 && pointerPos.yPercent(specificEl) >= 0 && pointerPos.yPercent(specificEl) <= 1) {
+    if(pointerPos.xNorm(specificEl) >= 0 && pointerPos.xNorm(specificEl) <= 1 && pointerPos.yNorm(specificEl) >= 0 && pointerPos.yNorm(specificEl) <= 1) {
       if(specificEntered == false) {
         specificEntered = true;
         specificEl.classList.add('entered');
