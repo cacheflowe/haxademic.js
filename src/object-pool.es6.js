@@ -2,7 +2,7 @@ class ObjectPool {
 
   // An object pool that grows as needed.
   // Contract:
-  // * Object has a public `active` boolean
+  // * Object has a public `isActive()` function
   // * Init by passing in Class definition: `new ObjectPool(GameSphere)`
 
   constructor(klass) {
@@ -17,7 +17,7 @@ class ObjectPool {
   getObject() {
     // try to find an inactive object
     let freeObject = this.objects.find((el) => {
-      return el.active == false;
+      return el.isActive() == false;
     });
     if(freeObject) {
       return freeObject;
@@ -29,7 +29,7 @@ class ObjectPool {
 
   anyActive() {
     return null != this.objects.find((el) => {
-      return el.active == true;
+      return el.isActive() == true;
     });
   }
 
