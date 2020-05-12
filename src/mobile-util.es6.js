@@ -15,13 +15,23 @@ class MobileUtil {
 
   static lockTouchScreen(isLocked) {
     if(isLocked == false) {
-      document.ontouchmove = null;
       document.body.style.removeProperty('touch-action');
       document.body.style.removeProperty('overflow');
+      document.ontouchmove = null;
     } else {
       document.body.style.setProperty('touch-action', 'none');
       document.body.style.setProperty('overflow', 'hidden');
       document.ontouchmove = function(e) { e.preventDefault(); };
+    }
+  }
+
+  static lockElement(isLocked) {
+    if(isLocked == false) {
+      document.ontouchmove = null;
+      document.body.style.removeProperty('touch-action');
+    } else {
+      document.ontouchmove = function(e) { e.preventDefault(); };
+      document.body.style.setProperty('touch-action', 'none');
     }
   }
 
