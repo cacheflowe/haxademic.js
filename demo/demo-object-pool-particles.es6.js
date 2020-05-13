@@ -26,7 +26,7 @@ class ObjectPoolParticlesDemo extends DemoBase {
         }
         .particle {
           position: absolute;
-          background-color: rgba(0,255,0,0.5);
+          background-color: #0f0;
           width: 10px;
           height: 10px;
           border-radius: 5px;
@@ -67,16 +67,20 @@ class ObjectPoolParticlesDemo extends DemoBase {
 
   // callbacks
 
-  onPointerMove() {
+  launchParticles() {
     let x = this.pointerPos.x(this.particlesEl);
     let y = this.pointerPos.y(this.particlesEl);
     let speedX = this.pointerPos.xDelta(this.particlesEl) / 2;
     let speedY = this.pointerPos.yDelta(this.particlesEl) / 2;
-    const numLaunches = 2;
+    const numLaunches = 3;
     for(var i=0; i < numLaunches; i++) {
       let newParticle = this.particlePool.getObject();
       newParticle.launch(this.particlesEl, x, y, speedX, speedY);
     }
+  }
+
+  onPointerMove() {
+    // this.log.log('MOVE!');
   }
 
   onPointerStart() {
@@ -90,6 +94,7 @@ class ObjectPoolParticlesDemo extends DemoBase {
   // animation updates
 
   frameLoop(frameCount) {
+    if(this.pointerPos.isTouching()) this.launchParticles();
     this.particlePool.pool().forEach((particle) => {
       particle.update();
     });
