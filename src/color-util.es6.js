@@ -210,4 +210,13 @@ class ColorUtil {
 
     return rgb;
   }
+
+  /**
+   *  Converts a hex color value to a darker or lighter version. Original code from from: https://stackoverflow.com/a/57401891/352456
+   *  @return A hex color string.
+   *  @use    {@code CanvasUtil.colorLuminance('00ff00', -255 - 255);}
+   */
+  static hexBrighten(color, amount) {
+    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+  }
 }
