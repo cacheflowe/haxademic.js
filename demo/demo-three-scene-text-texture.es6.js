@@ -1,4 +1,4 @@
-class ThreeSceneDemo extends DemoBase {
+class ThreeSceneTextTextureDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
@@ -20,7 +20,7 @@ class ThreeSceneDemo extends DemoBase {
             font-family: Roboto-Black;
           }
         </style>
-        <h1>ThreeScene</h1>
+        <h1>ThreeScene | Text Texture</h1>
         <p>Custom textured shape w/dynamic canvas text</p>
         <div id="three-scene" style="width: 512px; height: 512px;"></div>
       </div>
@@ -194,4 +194,4 @@ class TextCylinder {
 
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneDemo(document.body);
+if(window.autoInitDemo) window.demo = new ThreeSceneTextTextureDemo(document.body);

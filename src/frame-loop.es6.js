@@ -70,7 +70,7 @@ class FrameLoop {
 		return this.frame * mult;
 	}
 
-  osc(mult, low, high) {
+  osc(mult, low=-1, high=1) {
 		let range = (high - low) * 0.5;
 		let mid = low + range;
 		return mid + Math.sin(this.count(mult)) * range;

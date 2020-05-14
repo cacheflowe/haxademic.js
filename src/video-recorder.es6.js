@@ -5,6 +5,7 @@ class VideoRecorder {
   // see also: https://w3c.github.io/mediacapture-fromelement/#dom-htmlmediaelement-capturestream
   // and: https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/MediaRecorder
   // more here: https://mozdevs.github.io/MediaRecorder-examples/
+  // this also looks like a nice wrapper: https://recordrtc.org/
 
   constructor(canvas, {
       fileType = 'mkv',   // can choose `webm` too, but mkv has higher quality output potential. mp4 doesn't seem supported yet
