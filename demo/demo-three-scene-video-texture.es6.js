@@ -115,7 +115,7 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.planeMaterial = new THREE.MeshPhongMaterial({
       color: 0x555555,
       side: THREE.DoubleSide,
-      wireframe: true,
+      wireframe: false,
       emissive : 0x222222, // 0x000000
       specular : 0x333333,
       shininess : 10,
