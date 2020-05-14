@@ -4,17 +4,22 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     super(parentEl, [
       "../vendor/guify.min.js",
       "../vendor/three/three.min.js",
-      "../src/canvas-util.es6.js",
+      "../src/drag-drop-util.es6.js",
       "../src/frame-loop.es6.js",
-      "../src/math-util.es6.js",
+      // "../src/math-util.es6.js",
       "../src/mobile-util.es6.js",
       "../src/pointer-pos.es6.js",
       "../src/three-scene-.es6.js",
       "../src/ui-control-panel.es6.js",
     ], `
       <div class="container">
+        <style>
+          .drop-over {
+            outline: 10px dashed #009900;
+          }
+        </style>
         <h1>ThreeScene | Video Texture</h1>
-        <div id="three-scene" style="width: 512px; height: 512px;"></div>
+        <div id="three-scene" style="width: 100%; height: 0; padding-bottom: 100%;"></div>
         <div id="video-debug"></div>
       </div>
     `);
@@ -27,6 +32,7 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.startAnimation();
     this.setupInput();
     this.setupUI();
+    this.setupDragDrop();
   }
 
   setupScene() {
@@ -35,11 +41,15 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.scene = this.threeScene.getScene();
   }
 
+  // camera rotate via mouse
+
   setupInput() {
     this.pointerPos = new PointerPos();
     MobileUtil.lockTouchScreen(true);
     MobileUtil.disableTextSelect(document.body, true);
   }
+
+  // UI
 
   setupUI() {
     window._ui = new UIControlPanel(document.body, "Video Texture");
@@ -50,6 +60,17 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
   guiValueUpdated(key, value) {
     console.log('guiValueUpdated: "' + key + '" = ' + value);
   }
+
+  // drag/drop
+
+  setupDragDrop() {
+    DragDropUtil.dropFile(this.el, (fileResult) => {
+      this.videoEl.src = fileResult;
+      this.videoEl.play();
+    });
+  }
+
+  // THREE scene
 
   addLights() {
     var ambientLight = new THREE.AmbientLight(0xffffff, 0.99);
@@ -65,12 +86,12 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
   }
 
   buildVideoMesh() {
-        // setup
+    // setup
     this.videoDebugEl = document.getElementById('video-debug');
 
     // add video element
     this.videoEl = document.createElement('video');
-    this.videoEl.src = '../data/wash-your-hands.mp4';
+    this.videoEl.src = '../data/wash-your-hands-512.mp4';
     this.videoEl.style.setProperty('width', '320px');
     this.videoEl.setAttribute('loop', 'true');
     this.videoEl.setAttribute('muted', 'true');
@@ -94,11 +115,12 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.planeMaterial = new THREE.MeshPhongMaterial({
       color: 0x555555,
       side: THREE.DoubleSide,
-      wireframe: false,
+      wireframe: true,
       emissive : 0x222222, // 0x000000
       specular : 0x333333,
       shininess : 10,
       map: this.videoTexture,
+      // normalMap: this.videoTexture,
       displacementMap: this.videoTexture,
       displacementScale: 50,
       // transparent: true,
