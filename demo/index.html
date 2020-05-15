@@ -23,7 +23,7 @@
       // get demo name & turn into javascript include
       let demo = document.location.hash;// URLUtil.getHashQueryVariable('demo');
       // let demoJsFile = `./demo-${demo}.es6.js`;
-      let demoJsFile = `./demo-${demo.substring(1)}.es6.js`;
+      let demoJsFile = `./demo-${demo.substring(1)}.es6.js?v=${Math.round(Math.random() * 9999999)}`;
       if(demo) {
         console.log("Loading demo: ", demoJsFile);
         ErrorUtil.initErrorCatching();

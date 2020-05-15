@@ -45,6 +45,7 @@ class DemoBase {
       if(nextJsFile.indexOf('dom-util.es6') != -1) {  // don't reload dom-util (TODO: check any others that might overlap)
         this.loadNextScript();
       } else {
+        nextJsFile += `?v=${Math.round(Math.random() * 9999999)}`;
         DOMUtil.loadJavascript(nextJsFile, () => this.loadNextScript());
       }
     } else {
