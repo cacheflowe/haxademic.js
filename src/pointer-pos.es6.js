@@ -60,6 +60,8 @@ class PointerPos {
     this.checkInputType(e);
     this.curX = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
     this.curY = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
+    this.lastX = this.curX;
+    this.lastY = this.curY;
     this.totalDeltaX = 0;
     this.totalDeltaY = 0;
     this.pointerActive = true;
