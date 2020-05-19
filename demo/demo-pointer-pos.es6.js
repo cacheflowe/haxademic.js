@@ -32,6 +32,7 @@ class FrameLoopDemo extends DemoBase {
       <div><code>PointerPos.yDelta()</code> = <span id="pos-y-delta"></span></div>
       <div><code>PointerPos.xDeltaTotal()</code> = <span id="pos-x-delta-total"></span></div>
       <div><code>PointerPos.yDeltaTotal()</code> = <span id="pos-y-delta-total"></span></div>
+      <div><code>PointerPos.numPointers()</code> = <span id="num-pointers"></span></div>
       <div id="specific-el">
         <div>Specific element relative position:</div>
         <div><code>PointerPos.x(el)</code> = <span id="specific-pos-x"></span></div>
@@ -75,6 +76,7 @@ class FrameLoopDemo extends DemoBase {
     this.outputTextYDelta = document.getElementById('pos-y-delta');
     this.outputTextXDeltaTotal = document.getElementById('pos-x-delta-total');
     this.outputTextYDeltaTotal = document.getElementById('pos-y-delta-total');
+    this.outputTextNumPointers = document.getElementById('num-pointers');
     // var crossHairX = document.querySelector('body > .crosshair-h');
     // var crossHairY = document.querySelector('body > .crosshair-v');
 
@@ -124,6 +126,7 @@ class FrameLoopDemo extends DemoBase {
     this.outputTextYDelta.innerHTML = this.pointerPos.yDelta();
     this.outputTextXDeltaTotal.innerHTML = this.pointerPos.xDeltaTotal();
     this.outputTextYDeltaTotal.innerHTML = this.pointerPos.yDeltaTotal();
+    this.outputTextNumPointers.innerHTML = this.pointerPos.numPointers();
     // specific el
     this.outputTextSpecificPosX.innerHTML = this.pointerPos.x(this.specificEl);
     this.outputTextSpecificPosY.innerHTML = this.pointerPos.y(this.specificEl);

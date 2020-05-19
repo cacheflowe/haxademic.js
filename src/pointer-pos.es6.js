@@ -12,6 +12,7 @@ class PointerPos {
     this.totalDeltaX = 0;
     this.totalDeltaY = 0;
     this.pointerActive = false;
+    this.pointerCount = 0;
     this.cancelClickThresh = 8;
     this.isTouchEvents = false;
     this.hasCheckedTouchEvents = false;
@@ -60,6 +61,7 @@ class PointerPos {
     this.checkInputType(e);
     this.curX = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
     this.curY = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
+    this.pointerCount = (this.isTouchEvents) ? e.touches.length : 1;
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.totalDeltaX = 0;
@@ -71,6 +73,7 @@ class PointerPos {
   pointerMove(e) {
     let x = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
     let y = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
+    this.pointerCount = (this.isTouchEvents) ? e.touches.length : 1;
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.curX = x;
@@ -84,7 +87,8 @@ class PointerPos {
     if(this.callbackMove && this.pointerActive) this.callbackMove(this.curX, this.curY, deltaX, deltaY);
   }
 
-  pointerEnd(x, y) {
+  pointerEnd(e) {
+    this.pointerCount = (this.isTouchEvents) ? e.touches.length : 0;
     this.pointerActive = false;
     if(this.callbackEnd) this.callbackEnd();
   }
@@ -149,6 +153,10 @@ class PointerPos {
 
   isTouching() {
     return this.pointerActive;
+  }
+
+  numPointers() {
+    return this.pointerCount;
   }
 
   setCancelClickThresh(thresh) {
