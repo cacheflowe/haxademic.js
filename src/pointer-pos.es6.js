@@ -89,8 +89,10 @@ class PointerPos {
 
   pointerEnd(e) {
     this.pointerCount = (this.isTouchEvents) ? e.touches.length : 0;
-    this.pointerActive = false;
-    if(this.callbackEnd) this.callbackEnd();
+    if(this.pointerCount == 0) {
+      this.pointerActive = false;
+      if(this.callbackEnd) this.callbackEnd();
+    }
   }
 
   // position
