@@ -28,7 +28,6 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
   init() {
     this.setupScene();
     this.addLights();
-    this.createVideoCanvas();
     this.createDisplacementMap();
     this.buildVideoMesh();
     this.startAnimation();
@@ -108,25 +107,14 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     // this.videoEl.volume = 0;
 
     // add THREE video texture
-    /*
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
     this.videoTexture.minFilter = THREE.LinearFilter;
     this.videoTexture.magFilter = THREE.LinearFilter;
     this.videoTexture.format = THREE.RGBFormat;
     this.videoTexture.repeat.set(0.5, 1);
-    // console.log(this.videoTexture);
-
-    // add THREE video texture
-    this.videoDisplaceTex = new THREE.VideoTexture(this.videoEl);
-    this.videoDisplaceTex.minFilter = THREE.LinearFilter;
-    this.videoDisplaceTex.magFilter = THREE.LinearFilter;
-    this.videoDisplaceTex.format = THREE.RGBFormat;
-    this.videoDisplaceTex.repeat.set(0.5, 1);
-    this.videoDisplaceTex.offset.set(0.5, 0);
-    */
 
     // build shape
-    let planeResolution = 200;
+    let planeResolution = 100;
     this.planeGeometry = new THREE.PlaneGeometry(175, 250, planeResolution, planeResolution);
     this.planeMaterial = new THREE.MeshPhongMaterial({
       color: 0x555555,
@@ -135,10 +123,7 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
       emissive : 0x222222, // 0x000000
       specular : 0x333333,
       shininess : 10,
-      map: this.canvasTexture,
-      // map: this.videoTexture,
-      // normalMap: this.videoTexture,
-      // displacementMap: this.videoDisplaceTex, // this.canvasTexture
+      map: this.videoTexture,
       displacementMap: this.canvasDispTexture,
       displacementScale: 50,
     });
@@ -146,39 +131,20 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.scene.add(this.plane);
   }
 
-  createVideoCanvas() {
-    // create canvas
-		this.canvasTex = document.createElement('canvas');
-    this.canvasTex.setAttribute('width', '256');
-    this.canvasTex.setAttribute('height', '512');
-		this.ctx = this.canvasTex.getContext('2d');
-
-    // create THREE texture from canvas
-    this.canvasTexture = new THREE.Texture(this.canvasTex);
-    // this.canvasTexture.repeat.set(0.25, 1);
-    this.canvasTexture.needsUpdate = true;
-
-    // debug
-    setTimeout(() => {
-      // this.videoDebugEl.appendChild(this.canvasTex);
-    }, 200);
-  }
-
   createDisplacementMap() {
     // create canvas
 		this.canvasMap = document.createElement('canvas');
-    this.canvasMap.setAttribute('width', '256');
+    this.canvasMap.setAttribute('width', '512');
     this.canvasMap.setAttribute('height', '512');
 		this.ctxDisp = this.canvasMap.getContext('2d');
 
     // create THREE texture from canvas
     this.canvasDispTexture = new THREE.Texture(this.canvasMap);
-    // this.canvasDispTexture.repeat.set(1, 1);
     this.canvasDispTexture.needsUpdate = true;
 
     // debug
     setTimeout(() => {
-      // this.videoDebugEl.appendChild(this.canvasMap);
+      this.videoDebugEl.appendChild(this.canvasMap);
     }, 200);
   }
 
@@ -188,16 +154,11 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
   }
 
   frameLoop(frameCount) {
-    // update low-res video texture
-    if(this.planeMaterial.map == this.canvasTexture) {
-      // this.ctx.filter = 'grayscale(100%) blur(2px)';
-      // this.ctx.globalAlpha = 0.5;
-      // this.ctx.globalCompositeOperation = 'source-over';
-      this.ctx.drawImage(    this.videoEl,    0, 0, 512, this.canvasTex.height);
-      this.ctxDisp.drawImage(this.videoEl, -256, 0, 512, this.canvasMap.height);
-      this.canvasTexture.needsUpdate = true;
-      this.canvasDispTexture.needsUpdate = true;
-    }
+    // update displacement texture with half of source video
+    this.ctxDisp.fillStyle = "#fff"; 
+    this.ctxDisp.fillRect(0, 0, this.canvasMap.width, this.canvasMap.height); 
+    this.ctxDisp.drawImage(this.videoEl, -256, 0, 512, this.canvasMap.height);
+    this.canvasDispTexture.needsUpdate = true;
 
     // update camera
     this.plane.rotation.y = -1 + 2 * this.pointerPos.xNorm(this.el);
