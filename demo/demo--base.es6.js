@@ -2,12 +2,12 @@ class DemoBase {
 
   constructor(parentEl, jsFiles, layoutHtml=null, elId=null) {
     this.parentEl = parentEl;
-    this.loadJsDependenciesSerial(jsFiles);
     if(layoutHtml != null && elId == null) {
       this.buildLayout(layoutHtml);
     } else if(elId != null) {
       this.buildLayoutBasic(layoutHtml, elId);
     }
+    this.loadJsDependenciesSerial(jsFiles);
   }
 
   /*
