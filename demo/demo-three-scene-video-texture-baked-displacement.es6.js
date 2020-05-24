@@ -93,8 +93,7 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
 
     // add video element
     this.videoEl = document.createElement('video');
-    // this.videoEl.src = '../data/wash-your-hands-512.mp4';
-    this.videoEl.src = '../data/COOS_BAY_MAXIM_TEST_1.mp4';
+    this.videoEl.src = '../data/wash-your-hands-512.mp4';
     this.videoEl.setAttribute('loop', 'true');
     this.videoEl.setAttribute('muted', 'true');
     this.videoEl.setAttribute('playsinline', 'true');
