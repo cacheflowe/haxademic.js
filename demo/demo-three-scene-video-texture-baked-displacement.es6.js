@@ -28,6 +28,8 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
   init() {
     this.setupScene();
     this.addLights();
+    this.createVideoCanvas();
+    this.createDisplacementMap();
     this.buildVideoMesh();
     this.startAnimation();
     this.setupInput();
@@ -91,8 +93,8 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
 
     // add video element
     this.videoEl = document.createElement('video');
-    this.videoEl.src = '../data/wash-your-hands-512.mp4';
-    this.videoEl.style.setProperty('width', '320px');
+    // this.videoEl.src = '../data/wash-your-hands-512.mp4';
+    this.videoEl.src = '../data/COOS_BAY_MAXIM_TEST_1.mp4';
     this.videoEl.setAttribute('loop', 'true');
     this.videoEl.setAttribute('muted', 'true');
     this.videoEl.setAttribute('playsinline', 'true');
@@ -101,18 +103,32 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.videoEl.defaultMuted = true;
     this.videoEl.muted = true;
     this.videoEl.play();
+    this.videoEl.style.setProperty('width', '320px');   // for debug view
+    this.videoEl.style.setProperty('border', '1px solid #090');
     this.videoDebugEl.appendChild(this.videoEl);
     // this.videoEl.volume = 0;
 
     // add THREE video texture
+    /*
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
     this.videoTexture.minFilter = THREE.LinearFilter;
     this.videoTexture.magFilter = THREE.LinearFilter;
     this.videoTexture.format = THREE.RGBFormat;
+    this.videoTexture.repeat.set(0.5, 1);
+    // console.log(this.videoTexture);
+
+    // add THREE video texture
+    this.videoDisplaceTex = new THREE.VideoTexture(this.videoEl);
+    this.videoDisplaceTex.minFilter = THREE.LinearFilter;
+    this.videoDisplaceTex.magFilter = THREE.LinearFilter;
+    this.videoDisplaceTex.format = THREE.RGBFormat;
+    this.videoDisplaceTex.repeat.set(0.5, 1);
+    this.videoDisplaceTex.offset.set(0.5, 0);
+    */
 
     // build shape
     let planeResolution = 200;
-    this.planeGeometry = new THREE.PlaneGeometry(250, 250, planeResolution, planeResolution);
+    this.planeGeometry = new THREE.PlaneGeometry(175, 250, planeResolution, planeResolution);
     this.planeMaterial = new THREE.MeshPhongMaterial({
       color: 0x555555,
       side: THREE.DoubleSide,
@@ -120,22 +136,70 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
       emissive : 0x222222, // 0x000000
       specular : 0x333333,
       shininess : 10,
-      map: this.videoTexture,
+      map: this.canvasTexture,
+      // map: this.videoTexture,
       // normalMap: this.videoTexture,
-      displacementMap: this.videoTexture,
+      // displacementMap: this.videoDisplaceTex, // this.canvasTexture
+      displacementMap: this.canvasDispTexture,
       displacementScale: 50,
-      // transparent: true,
-      // opacity: 0.8,
     });
     this.plane = new THREE.Mesh( this.planeGeometry, this.planeMaterial );
     this.scene.add(this.plane);
   }
+
+  createVideoCanvas() {
+    // create canvas
+		this.canvasTex = document.createElement('canvas');
+    this.canvasTex.setAttribute('width', '256');
+    this.canvasTex.setAttribute('height', '512');
+		this.ctx = this.canvasTex.getContext('2d');
+
+    // create THREE texture from canvas
+    this.canvasTexture = new THREE.Texture(this.canvasTex);
+    // this.canvasTexture.repeat.set(0.25, 1);
+    this.canvasTexture.needsUpdate = true;
+
+    // debug
+    setTimeout(() => {
+      // this.videoDebugEl.appendChild(this.canvasTex);
+    }, 200);
+  }
+
+  createDisplacementMap() {
+    // create canvas
+		this.canvasMap = document.createElement('canvas');
+    this.canvasMap.setAttribute('width', '256');
+    this.canvasMap.setAttribute('height', '512');
+		this.ctxDisp = this.canvasMap.getContext('2d');
+
+    // create THREE texture from canvas
+    this.canvasDispTexture = new THREE.Texture(this.canvasMap);
+    // this.canvasDispTexture.repeat.set(1, 1);
+    this.canvasDispTexture.needsUpdate = true;
+
+    // debug
+    setTimeout(() => {
+      // this.videoDebugEl.appendChild(this.canvasMap);
+    }, 200);
+  }
+
 
   startAnimation() {
     window._frameLoop = (new FrameLoop()).addListener(this);
   }
 
   frameLoop(frameCount) {
+    // update low-res video texture
+    if(this.planeMaterial.map == this.canvasTexture) {
+      // this.ctx.filter = 'grayscale(100%) blur(2px)';
+      // this.ctx.globalAlpha = 0.5;
+      // this.ctx.globalCompositeOperation = 'source-over';
+      this.ctx.drawImage(    this.videoEl,    0, 0, 512, this.canvasTex.height);
+      this.ctxDisp.drawImage(this.videoEl, -256, 0, 512, this.canvasMap.height);
+      this.canvasTexture.needsUpdate = true;
+      this.canvasDispTexture.needsUpdate = true;
+    }
+
     // update camera
     this.plane.rotation.y = -1 + 2 * this.pointerPos.xNorm(this.el);
     this.plane.rotation.x = -1 + 2 * this.pointerPos.yNorm(this.el);
