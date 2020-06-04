@@ -1,9 +1,10 @@
-class ThreeSceneFBO {
+class ThreeScenePlane {
 
-  constructor(width, height, bgColor=0xff0000) {
+  constructor(width, height, bgColor=0xff0000, transparent=false) {
     this.width = width;
     this.height = height;
     this.bgColor = bgColor;
+    this.transparent = transparent;
     this.devicePixelRatio = window.devicePixelRatio || 1;
     this.buildScene();
     this.buildRenderer();
@@ -17,7 +18,7 @@ class ThreeSceneFBO {
 
     // camera-filling plane
     this.plane = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(this.width, this.height),
+      new THREE.PlaneBufferGeometry(this.width, this.height, 1),
       new THREE.MeshBasicMaterial({ color: 0x00ffff })
     );
     this.plane.position.set(0, 0, 0);
@@ -25,16 +26,18 @@ class ThreeSceneFBO {
   }
 
   buildRenderer() {
+    // See: view-source:https://threejs.org/examples/webgl_rtt.html
     let options = {
-      format: THREE.RGBAFormat,
-      minFilter: THREE.LinearFilter, 
-      magFilter: THREE.LinearFilter,
+      antialias: true, 
       depthBuffer: false, 
-      stencilBuffer: false,
+      stencilBuffer: false
     };
-    this.renderBuffer = new THREE.WebGLRenderTarget(this.width, this.height, options);
-    this.renderBuffer.background = this.bgColor;
-    // console.log(this.renderBuffer);
+    if(this.transparent) options.alpha = true;
+    this.renderer = new THREE.WebGLRenderer(options);
+    this.renderer.setClearColor(this.bgColor, (this.transparent) ? 0 : 1);
+		this.renderer.setPixelRatio(this.devicePixelRatio);
+    this.renderer.setSize(this.width, this.height);
+    this.render();
   }
 
   setMaterial(material) {
@@ -62,23 +65,15 @@ class ThreeSceneFBO {
   }
 
   canvasEl() {
-    return this.renderBuffer.domElement;
+    return this.renderer.domElement;
   }
 
-  getRenderTarget() {
-    return this.renderBuffer;
+  getRenderer() {
+    return this.renderer;
   }
 
-  getRenderTargetTexture() {
-    return this.renderBuffer.texture;
-  }
-
-  render(mainRenderer, scene=this.scene, camera=this.camera) {
-    // uses main WebGLRenderer, passed in from the main app
-    // it could also pass in a different scene & camera if we wanted to get fancy with the main scene/camera
-    mainRenderer.setRenderTarget(this.renderBuffer);
-    mainRenderer.render(scene, camera);
-    mainRenderer.setRenderTarget(null);
+  render() {
+    this.renderer.render(this.scene, this.camera);
   }
 
 }

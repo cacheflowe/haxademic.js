@@ -10,9 +10,15 @@ class SolidSocket {
     this.startMonitoringConnection();
   }
 
+  // Public methods
+
   setURL(wsURL) {
     this.wsURL = wsURL;
     if(this.socket) this.socket.close();
+  }
+
+  isConnected() {
+    return this.socket.readyState === WebSocket.OPEN;
   }
 
   // WebSocket LISTENERS
@@ -80,7 +86,7 @@ class SolidSocket {
   // SEND
 
   sendMessage(message) {
-    if(this.socket.readyState === WebSocket.OPEN) {
+    if(this.isConnected()) {
       this.socket.send(message);
     } else {
       console.warn('SolidSocket.sendMessage() failed - not connected!');
@@ -98,7 +104,7 @@ class SolidSocket {
   }
 
   checkConnection() {
-    let socketOpen = this.socket.readyState == WebSocket.OPEN;
+    let socketOpen = this.isConnected();
     let socketConnecting = this.socket.readyState == WebSocket.CONNECTING;
     let timeForReconnect = Date.now() > this.lastConnectAttemptTime + SolidSocket.RECONNECT_INTERVAL;
     if(timeForReconnect) {

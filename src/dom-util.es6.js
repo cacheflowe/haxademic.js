@@ -37,11 +37,11 @@ class DOMUtil {
     return el.outerHTML;
   }
 
-  static addLoadedClass() { // add class to enable animation a moment after window load
+  static addLoadedClass(delay=1000, className='ready') { // add class to enable animation a moment after window load
     window.addEventListener('load', (e) => {
       setTimeout(() => {
-        document.body.classList.add('ready');
-      }, 1000);
+        document.body.classList.add(className);
+      }, delay);
     });
   }
 

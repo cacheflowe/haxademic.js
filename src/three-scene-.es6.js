@@ -58,6 +58,10 @@ class ThreeScene {
     return this.renderer.domElement;
   }
 
+  getRenderer() {
+    return this.renderer;
+  }
+
   render() {
     this.renderer.render(this.scene, this.camera);
   }

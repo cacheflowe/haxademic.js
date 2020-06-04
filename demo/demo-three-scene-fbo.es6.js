@@ -3,26 +3,28 @@ class ThreeSceneFBODemo extends DemoBase {
   constructor(parentEl) {
     super(parentEl, [
       "../vendor/three/three.min.js",
-      "http://mrdoob.github.com/three.js/examples/js/shaders/CopyShader.js",
-      "http://mrdoob.github.com/three.js/examples/js/shaders/HorizontalBlurShader.js",
-      "http://mrdoob.github.com/three.js/examples/js/shaders/VerticalBlurShader.js",
-      "http://mrdoob.github.com/three.js/examples/js/postprocessing/EffectComposer.js",
-      "http://mrdoob.github.com/three.js/examples/js/postprocessing/RenderPass.js",
-      "http://mrdoob.github.com/three.js/examples/js/postprocessing/MaskPass.js",
-      "http://mrdoob.github.com/three.js/examples/js/postprocessing/ShaderPass.js",
+      "../vendor/three/shaders/CopyShader.js",
+      "../vendor/three/shaders/HorizontalBlurShader.js",
+      "../vendor/three/shaders/VerticalBlurShader.js",
+      "../vendor/three/postprocessing/EffectComposer.js",
+      "../vendor/three/postprocessing/RenderPass.js",
+      "../vendor/three/postprocessing/MaskPass.js",
+      "../vendor/three/postprocessing/ShaderPass.js",
+      "../src/drag-drop-util.es6.js",
       "../src/frame-loop.es6.js",
       "../src/pointer-pos.es6.js",
       "../src/three-chroma-shader.es6.js",
+      "../src/three-scene-.es6.js",
       "../src/three-scene-fbo.es6.js",
     ], `
       <div class="container">
         <style>
-          body {
-            background: #00ff00;
+          .drop-over {
+            outline: 10px dashed #009900;
           }
         </style>
         <h1>ThreeSceneFBO</h1>
-        <div id="three-scene-fbo"></div>
+        <div id="three-scene-fbo" style="width: 100%; height: 600px;"></div>
         <div id="video-debug"></div>
       </div>
     `);
@@ -30,18 +32,91 @@ class ThreeSceneFBODemo extends DemoBase {
 
   init() {
     this.setupScene();
+    this.buildImageMesh();
     this.buildVideoTexture();
-    this.buildPostProcessing();
+    // this.buildPostProcessing();
+    this.buildVideoMesh();
+    this.setupInput();
     this.startAnimation();
+    this.setupDragDrop();
   }
 
   setupScene() {
     this.el = document.getElementById('three-scene-fbo');
-    this.threeScene = new ThreeSceneFBO(256, 256, 0xff0000, true);
+    this.threeScene = new ThreeScene(this.el, 0xffffff);
+    // this.threeScene.getRenderer().autoClear = false;
+    this.scene = this.threeScene.getScene();
     this.el.appendChild(this.threeScene.canvasEl());
+    this.threeFBO = new ThreeSceneFBO(768, 768, 0xffffff);
+  }
+
+  setupInput() {
+    this.pointerPos = new PointerPos();
+    // MobileUtil.lockTouchScreen(true);
+    // MobileUtil.disableTextSelect(document.body, true);
+  }
+  
+  setupDragDrop() {
+    DragDropUtil.dropFile(this.el, (fileResult) => {
+      if(!!fileResult.match(/video/)) {
+        // debugger
+        this.videoEl.src = fileResult;
+        this.videoEl.play();
+      }
+      if(!!fileResult.match(/image/)) {
+        // debugger
+        // var texture = new THREE.Texture(fileResult);
+        // texture.encoding = THREE.sRGBEncoding;
+        // texture.needsUpdate = true;
+        // this.planeBg.material.map = new THREE.TextureLoader().load(fileResult);
+        // this.planeBg.material.needsUpdate = true; 
+        var loader = new THREE.TextureLoader();
+        loader.load(fileResult,
+          (texture) => {
+            this.planeBg.material.map = texture;
+            this.planeBg.material.needsUpdate = true; 
+          },
+          undefined,
+          ( err ) => {
+            console.error( 'An error happened.' );
+          }
+        );
+      }
+    });
   }
 
   // THREE scene
+
+  buildImageMesh() {
+    // build shape
+    this.planeBg = new THREE.Mesh(
+      new THREE.PlaneGeometry(1920/2, 1080/2), 
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.DoubleSide,
+        wireframe: false,
+      })
+    );
+    this.scene.add(this.planeBg);   
+  }
+
+  buildVideoMesh() {
+    // build shape
+    let planeResolution = 1;
+    this.planeGeometry = new THREE.PlaneGeometry(320*0.5, 400*0.5, planeResolution, planeResolution);
+    this.planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      side: THREE.DoubleSide,
+      wireframe: false,
+      map: this.threeFBO.getRenderTargetTexture(),
+      blending: THREE.MultiplyBlending,
+      // transparent: true,
+      // opacity: 0.85,
+    });
+    this.plane = new THREE.Mesh( this.planeGeometry, this.planeMaterial );
+    this.plane.position.set(0, 0, 50);
+    this.planeBg.add(this.plane);
+  }
 
   buildVideoTexture() {
     // setup
@@ -69,48 +144,26 @@ class ThreeSceneFBODemo extends DemoBase {
     this.videoTexture.format = THREE.RGBFormat;
 
     // set texture on FBO plane
-    this.threeScene.setMaterial(new THREE.MeshBasicMaterial({
+    this.threeFBO.setMaterial(new THREE.MeshBasicMaterial({
       map: this.videoTexture,
       color: 0xffffff,
       transparent: true,
     }));
   }
 
-  // createDisplacementMap() {
-  //   // create canvas
-	// 	this.canvasMap = document.createElement('canvas');
-  //   this.canvasMap.setAttribute('width', '512');
-  //   this.canvasMap.setAttribute('height', '512');
-	// 	this.ctx = this.canvasMap.getContext('2d');
-  //   setTimeout(() => {
-  //     this.videoDebugEl.appendChild(this.canvasMap);
-  //   }, 200);
-
-  //   // create THREE texture from canvas
-  //   this.canvasTexture = new THREE.Texture(this.canvasMap);
-  //   this.canvasTexture.needsUpdate = true;
-  // }
-
   buildPostProcessing() {
-    this.composer = new THREE.EffectComposer(this.threeScene.getRenderer());
-    this.composer.addPass(new THREE.RenderPass(this.threeScene.getScene(), this.threeScene.getCamera()));
-
-    this.hblur = new THREE.ShaderPass( THREE.HorizontalBlurShader );
-    this.hblur.uniforms.h.value = 0.005;
-    // this.composer.addPass(this.hblur);
-
-    this.vblur = new THREE.ShaderPass( THREE.VerticalBlurShader );
-    this.vblur.uniforms.v.value = 0.005;
-    // this.composer.addPass(this.vblur);
+    // set up effects chain on render buffer
+    this.composer = new THREE.EffectComposer(this.threeScene.getRenderer(), this.threeFBO.getRenderTarget());
+    this.composer.addPass(new THREE.RenderPass(this.threeFBO.getScene(), this.threeFBO.getCamera()));
+    this.composer.renderToScreen = false;
     
+    // add chroma filter
     this.chroma = new THREE.ShaderPass( THREE.ChromaShader );
     this.chroma.material.transparent = true; 
-    this.composer.addPass(this.chroma);
-    this.chroma.uniforms.thresholdSensitivity.value = 0.2;
-    this.chroma.uniforms.smoothing.value = 0.7;
+    this.chroma.uniforms.thresholdSensitivity.value = 0.1;
+    this.chroma.uniforms.smoothing.value = 0.9;
     this.chroma.uniforms.colorToReplace.value = new THREE.Color(0xffffff);
-
-    this.chroma.renderToScreen = true;
+    this.composer.addPass(this.chroma);
   }
 
   startAnimation() {
@@ -118,16 +171,19 @@ class ThreeSceneFBODemo extends DemoBase {
   }
 
   frameLoop(frameCount) {
-    // update low-res video texture
-    // if(this.planeMaterial.displacementMap == this.canvasTexture) {
-    //   this.canvasTexture.needsUpdate = true;
-    // }
+    // update camera
+    this.planeBg.rotation.y = -0.5 + 1.0 * this.pointerPos.xNorm(this.el);
+    this.planeBg.rotation.x = -0.5 + 1.0 * this.pointerPos.yNorm(this.el);
     
     // render!
     if(!!this.composer) {
+      this.threeFBO.render(this.threeScene.getRenderer());
+      this.composer.reset(this.threeFBO.getRenderTarget());   // needed fo chroma filter
       this.composer.render();
+      this.threeScene.render();
     } else {
-      // this.threeScene.render();
+      this.threeFBO.render(this.threeScene.getRenderer());
+      this.threeScene.render();
     }
   }
 
