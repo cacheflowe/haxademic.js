@@ -12,6 +12,7 @@ class ThreeSceneFBODemo extends DemoBase {
       "../vendor/three/postprocessing/ShaderPass.js",
       "../src/drag-drop-util.es6.js",
       "../src/frame-loop.es6.js",
+      "../src/mobile-util.es6.js",
       "../src/pointer-pos.es6.js",
       "../src/three-chroma-shader.es6.js",
       "../src/three-scene-.es6.js",
@@ -43,8 +44,8 @@ class ThreeSceneFBODemo extends DemoBase {
 
   setupScene() {
     this.el = document.getElementById('three-scene-fbo');
-    this.threeScene = new ThreeScene(this.el, 0xffffff);
-    // this.threeScene.getRenderer().autoClear = false;
+    this.threeScene = new ThreeScene(this.el, 0xff0000);
+    this.threeScene.getRenderer().setClearColor(0x000000, 0);
     this.scene = this.threeScene.getScene();
     this.el.appendChild(this.threeScene.canvasEl());
     this.threeFBO = new ThreeSceneFBO(768, 768, 0xffffff);
@@ -52,24 +53,17 @@ class ThreeSceneFBODemo extends DemoBase {
 
   setupInput() {
     this.pointerPos = new PointerPos();
-    // MobileUtil.lockTouchScreen(true);
-    // MobileUtil.disableTextSelect(document.body, true);
+    MobileUtil.lockTouchScreen(true);
+    MobileUtil.disableTextSelect(document.body, true);
   }
   
   setupDragDrop() {
     DragDropUtil.dropFile(this.el, (fileResult) => {
       if(!!fileResult.match(/video/)) {
-        // debugger
         this.videoEl.src = fileResult;
         this.videoEl.play();
       }
       if(!!fileResult.match(/image/)) {
-        // debugger
-        // var texture = new THREE.Texture(fileResult);
-        // texture.encoding = THREE.sRGBEncoding;
-        // texture.needsUpdate = true;
-        // this.planeBg.material.map = new THREE.TextureLoader().load(fileResult);
-        // this.planeBg.material.needsUpdate = true; 
         var loader = new THREE.TextureLoader();
         loader.load(fileResult,
           (texture) => {
@@ -77,8 +71,8 @@ class ThreeSceneFBODemo extends DemoBase {
             this.planeBg.material.needsUpdate = true; 
           },
           undefined,
-          ( err ) => {
-            console.error( 'An error happened.' );
+          (err) => {
+            console.error('An error happened.', err);
           }
         );
       }
@@ -109,12 +103,11 @@ class ThreeSceneFBODemo extends DemoBase {
       side: THREE.DoubleSide,
       wireframe: false,
       map: this.threeFBO.getRenderTargetTexture(),
-      blending: THREE.MultiplyBlending,
-      // transparent: true,
-      // opacity: 0.85,
+      blending: THREE.MultiplyBlending,  // use this if not using chroma shader postprocessing
+      transparent: true,
     });
     this.plane = new THREE.Mesh( this.planeGeometry, this.planeMaterial );
-    this.plane.position.set(0, 0, 50);
+    this.plane.position.set(0, 0, 25);
     this.planeBg.add(this.plane);
   }
 
@@ -158,6 +151,8 @@ class ThreeSceneFBODemo extends DemoBase {
     this.composer.renderToScreen = false;
     
     // add chroma filter
+    // this requires the following renderer setting to properly set tranparency
+    // this.threeScene.getRenderer().setClearColor(0x000000, 0);
     this.chroma = new THREE.ShaderPass( THREE.ChromaShader );
     this.chroma.material.transparent = true; 
     this.chroma.uniforms.thresholdSensitivity.value = 0.1;
