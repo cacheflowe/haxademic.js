@@ -9,7 +9,6 @@ A personal front-end JavaScript toolkit
 
 # TODO
 
-* <video> to SoundFFT test/demo -  https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaElementSource
 * MIDI learn - work into dat.gui refactor from old gui library
 * Field trip video textures w/UIControlPanel & LED mapping
 

@@ -33,6 +33,7 @@ class ThreeScene {
     this.renderer.setSize(this.elSize.width, this.elSize.height);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // console.log(this.renderer.capabilities);
   }
 
   buildLights() {

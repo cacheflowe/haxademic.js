@@ -13,6 +13,7 @@ class PointerPos {
     this.totalDeltaY = 0;
     this.pointerActive = false;
     this.pointerCount = 0;
+    this.touches = null;
     this.cancelClickThresh = 8;
     this.isTouchEvents = false;
     this.hasCheckedTouchEvents = false;
@@ -62,6 +63,7 @@ class PointerPos {
     this.curX = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
     this.curY = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
     this.pointerCount = (this.isTouchEvents) ? e.touches.length : 1;
+    this.touches = (this.pointerCount > 1) ? e.touches : null;
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.totalDeltaX = 0;
@@ -74,6 +76,7 @@ class PointerPos {
     let x = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
     let y = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
     this.pointerCount = (this.isTouchEvents) ? e.touches.length : 1;
+    this.touches = (this.pointerCount > 1) ? e.touches : null;
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.curX = x;
@@ -91,6 +94,7 @@ class PointerPos {
     this.pointerCount = (this.isTouchEvents) ? e.touches.length : 0;
     if(this.pointerCount == 0) {
       this.pointerActive = false;
+      this.touches = null;
       if(this.callbackEnd) this.callbackEnd();
     }
   }
