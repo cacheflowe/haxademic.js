@@ -6,15 +6,15 @@ class ObjectUtil {
   }
 
   static addPropertyChangedCallback(obj, prop, callback) {
-    if (obj[prop]) {
-      callback();
-    } else {
-      Object.defineProperty(obj, prop, {
-        set: function(val) {
-          callback();
-        }
-      });
-    }
+    if (obj[prop]) callback(obj[prop]);   // if value already exists, do callback immediately
+    let val = obj[prop];                  // cache value & create listener for changes
+    Object.defineProperty(obj, prop, {
+      get() { return val; }, // return the cached value
+      set(newVal) {
+        val = newVal;
+        callback(val);
+      }
+    });
   }
 
 }
