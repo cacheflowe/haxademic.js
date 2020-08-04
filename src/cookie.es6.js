@@ -25,4 +25,12 @@ class Cookie {
     Cookie.createCookie(key,"",-1);
   }
 
+  static parseCookies(cookieStr="") {
+    // from: https://gist.github.com/rendro/525bbbf85e84fa9042c2
+    return Object.fromEntries(cookieStr.split(/; */).map(c => {
+      const [ key, ...v ] = c.split('=');
+      return [ key, decodeURIComponent(v.join('=')) ];
+    }));
+  }
+
 }
