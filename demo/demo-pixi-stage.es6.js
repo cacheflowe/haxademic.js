@@ -45,6 +45,8 @@ class PixiStageDemo extends DemoBase {
     this.bg = new PIXI.Graphics();
     this.bg.beginFill(0x333333, 1);
     this.bg.drawRect(0, 0, this.pixiStage.width(), this.pixiStage.height());
+    this.bg.pivot.set(this.bg.width * 0.5, this.bg.height * 0.5);
+    this.bg.position.set(this.pixiStage.width() * 0.5, this.pixiStage.height() * 0.5);
     this.pixiStage.container().addChild(this.bg);
 
     // build image this.sprite

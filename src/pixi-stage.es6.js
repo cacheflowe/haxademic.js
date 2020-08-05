@@ -64,4 +64,8 @@ class PixiStage {
   fps() {
     return this.app.ticker.FPS;
   }
+
+  graphicsToTexture(graphics) {
+    return this.app.renderer.generateTexture(graphics);
+  }
 }
