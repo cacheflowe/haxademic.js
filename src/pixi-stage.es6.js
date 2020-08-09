@@ -8,7 +8,6 @@ class PixiStage {
     // PIXI.settings.PRECISION_FRAGMENT = 'highp'; // this makes text look better?
 
     // create app
-    console.log(pixelRatio);
     this.app = new PIXI.Application({
         width: this.elSize.width,
         height: this.elSize.height,
