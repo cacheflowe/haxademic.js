@@ -48,17 +48,18 @@ class PixiStageTexturedMeshGlobeDemo extends DemoBase {
   loadVideo() {
     // add video element
     this.videoEl = document.createElement('video');
+    this.videoEl.setAttribute('crossOrigin', 'anonymous');
     this.videoEl.src = '../data/wash-your-hands-512.mp4';
     this.videoEl.setAttribute('loop', 'true');
     this.videoEl.setAttribute('muted', 'true');
     this.videoEl.setAttribute('playsinline', 'true');
     this.videoEl.setAttribute('preload', 'auto');
-    this.videoEl.setAttribute('crossOrigin', 'anonymous');
     this.videoEl.defaultMuted = true;
     this.videoEl.muted = true;
     this.videoEl.play();
     this.videoEl.style.setProperty('width', '320px');   // for debug view
     this.videoEl.style.setProperty('border', '1px solid #090');
+    document.body.addChild(this.video);
 
     this.texture = new PIXI.Texture.from(this.videoEl);
     this.texture.once('update', (texture) => {    // use `once` instead of `on`, since event can fire twice. this is noted in the PIXI docs
@@ -125,18 +126,6 @@ class PixiStageTexturedMeshGlobeDemo extends DemoBase {
 
   draw() {
     this.frameCount++;
-
-    // // make mesh wave
-    // const vertices = this.mesh.vertexData;
-    // const uvs = this.mesh.uvs;
-    // const numVertices = this.mesh.vertexData.length;
-    // for (let i=0; i < vertices.length; i+=2) {        // vertices array are groups of 2. no 3d :)
-    //   const vertX = this.meshVerticesOrig[i];
-    //   const vertY = this.meshVerticesOrig[i+1];
-    //   let yOffset = vertY + 10 * Math.sin(vertX/36 + this.frameCount/20);
-    //   vertices[i+1] = yOffset;
-    //   if(uvs) uvs[i] += 0.0005;                        // scroll x.. uvs might not be built until after first render!
-    // }
   }
 
 }

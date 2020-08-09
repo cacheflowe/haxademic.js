@@ -15,7 +15,7 @@ class WebcamDemo extends DemoBase {
     this.startButton.innerText = 'Start';
     this.webcamContainer.appendChild(this.startButton);
 
-    // click video to add audio response
+    // click video to load webcam
     this.startButton.addEventListener('click', (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
 
