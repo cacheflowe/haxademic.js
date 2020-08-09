@@ -13,7 +13,7 @@ class PixiStageDemo extends DemoBase {
     // create PIXI stage object
     this.pixiContainer = document.getElementById('pixi-stage-container');
     this.pixiContainer.setAttribute('style', 'height: 500px;');
-    this.pixiStage = new PixiStage(this.pixiContainer);
+    this.pixiStage = new PixiStage(this.pixiContainer); // , 0xff000000, 'pixi', 2);
 
     // load image before building other objects
     this.loadImage();
@@ -26,7 +26,7 @@ class PixiStageDemo extends DemoBase {
     loader.add('cache', '../images/cacheflowe-logo-trans-white.png');
     loader.load((loader, resources) => {
       this.buildSprite(resources);
-      this.buildShaders();      
+      this.buildShaders();
       // start PIXI frame loop
       this.frameCount = 0;
       this.pixiStage.addFrameListener(() => this.draw());
@@ -78,7 +78,7 @@ class PixiStageDemo extends DemoBase {
       }
     `;
     this.tint = new PIXI.Filter(null, shaderFragTint, {
-      iTime: 0, 
+      iTime: 0,
       amp:1
     });
     // this.pixiStage.container().filters = [this.tint];
@@ -112,7 +112,7 @@ class PixiStageDemo extends DemoBase {
       }
     `;
     this.pattern = new PIXI.Filter(null, this.patternShader, {
-      iTime: 0, 
+      iTime: 0,
       dimensions: [this.pixiStage.width(), this.pixiStage.height()]
     });
     this.bg.filters = [this.pattern, this.tint];

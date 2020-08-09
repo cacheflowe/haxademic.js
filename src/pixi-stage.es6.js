@@ -1,13 +1,14 @@
 class PixiStage {
 
-  constructor(el=document.body, bgColor=0x000000, id='pixi') {
+  constructor(el=document.body, bgColor=0x000000, id='pixi', pixelRatio=(window.devicePixelRatio || 1)) {
     // store elements
     this.el = el;
     this.elSize = this.el.getBoundingClientRect();
-    this.devicePixelRatio = window.devicePixelRatio || 1;
+    this.devicePixelRatio = pixelRatio;
     // PIXI.settings.PRECISION_FRAGMENT = 'highp'; // this makes text look better?
 
     // create app
+    console.log(pixelRatio);
     this.app = new PIXI.Application({
         width: this.elSize.width,
         height: this.elSize.height,
@@ -16,7 +17,7 @@ class PixiStage {
         resizeTo: this.el,
         autoDensity: true,
         antialias: true,
-        resolution: this.devicePixelRatio,
+        resolution: pixelRatio,
     });
 
     el.appendChild(this.app.view);
