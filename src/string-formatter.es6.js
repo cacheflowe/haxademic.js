@@ -46,8 +46,57 @@ class StringFormatter {
   }
 
   /**
+   *  Returns a number with the local delimiter & decmial format.
+   *  @param  number A numeric value.
+   *  @return A number (in float/int format) with local formatting.
+   *  @use    {@code var numFormatted = StringFormatter.numberFormattedString(30303.333333);}
+   */
+  static numberToFormattedString(num) {
+    return num.toLocaleString();
+  }
+
+  /**
+   *  Returns a number with the traditional US currency format. Info from: https://elijahmanor.com/format-js-numbers
+   *  @param  number A numeric monetary value.
+   *  @return A number (in string format), with traditional US currency formatting.
+   *  @use    {@code var moneyVal = StringFormatter.numberToFormattedCurrency(30303.333333);}
+   */
+  static numberToFormattedCurrency(num) {
+    return num.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    });
+  }
+
+  /**
+   *  Returns a number with compact notation
+   *  @param  number A numeric value.
+   *  @return A number (in string format), with compact abbreviation.
+   *  @use    {@code var moneyVal = StringFormatter.numberToCompactString(30303.333333);}
+   */
+  static numberToCompactString(num) {
+    return num.toLocaleString('en-US', {
+      notation: 'compact',
+      compactDisplay: 'short',
+    });
+  }
+
+  /**
+   *  Returns a number with compact notation
+   *  @param  number A noamralized numeric value.
+   *  @return A number (in string format), converted to a percent.
+   *  @use    {@code var percent = StringFormatter.numberToPercentString(0.1234, 2);}
+   */
+  static numberToPercentString(num, decimalDigits=2) {
+    return num.toLocaleString('en-US', {
+      style: 'percent',
+      minimumFractionDigits: decimalDigits,
+    });
+  }
+
+  /**
    *  Returns a number with the traditional US currency format.
-   *  @param  str A numberic monetary value.
+   *  @param  str A numeric monetary value.
    *  @return A number (in string format), with traditional US currency formatting.
    *  @use    {@code var moneyVal = StringFormatter.formatDollarsCents('303.333333');}
    */
