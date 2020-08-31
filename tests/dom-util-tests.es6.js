@@ -30,12 +30,11 @@ insertHtmlStr('<hr/>');
 // Unit tests
 /////////////////////////////////////////////
 
-zoraTests
-  .test('DOMUtil.stringToDomElement', function*(assert) {
+zora.test('DOMUtil.stringToDomElement', function*(assert) {
     assert.ok(DOMUtil.stringToDomElement(SVGUtil.testSVG));
     assert.equal(svgEl.nodeName.toLowerCase(), 'svg');
   })
-  .test('DOMUtil.closest', function*(assert) {
+zora.test('DOMUtil.closest', function*(assert) {
     assert.ok(DOMUtil.closest(innerEl, 'div.test-closest'));
     assert.equal(DOMUtil.closest(innerEl, 'div.test-closest').nodeName.toLowerCase(), 'div');
   })

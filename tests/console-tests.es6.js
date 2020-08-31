@@ -6,10 +6,9 @@
 // Unit tests
 /////////////////////////////////////////////
 
-zoraTests
-  .test('console.todo', function*(assert) {
+zora.test('console.todo', function*(assert) {
     assert.ok(console.todo);
   })
-  .test('console.important', function*(assert) {
+zora.test('console.important', function*(assert) {
     assert.ok(console.important);
   })

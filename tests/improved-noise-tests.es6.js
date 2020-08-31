@@ -24,8 +24,7 @@ insertHtmlStr('<hr/>');
 // Unit tests
 /////////////////////////////////////////////
 
-zoraTests
-  .test('ImprovedNoise.noise', function*(assert) {
+zora.test('ImprovedNoise.noise', function*(assert) {
     assert.ok(improvedNoise.noise(Date.now()/10000, Date.now()/10200, Date.now()/10100));
     assert.equal(improvedNoise.noise(.1, 0.2, 0.3), 0.35122924878110723);
   })

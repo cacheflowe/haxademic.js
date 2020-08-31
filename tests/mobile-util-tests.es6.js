@@ -19,36 +19,35 @@ insertHtmlStr('<hr/>');
 // Unit tests
 /////////////////////////////////////////////
 
-zoraTests
-  .test('MobileUtil.enablePseudoStyles', function*(assert) {
+zora.test('MobileUtil.enablePseudoStyles', function*(assert) {
     assert.notOk(MobileUtil.enablePseudoStyles());
   })
-  .test('MobileUtil.lockTouchScreen', function*(assert) {
+zora.test('MobileUtil.lockTouchScreen', function*(assert) {
     assert.notOk(MobileUtil.lockTouchScreen(true));
     assert.notOk(MobileUtil.lockTouchScreen(false));
   })
-  .test('MobileUtil.hideSoftKeyboard', function*(assert) {
+zora.test('MobileUtil.hideSoftKeyboard', function*(assert) {
     assert.notOk(MobileUtil.hideSoftKeyboard());
   })
-  .test('MobileUtil.unlockWebAudioOnTouch()', function*(assert) {
+zora.test('MobileUtil.unlockWebAudioOnTouch()', function*(assert) {
     assert.notOk(MobileUtil.unlockWebAudioOnTouch());
   })
-  .test('MobileUtil.playEmptyWebAudioSound()', function*(assert) {
+zora.test('MobileUtil.playEmptyWebAudioSound()', function*(assert) {
     assert.notOk(MobileUtil.playEmptyWebAudioSound());
   })
-  .test('MobileUtil.isMobileBrowser()', function*(assert) {
+zora.test('MobileUtil.isMobileBrowser()', function*(assert) {
     MobileUtil.isMobileBrowser();
   })
-  .test('MobileUtil.isIOS()', function*(assert) {
+zora.test('MobileUtil.isIOS()', function*(assert) {
     MobileUtil.isIOS();
   })
-  .test('MobileUtil.isIPhone()', function*(assert) {
+zora.test('MobileUtil.isIPhone()', function*(assert) {
     MobileUtil.isIPhone();
   })
-  .test('MobileUtil.isAndroid()', function*(assert) {
+zora.test('MobileUtil.isAndroid()', function*(assert) {
     MobileUtil.isAndroid();
   })
-  .test('MobileUtil.isSafari()', function*(assert) {
+zora.test('MobileUtil.isSafari()', function*(assert) {
     MobileUtil.isSafari();
   })
   // .test('MobileUtil.randRangeDecimel', function*(assert) {

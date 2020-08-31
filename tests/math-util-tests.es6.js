@@ -17,16 +17,15 @@ insertHtmlStr('<hr/>');
 // Unit tests
 /////////////////////////////////////////////
 
-zoraTests
-  .test('MathUtil.randRange', function*(assert) {
+zora.test('MathUtil.randRange', function*(assert) {
     assert.ok(MathUtil.randRange(0, 10));
     assert.equal(MathUtil.randRange(0, 0), 0);
   })
-  .test('MathUtil.randRangeDecimel', function*(assert) {
+zora.test('MathUtil.randRangeDecimel', function*(assert) {
     assert.ok(MathUtil.randRangeDecimel(0, 10));
     assert.equal(MathUtil.randRangeDecimel(0, 0), 0);
   })
-  .test('MathUtil.getPercentWithinRange', function*(assert) {
+zora.test('MathUtil.getPercentWithinRange', function*(assert) {
     assert.ok(MathUtil.getPercentWithinRange(30, 40, 35));
     assert.equal(MathUtil.getPercentWithinRange(30, 40, 35), 0.5);
   })

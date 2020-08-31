@@ -1,245 +1,5 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.Zora = factory());
-}(this, (function () { 'use strict';
-
-/**
- * slice() reference.
- */
-
-var slice = Array.prototype.slice;
-
-/**
- * Expose `co`.
- */
-
-var index = co['default'] = co.co = co;
-
-/**
- * Wrap the given generator `fn` into a
- * function that returns a promise.
- * This is a separate function so that
- * every `co()` call doesn't create a new,
- * unnecessary closure.
- *
- * @param {GeneratorFunction} fn
- * @return {Function}
- * @api public
- */
-
-co.wrap = function (fn) {
-  createPromise.__generatorFunction__ = fn;
-  return createPromise;
-  function createPromise() {
-    return co.call(this, fn.apply(this, arguments));
-  }
-};
-
-/**
- * Execute the generator function or a generator
- * and return a promise.
- *
- * @param {Function} fn
- * @return {Promise}
- * @api public
- */
-
-function co(gen) {
-  var ctx = this;
-  var args = slice.call(arguments, 1);
-
-  // we wrap everything in a promise to avoid promise chaining,
-  // which leads to memory leak errors.
-  // see https://github.com/tj/co/issues/180
-  return new Promise(function(resolve, reject) {
-    if (typeof gen === 'function') gen = gen.apply(ctx, args);
-    if (!gen || typeof gen.next !== 'function') return resolve(gen);
-
-    onFulfilled();
-
-    /**
-     * @param {Mixed} res
-     * @return {Promise}
-     * @api private
-     */
-
-    function onFulfilled(res) {
-      var ret;
-      try {
-        ret = gen.next(res);
-      } catch (e) {
-        return reject(e);
-      }
-      next(ret);
-    }
-
-    /**
-     * @param {Error} err
-     * @return {Promise}
-     * @api private
-     */
-
-    function onRejected(err) {
-      var ret;
-      try {
-        ret = gen.throw(err);
-      } catch (e) {
-        return reject(e);
-      }
-      next(ret);
-    }
-
-    /**
-     * Get the next value in the generator,
-     * return a promise.
-     *
-     * @param {Object} ret
-     * @return {Promise}
-     * @api private
-     */
-
-    function next(ret) {
-      if (ret.done) return resolve(ret.value);
-      var value = toPromise.call(ctx, ret.value);
-      if (value && isPromise(value)) return value.then(onFulfilled, onRejected);
-      return onRejected(new TypeError('You may only yield a function, promise, generator, array, or object, '
-        + 'but the following object was passed: "' + String(ret.value) + '"'));
-    }
-  });
-}
-
-/**
- * Convert a `yield`ed value into a promise.
- *
- * @param {Mixed} obj
- * @return {Promise}
- * @api private
- */
-
-function toPromise(obj) {
-  if (!obj) return obj;
-  if (isPromise(obj)) return obj;
-  if (isGeneratorFunction(obj) || isGenerator(obj)) return co.call(this, obj);
-  if ('function' == typeof obj) return thunkToPromise.call(this, obj);
-  if (Array.isArray(obj)) return arrayToPromise.call(this, obj);
-  if (isObject(obj)) return objectToPromise.call(this, obj);
-  return obj;
-}
-
-/**
- * Convert a thunk to a promise.
- *
- * @param {Function}
- * @return {Promise}
- * @api private
- */
-
-function thunkToPromise(fn) {
-  var ctx = this;
-  return new Promise(function (resolve, reject) {
-    fn.call(ctx, function (err, res) {
-      if (err) return reject(err);
-      if (arguments.length > 2) res = slice.call(arguments, 1);
-      resolve(res);
-    });
-  });
-}
-
-/**
- * Convert an array of "yieldables" to a promise.
- * Uses `Promise.all()` internally.
- *
- * @param {Array} obj
- * @return {Promise}
- * @api private
- */
-
-function arrayToPromise(obj) {
-  return Promise.all(obj.map(toPromise, this));
-}
-
-/**
- * Convert an object of "yieldables" to a promise.
- * Uses `Promise.all()` internally.
- *
- * @param {Object} obj
- * @return {Promise}
- * @api private
- */
-
-function objectToPromise(obj){
-  var results = new obj.constructor();
-  var keys = Object.keys(obj);
-  var promises = [];
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    var promise = toPromise.call(this, obj[key]);
-    if (promise && isPromise(promise)) defer(promise, key);
-    else results[key] = obj[key];
-  }
-  return Promise.all(promises).then(function () {
-    return results;
-  });
-
-  function defer(promise, key) {
-    // predefine the key in the result
-    results[key] = undefined;
-    promises.push(promise.then(function (res) {
-      results[key] = res;
-    }));
-  }
-}
-
-/**
- * Check if `obj` is a promise.
- *
- * @param {Object} obj
- * @return {Boolean}
- * @api private
- */
-
-function isPromise(obj) {
-  return 'function' == typeof obj.then;
-}
-
-/**
- * Check if `obj` is a generator.
- *
- * @param {Mixed} obj
- * @return {Boolean}
- * @api private
- */
-
-function isGenerator(obj) {
-  return 'function' == typeof obj.next && 'function' == typeof obj.throw;
-}
-
-/**
- * Check if `obj` is a generator function.
- *
- * @param {Mixed} obj
- * @return {Boolean}
- * @api private
- */
-function isGeneratorFunction(obj) {
-  var constructor = obj.constructor;
-  if (!constructor) return false;
-  if ('GeneratorFunction' === constructor.name || 'GeneratorFunction' === constructor.displayName) return true;
-  return isGenerator(constructor.prototype);
-}
-
-/**
- * Check for plain object.
- *
- * @param {Mixed} val
- * @return {Boolean}
- * @api private
- */
-
-function isObject(val) {
-  return Object == val.constructor;
-}
+var zora = (function () {
+'use strict';
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -256,6 +16,8 @@ function shim (obj) {
   return keys;
 }
 });
+
+var keys_1 = keys.shim;
 
 var is_arguments = createCommonjsModule(function (module, exports) {
 var supportsArgumentsClass = (function(){
@@ -280,10 +42,13 @@ function unsupported(object){
 }
 });
 
-var index$1 = createCommonjsModule(function (module) {
+var is_arguments_1 = is_arguments.supported;
+var is_arguments_2 = is_arguments.unsupported;
+
+var deepEqual_1 = createCommonjsModule(function (module) {
 var pSlice = Array.prototype.slice;
-var objectKeys = keys;
-var isArguments = is_arguments;
+
+
 
 var deepEqual = module.exports = function (actual, expected, opts) {
   if (!opts) opts = {};
@@ -331,8 +96,8 @@ function objEquiv(a, b, opts) {
   if (a.prototype !== b.prototype) return false;
   //~~~I've managed to break Object.keys through screwy arguments passing.
   //   Converting to array solves the problem.
-  if (isArguments(a)) {
-    if (!isArguments(b)) {
+  if (is_arguments(a)) {
+    if (!is_arguments(b)) {
       return false;
     }
     a = pSlice.call(a);
@@ -350,8 +115,8 @@ function objEquiv(a, b, opts) {
     return true;
   }
   try {
-    var ka = objectKeys(a),
-        kb = objectKeys(b);
+    var ka = keys(a),
+        kb = keys(b);
   } catch (e) {//happens when one is a string literal and the other isn't
     return false;
   }
@@ -377,287 +142,420 @@ function objEquiv(a, b, opts) {
 }
 });
 
-const assertions = {
-  ok(val, message = 'should be truthy') {
-    const assertionResult = {
-      pass: Boolean(val),
-      expected: 'truthy',
-      actual: val,
-      operator: 'ok',
-      message
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  deepEqual(actual, expected, message = 'should be equivalent') {
-    const assertionResult = {
-      pass: index$1(actual, expected),
-      actual,
-      expected,
-      message,
-      operator: 'deepEqual'
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  equal(actual, expected, message = 'should be equal') {
-    const assertionResult = {
-      pass: actual === expected,
-      actual,
-      expected,
-      message,
-      operator: 'equal'
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  notOk(val, message = 'should not be truthy') {
-    const assertionResult = {
-      pass: !Boolean(val),
-      expected: 'falsy',
-      actual: val,
-      operator: 'notOk',
-      message
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  notDeepEqual(actual, expected, message = 'should not be equivalent') {
-    const assertionResult = {
-      pass: !index$1(actual, expected),
-      actual,
-      expected,
-      message,
-      operator: 'notDeepEqual'
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  notEqual(actual, expected, message = 'should not be equal') {
-    const assertionResult = {
-      pass: actual !== expected,
-      actual,
-      expected,
-      message,
-      operator: 'notEqual'
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  throws(func, expected, message) {
-    let caught, pass, actual;
-    if (typeof expected === 'string') {
-      [expected, message] = [message, expected];
-    }
-    try {
-      func();
-    } catch (error) {
-      caught = {error};
-    }
-    pass = caught !== undefined;
-    actual = caught && caught.error;
-    if (expected instanceof RegExp) {
-      pass = expected.test(actual) || expected.test(actual && actual.message);
-      expected = String(expected);
-    } else if (typeof expected === 'function' && caught) {
-      pass = actual instanceof expected;
-      actual = actual.constructor;
-    }
-    const assertionResult = {
-      pass,
-      expected,
-      actual,
-      operator: 'throws',
-      message: message || 'should throw'
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  doesNotThrow(func, expected, message) {
-    let caught;
-    if (typeof expected === 'string') {
-      [expected, message] = [message, expected];
-    }
-    try {
-      func();
-    } catch (error) {
-      caught = {error};
-    }
-    const assertionResult = {
-      pass: caught === undefined,
-      expected: 'no thrown error',
-      actual: caught && caught.error,
-      operator: 'doesNotThrow',
-      message: message || 'should not throw'
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  },
-  fail(reason = 'fail called') {
-    const assertionResult = {
-      pass: false,
-      actual: 'fail called',
-      expected: 'fail not called',
-      message: reason,
-      operator: 'fail'
-    };
-    this.test.addAssertion(assertionResult);
-    return assertionResult;
-  }
+const getAssertionLocation = () => {
+	const err = new Error();
+	const stack = (err.stack || '').split('\n');
+	return (stack[3] || '').trim().replace(/^at/i, '');
 };
 
-function assertion (test) {
-  return Object.create(assertions, {test: {value: test}});
-}
+const assertMethodHook = fn => function (...args) {
+	const assertResult = fn(...args);
 
-const Test = {
-  run: function () {
-    const assert = assertion(this);
-    const now = Date.now();
-    return index(this.coroutine(assert))
-      .then(() => {
-        return {assertions: this.assertions, executionTime: Date.now() - now};
-      });
-  },
-  addAssertion(){
-    const newAssertions = [...arguments].map(a => Object.assign({description: this.description}, a));
-    this.assertions.push(...newAssertions);
-    return this;
-  }
+	if (assertResult.pass === false) {
+		assertResult.at = getAssertionLocation();
+	}
+
+	this.collect(assertResult);
+	return assertResult;
 };
 
-function test ({description, coroutine, only = false}) {
-  return Object.create(Test, {
-    description: {value: description},
-    coroutine: {value: coroutine},
-    assertions: {value: []},
-    only: {value: only},
-    length: {
-      get(){
-        return this.assertions.length
-      }
-    }
-  });
-}
-
-function tapOut ({pass, message, index}) {
-  const status = pass === true ? 'ok' : 'not ok';
-  console.log([status, index, message].join(' '));
-}
-
-function canExit () {
-  return typeof process !== 'undefined' && typeof process.exit === 'function';
-}
-
-function tap () {
-  return function * () {
-    let index = 1;
-    let lastId = 0;
-    let success = 0;
-    let failure = 0;
-
-    const starTime = Date.now();
-    console.log('TAP version 13');
-    try {
-      while (true) {
-        const assertion = yield;
-        if (assertion.pass === true) {
-          success++;
-        } else {
-          failure++;
-        }
-        assertion.index = index;
-        if (assertion.id !== lastId) {
-          console.log(`# ${assertion.description} - ${assertion.executionTime}ms`);
-          lastId = assertion.id;
-        }
-        tapOut(assertion);
-        if (assertion.pass !== true) {
-          console.log(`  ---
-  operator: ${assertion.operator}
-  expected: ${JSON.stringify(assertion.expected)}
-  actual: ${JSON.stringify(assertion.actual)}
-  ...`);
-        }
-        index++;
-      }
-    } catch (e) {
-      console.log('Bail out! unhandled exception');
-      console.log(e);
-      if (canExit()) {
-        process.exit(1);
-      }
-    }
-    finally {
-      const execution = Date.now() - starTime;
-      if (index > 1) {
-        console.log(`
-1..${index - 1}
-# duration ${execution}ms
-# success ${success}
-# failure ${failure}`);
-      }
-      if (failure && canExit()) {
-        process.exit(1);
-      }
-    }
-  };
-}
-
-const Plan = {
-  test(description, coroutine, opts = {}){
-    const testItems = (!coroutine && description.tests) ? [...description] : [{description, coroutine}];
-    this.tests.push(...testItems.map(t=>test(Object.assign(t, opts))));
-    return this;
-  },
-
-  only(description, coroutine){
-    return this.test(description, coroutine, {only: true});
-  },
-
-  run(sink = tap()){
-    const sinkIterator = sink();
-    sinkIterator.next();
-    const hasOnly = this.tests.some(t=>t.only);
-    const runnable = hasOnly ? this.tests.filter(t=>t.only) : this.tests;
-    return index(function * () {
-      let id = 1;
-      try {
-        const results = runnable.map(t=>t.run());
-        for (let r of results) {
-          const {assertions, executionTime} = yield r;
-          for (let assert of assertions) {
-            sinkIterator.next(Object.assign(assert, {id, executionTime}));
-          }
-          id++;
-        }
-      }
-      catch (e) {
-        sinkIterator.throw(e);
-      } finally {
-        sinkIterator.return();
-      }
-    }.bind(this))
-  },
-
-  * [Symbol.iterator](){
-    for (let t of this.tests) {
-      yield t;
-    }
-  }
+const Assertion = {
+	ok: assertMethodHook((val, description = 'should be truthy') => ({
+		pass: Boolean(val),
+		actual: val,
+		expected: true,
+		description,
+		operator: 'ok'
+	})),
+	deepEqual: assertMethodHook((actual, expected, description = 'should be equivalent') => ({
+		pass: deepEqual_1(actual, expected),
+		actual,
+		expected,
+		description,
+		operator: 'deepEqual'
+	})),
+	equal: assertMethodHook((actual, expected, description = 'should be equal') => ({
+		pass: actual === expected,
+		actual,
+		expected,
+		description,
+		operator: 'equal'
+	})),
+	notOk: assertMethodHook((val, description = 'should not be truthy') => ({
+		pass: !val,
+		expected: false,
+		actual: val,
+		description,
+		operator: 'notOk'
+	})),
+	notDeepEqual: assertMethodHook((actual, expected, description = 'should not be equivalent') => ({
+		pass: !deepEqual_1(actual, expected),
+		actual,
+		expected,
+		description,
+		operator: 'notDeepEqual'
+	})),
+	notEqual: assertMethodHook((actual, expected, description = 'should not be equal') => ({
+		pass: actual !== expected,
+		actual,
+		expected,
+		description,
+		operator: 'notEqual'
+	})),
+	throws: assertMethodHook((func, expected, description) => {
+		let caught;
+		let pass;
+		let actual;
+		if (typeof expected === 'string') {
+			[expected, description] = [description, expected];
+		}
+		try {
+			func();
+		} catch (err) {
+			caught = {error: err};
+		}
+		pass = caught !== undefined;
+		actual = caught && caught.error;
+		if (expected instanceof RegExp) {
+			pass = expected.test(actual) || expected.test(actual && actual.message);
+			expected = String(expected);
+		} else if (typeof expected === 'function' && caught) {
+			pass = actual instanceof expected;
+			actual = actual.constructor;
+		}
+		return {
+			pass,
+			expected,
+			actual,
+			operator: 'throws',
+			description: description || 'should throw'
+		};
+	}),
+	doesNotThrow: assertMethodHook((func, expected, description) => {
+		let caught;
+		if (typeof expected === 'string') {
+			[expected, description] = [description, expected];
+		}
+		try {
+			func();
+		} catch (err) {
+			caught = {error: err};
+		}
+		return {
+			pass: caught === undefined,
+			expected: 'no thrown error',
+			actual: caught && caught.error,
+			operator: 'doesNotThrow',
+			description: description || 'should not throw'
+		};
+	}),
+	fail: assertMethodHook((description = 'fail called') => ({
+		pass: false,
+		actual: 'fail called',
+		expected: 'fail not called',
+		description,
+		operator: 'fail'
+	}))
 };
 
-function plan () {
-  return Object.create(Plan, {
-    tests: {value: []},
-    length: {
-      get(){
-        return this.tests.length
-      }
-    }
-  });
+var assert = (collect, test) => Object.assign(
+	Object.create(Assertion, {collect: {value: collect}}), {
+		async test(description, spec) {
+			// Note: we return the task so the caller can control whether he wants to wait for the sub test to complete or not
+			return test(description, spec).task;
+		}
+	});
+
+const tester = (collect, {offset = 0} = {}) => (description, spec) => {
+	const buffer = [{type: 'title', data: description, offset}];
+	const result = {count: 0, pass: true, description, spec};
+	let done = false;
+
+	const createAssertion = item => {
+		result.pass = result.pass && item.pass;
+		return {type: 'assert', data: item, offset};
+	};
+
+	const collector = item => {
+		result.count++;
+		item.id = result.count;
+		if (item[Symbol.asyncIterator] === undefined) {
+			// Assertion
+			buffer.push(createAssertion(item));
+		} else {
+			// Sub test
+			buffer.push(item);
+		}
+	};
+
+	const handleDelegate = async delegate => {
+		const {value, done} = await delegate.next();
+
+		// Delegate is exhausted: create a summary test point in the stream and throw the delegate
+		if (done === true) {
+			const {executionTime, pass, description} = value;
+			const subTestAssertion = Object.assign(createAssertion({
+				pass,
+				description,
+				id: delegate.id,
+				executionTime
+			}), {type: 'testAssert'});
+			buffer.shift();
+			buffer.unshift(subTestAssertion);
+			return instance.next();
+		}
+		return {value, done};
+	};
+
+	const subTest = tester(collector, {offset: offset + 1});
+
+	const start = Date.now();
+	// Execute the test collecting assertions
+	const assertFn = assert(collector, subTest);
+	const task = new Promise(resolve => resolve(spec(assertFn)))
+		.then(() => {
+			// Always report a plan and summary: the calling test will know how to deal with it
+			result.executionTime = Date.now() - start;
+			buffer.push({type: 'plan', data: {start: 1, end: result.count}, offset});
+			buffer.push({type: 'time', data: result.executionTime, offset});
+			done = true;
+			return result;
+		})
+		.catch(err => {
+			// We report a failing test before bail out ... while unhandled promise rejection is still allowed by nodejs...
+			buffer.push({type: 'assert', data: {pass: false, description}});
+			buffer.push({type: 'comment', data: 'Unhandled exception'});
+			buffer.push({type: 'bailout', data: err, offset});
+			done = true;
+		});
+
+	const instance = {
+		test: subTest,
+		task,
+		[Symbol.asyncIterator]() {
+			return this;
+		},
+		async next() {
+			if (buffer.length === 0) {
+				if (done === true) {
+					return {done: true, value: result};
+				}
+				// Flush
+				await task;
+				return this.next();
+			}
+
+			const next = buffer[0];
+
+			// Delegate if sub test
+			if (next[Symbol.asyncIterator] !== undefined) {
+				return handleDelegate(next);
+			}
+
+			return {value: buffer.shift(), done: false};
+		}
+	};
+
+	// Collection by the calling test
+	collect(instance);
+
+	return instance;
+};
+
+const print = (message, offset = 0) => {
+	console.log(message.padStart(message.length + (offset * 4))); // 4 white space used as indent (see tap-parser)
+};
+
+const toYaml = print => (obj, offset = 0) => {
+	for (const [prop, value] of Object.entries(obj)) {
+		print(`${prop}: ${JSON.stringify(value)}`, offset + 0.5);
+	}
+};
+
+const tap = print => {
+	const yaml = toYaml(print);
+	return {
+		version(version = 13) {
+			print(`TAP version ${version}`);
+		},
+		title(value, offset = 0) {
+			const message = offset > 0 ? `Subtest: ${value}` : value;
+			this.comment(message, offset);
+		},
+		assert(value, offset = 0) {
+			const {pass, description, id, executionTime, expected = '', actual = '', at = '', operator = ''} = value;
+			const label = pass === true ? 'ok' : 'not ok';
+			print(`${label} ${id} - ${description}${executionTime ? ` # time=${executionTime}ms` : ''}`, offset);
+			if (pass === false && value.operator) {
+				print('---', offset + 0.5);
+				yaml({expected, actual, at, operator}, offset);
+				print('...', offset + 0.5);
+			}
+		},
+		plan(value, offset = 0) {
+			print(`1..${value.end}`, offset);
+		},
+		time(value, offset = 0) {
+			this.comment(`time=${value}ms`, offset);
+		},
+		comment(value, offset = 0) {
+			print(`# ${value}`, offset);
+		},
+		bailout(value = 'Unhandled exception') {
+			print(`Bail out! ${value}`);
+		},
+		testAssert(value, offset = 0) {
+			return this.assert(value, offset);
+		}
+	};
+};
+
+var tap$1 = (printFn = print) => {
+	const reporter = tap(printFn);
+	return (toPrint = {}) => {
+		const {data, type, offset = 0} = toPrint;
+		if (typeof reporter[type] === 'function') {
+			reporter[type](data, offset);
+		}
+		// Else ignore (unknown message type)
+	};
+};
+
+// Some combinators for asynchronous iterators: this will be way more easier when
+// Async generator are widely supported
+
+const asyncIterator = behavior => Object.assign({
+	[Symbol.asyncIterator]() {
+		return this;
+	}
+}, behavior);
+
+const filter = predicate => iterator => asyncIterator({
+	async next() {
+		const {done, value} = await iterator.next();
+
+		if (done === true) {
+			return {done};
+		}
+
+		if (!predicate(value)) {
+			return this.next();
+		}
+
+		return {done, value};
+	}
+});
+
+const map = mapFn => iterator => asyncIterator({
+	[Symbol.asyncIterator]() {
+		return this;
+	},
+	async next() {
+		const {done, value} = await iterator.next();
+		if (done === true) {
+			return {done};
+		}
+		return {done, value: mapFn(value)};
+	}
+});
+
+const stream = asyncIterator => Object.assign(asyncIterator, {
+	map(fn) {
+		return stream(map(fn)(asyncIterator));
+	},
+	filter(fn) {
+		return stream(filter(fn)(asyncIterator));
+	}
+});
+
+const combine = (...iterators) => {
+	const [...pending] = iterators;
+	let current = pending.shift();
+
+	return asyncIterator({
+		async next() {
+			if (current === undefined) {
+				return {done: true};
+			}
+
+			const {done, value} = await current.next();
+
+			if (done === true) {
+				current = pending.shift();
+				return this.next();
+			}
+
+			return {done, value};
+		}
+	});
+};
+
+let flatten = true;
+const tests = [];
+const test = tester(t => tests.push(t));
+
+// Provide a root context for BSD style test suite
+const subTest = (test('Root', () => {})).test;
+test.test = (description, spec) => {
+	flatten = false; // Turn reporter into BSD style
+	return subTest(description, spec);
+};
+
+const start = async ({reporter = tap$1()} = {}) => {
+	let count = 0;
+	let failure = 0;
+	reporter({type: 'version', data: 13});
+
+	// Remove the irrelevant root title
+	await tests[0].next();
+
+	let outputStream = stream(combine(...tests));
+	outputStream = flatten ? outputStream
+		.filter(({type}) => type !== 'testAssert')
+		.map(item => Object.assign(item, {offset: 0})) :
+		outputStream;
+
+	const filterOutAtRootLevel = ['plan', 'time'];
+	outputStream = outputStream
+		.filter(item => item.offset > 0 || !filterOutAtRootLevel.includes(item.type))
+		.map(item => {
+			if (item.offset > 0 || (item.type !== 'assert' && item.type !== 'testAssert')) {
+				return item;
+			}
+
+			count++;
+			item.data.id = count;
+			failure += item.data.pass ? 0 : 1;
+			return item;
+		});
+
+	// One day with for await loops ... :) !
+	while (true) {
+		const {done, value} = await outputStream.next();
+
+		if (done === true) {
+			break;
+		}
+
+		reporter(value);
+
+		if (value.type === 'bailout') {
+			throw value.data; // Rethrow but with Nodejs we keep getting the deprecation warning (unhandled promise) and the process exists with 0 exit code...
+		}
+	}
+
+	reporter({type: 'plan', data: {start: 1, end: count}});
+	reporter({type: 'comment', data: failure > 0 ? `failed ${failure} of ${count} tests` : 'ok'});
+};
+
+// Auto bootstrap following async env vs sync env (browser vs node)
+if (typeof window === 'undefined') {
+	setTimeout(start, 0);
+} else {
+	window.addEventListener('load', start);
 }
 
-return plan;
+return test;
 
-})));
+}());
+//# sourceMappingURL=zora.js.map
