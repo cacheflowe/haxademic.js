@@ -3,7 +3,7 @@
 THREE.ChromaShader = {
 
 	uniforms: {
-		map: { value: null },
+		tDiffuse: { value: null },
 		thresholdSensitivity: { value: 0.2 },
 		smoothing: { value: 0.8 },
 		colorToReplace: { value: new THREE.Color( 0x000000 ) }
@@ -19,7 +19,7 @@ THREE.ChromaShader = {
   `,
 
 	fragmentShader: `
-    uniform sampler2D map;
+    uniform sampler2D tDiffuse;
     uniform float thresholdSensitivity;
     uniform float smoothing;
     uniform vec3 colorToReplace;
@@ -27,7 +27,7 @@ THREE.ChromaShader = {
     varying vec2 vUv;
 
     void main() {
-      vec4 textureColor = texture2D(map, vUv.xy);
+      vec4 textureColor = texture2D(tDiffuse, vUv.xy);
       float blendValue = smoothstep(thresholdSensitivity, thresholdSensitivity + smoothing, distance(colorToReplace, textureColor.rgb));
       gl_FragColor = vec4(textureColor.rgb, blendValue);
       // gl_FragColor = vec4(blendValue, blendValue, blendValue, blendValue);
