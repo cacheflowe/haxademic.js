@@ -2,7 +2,7 @@ class ColorUtil {
   /**
    *  Converts a hex color value to canvas-friendly rgba. Original code from Robin W. Spencer (http://scaledinnovation.com).
    *  @return An rgba color string.
-   *  @use    {@code CanvasUtil.hexToCanvasColor('#00ff00', 0.5);}
+   *  @use    {@code ColorUtil.hexToCanvasColor('#00ff00', 0.5);}
    */
   static hexToCanvasColor( hexColor, opacity ) {
     opacity = ( opacity != null ) ? opacity : "1.0";
@@ -16,17 +16,25 @@ class ColorUtil {
   /**
    *  Converts a hex value to a webGL-friendly number.
    *  @return A hex color string, without the hash.
-   *  @use    {@code CanvasUtil.hexStringToNumberColor('ff00ff');}
+   *  @use    {@code ColorUtil.hexStringToNumberColor('ff00ff');}
    */
-  static hexStringToNumberColor(hexStr) {
-    return Number("0x"+hexStr.replace('#', ''));
-  }
+   static hexStringToNumberColor(hexStr) {
+     return Number("0x"+hexStr.replace('#', ''));
+   }
+
+   static randomColorHex() {
+     return Math.floor(Math.random()*16777215).toString(16);
+   }
+
+   static randomColorHexInt() {
+     return ColorUtil.hexStringToNumberColor(ColorUtil.randomColorHex());
+   }
 
 
   /**
    *  Converts r, g, b, a values to a css-friendly hexadecimel string.
    *  @return An rgb color string.
-   *  @use    {@code CanvasUtil.rgb2hex(0, 255, 0);}
+   *  @use    {@code ColorUtil.rgb2hex(0, 255, 0);}
    */
   static rgb2hex(r,g,b) {
     return "#" + Number(0x1000000 + r*0x10000 + g*0x100 + b).toString(16).substring(1);
@@ -35,7 +43,7 @@ class ColorUtil {
   /**
    *  Converts a hex string to an rgb object.
    *  @return A hex color string.
-   *  @use    {@code CanvasUtil.hex2rgb('#ff00ff');}
+   *  @use    {@code ColorUtil.hex2rgb('#ff00ff');}
    */
   static hex2rgb(hexColor) {
     hexColor = hexColor.replace( "#", "" );
@@ -49,7 +57,7 @@ class ColorUtil {
   /**
    *  Converts r, g, b, a values to a THREE/PIXI-friendly hexadecimel number.
    *  @return An rgb color string.
-   *  @use    {@code CanvasUtil.rgb2hexNum(0, 255, 0);}
+   *  @use    {@code ColorUtil.rgb2hexNum(0, 255, 0);}
    */
   static rgb2hexNum(r,g,b) {
     return Number("0x"+ Number(0x1000000 + r*0x10000 + g*0x100 + b).toString(16).substring(1));
@@ -67,7 +75,7 @@ class ColorUtil {
   /**
    *  Converts r, g, b, a values to canvas-friendly rgba string.
    *  @return An rgba color string.
-   *  @use    {@code CanvasUtil.rgbToCanvasColor(0, 0, 0, 0.5);}
+   *  @use    {@code ColorUtil.rgbToCanvasColor(0, 0, 0, 0.5);}
    */
   static rgbToCanvasColor( r, g, b, opacity ) {
     return "rgba("+r+","+g+","+b+","+opacity+")";
@@ -76,7 +84,7 @@ class ColorUtil {
   /**
    *  Converts r, g, b, to a brightness between 0-1.
    *  @return A brightness percentage.
-   *  @use    {@code CanvasUtil.rgbToBrightness(0, 255, 0);}
+   *  @use    {@code ColorUtil.rgbToBrightness(0, 255, 0);}
    */
   static rgbToBrightness( r, g, b ) {
     return (r + g + b) / 765; // 765 is r,g,b: 255*3
@@ -169,7 +177,7 @@ class ColorUtil {
   }
 
   static saturateRGB(rgbObj, saturationAmp) {
-    var colorHSV = CanvasUtil.rgb2hsv([rgbObj.r, rgbObj.g, rgbObj.b]);
+    var colorHSV = ColorUtil.rgb2hsv([rgbObj.r, rgbObj.g, rgbObj.b]);
     colorHSV[1] *= saturationAmp;
     colorHSV[1] = Math.max(Math.min(0, colorHSV[1]), 1);
     var colorSaturatedRGB = hsv2rgb(colorHSV);
@@ -180,7 +188,7 @@ class ColorUtil {
   /**
    *  Returns the percent difference between 2 colors.
    *  @return A difference percentage.
-   *  @use    {@code CanvasUtil.rgbDifference(0, 0, 0, 255, 255, 255);}
+   *  @use    {@code ColorUtil.rgbDifference(0, 0, 0, 255, 255, 255);}
    */
   static rgbDifference( r1, g1, b1, r2, g2, b2 ) {
     return Math.abs((r1 + g1 + b1) - (r2 + g2 + b2)) / 765;
@@ -189,7 +197,7 @@ class ColorUtil {
   /**
    *  Converts a hex color value to a darker or lighter version. Original code from from: http://www.sitepoint.com/javascript-generate-lighter-darker-color/
    *  @return A hex color string.
-   *  @use    {@code CanvasUtil.colorLuminance('00ff00', 0.5);}
+   *  @use    {@code ColorUtil.colorLuminance('00ff00', 0.5);}
    */
   static colorLuminance(hex, lum) {
     // validate hex string
@@ -214,7 +222,7 @@ class ColorUtil {
   /**
    *  Converts a hex color value to a darker or lighter version. Original code from from: https://stackoverflow.com/a/57401891/352456
    *  @return A hex color string.
-   *  @use    {@code CanvasUtil.colorLuminance('00ff00', -255 - 255);}
+   *  @use    {@code ColorUtil.colorLuminance('00ff00', -255 - 255);}
    */
   static hexBrighten(color, amount) {
     return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
