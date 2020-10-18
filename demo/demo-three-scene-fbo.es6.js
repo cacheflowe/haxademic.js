@@ -35,7 +35,7 @@ class ThreeSceneFBODemo extends DemoBase {
     this.setupScene();
     this.buildImageMesh();
     this.buildVideoTexture();
-    // this.buildPostProcessing();
+    this.buildPostProcessing();
     this.buildVideoMesh();
     this.setupInput();
     this.startAnimation();
@@ -45,10 +45,10 @@ class ThreeSceneFBODemo extends DemoBase {
   setupScene() {
     this.el = document.getElementById('three-scene-fbo');
     this.threeScene = new ThreeScene(this.el, 0xff0000);
-    this.threeScene.getRenderer().setClearColor(0x000000, 0);
+    this.threeScene.getRenderer().setClearColor(0xff0000, 0);
     this.scene = this.threeScene.getScene();
     this.el.appendChild(this.threeScene.canvasEl());
-    this.threeFBO = new ThreeSceneFBO(768, 768, 0xffffff);
+    this.threeFBO = new ThreeSceneFBO(768, 768, 0x00ffff);
   }
 
   setupInput() {
@@ -56,7 +56,7 @@ class ThreeSceneFBODemo extends DemoBase {
     MobileUtil.lockTouchScreen(true);
     MobileUtil.disableTextSelect(document.body, true);
   }
-  
+
   setupDragDrop() {
     DragDropUtil.dropFile(this.el, (fileResult) => {
       if(!!fileResult.match(/video/)) {
@@ -68,7 +68,7 @@ class ThreeSceneFBODemo extends DemoBase {
         loader.load(fileResult,
           (texture) => {
             this.planeBg.material.map = texture;
-            this.planeBg.material.needsUpdate = true; 
+            this.planeBg.material.needsUpdate = true;
           },
           undefined,
           (err) => {
@@ -84,20 +84,20 @@ class ThreeSceneFBODemo extends DemoBase {
   buildImageMesh() {
     // build shape
     this.planeBg = new THREE.Mesh(
-      new THREE.PlaneGeometry(1920/2, 1080/2), 
+      new THREE.PlaneGeometry(1920/4, 1080/3),
       new THREE.MeshBasicMaterial({
         color: 0xffffff,
-        side: THREE.DoubleSide,
+        side: THREE.FrontSide,  // DoubleSide
         wireframe: false,
       })
     );
-    this.scene.add(this.planeBg);   
+    this.scene.add(this.planeBg);
   }
 
   buildVideoMesh() {
     // build shape
     let planeResolution = 1;
-    this.planeGeometry = new THREE.PlaneGeometry(320*0.5, 400*0.5, planeResolution, planeResolution);
+    this.planeGeometry = new THREE.PlaneGeometry(400*0.5, 320*0.5, planeResolution, planeResolution);
     this.planeMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       side: THREE.DoubleSide,
@@ -108,7 +108,7 @@ class ThreeSceneFBODemo extends DemoBase {
     });
     this.plane = new THREE.Mesh( this.planeGeometry, this.planeMaterial );
     this.plane.position.set(0, 0, 25);
-    this.planeBg.add(this.plane);
+    this.scene.add(this.plane);
   }
 
   buildVideoTexture() {
@@ -134,7 +134,7 @@ class ThreeSceneFBODemo extends DemoBase {
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
     this.videoTexture.minFilter = THREE.LinearFilter;
     this.videoTexture.magFilter = THREE.LinearFilter;
-    this.videoTexture.format = THREE.RGBFormat;
+    this.videoTexture.format = THREE.RGBAFormat;  // THREE.RGBFormat?
 
     // set texture on FBO plane
     this.threeFBO.setMaterial(new THREE.MeshBasicMaterial({
@@ -147,17 +147,17 @@ class ThreeSceneFBODemo extends DemoBase {
   buildPostProcessing() {
     // set up effects chain on render buffer
     this.composer = new THREE.EffectComposer(this.threeScene.getRenderer(), this.threeFBO.getRenderTarget());
+    // this.composer = new THREE.EffectComposer(this.threeScene.getRenderer());
     this.composer.addPass(new THREE.RenderPass(this.threeFBO.getScene(), this.threeFBO.getCamera()));
     this.composer.renderToScreen = false;
-    
+
     // add chroma filter
-    // this requires the following renderer setting to properly set tranparency
-    // this.threeScene.getRenderer().setClearColor(0x000000, 0);
     this.chroma = new THREE.ShaderPass( THREE.ChromaShader );
-    this.chroma.material.transparent = true; 
+    this.chroma.material.transparent = true;
     this.chroma.uniforms.thresholdSensitivity.value = 0.1;
     this.chroma.uniforms.smoothing.value = 0.9;
     this.chroma.uniforms.colorToReplace.value = new THREE.Color(0xffffff);
+    this.chroma.uniforms.tDiffuse.value = this.threeFBO.getRenderTarget().texture;
     this.composer.addPass(this.chroma);
   }
 
@@ -167,13 +167,18 @@ class ThreeSceneFBODemo extends DemoBase {
 
   frameLoop(frameCount) {
     // update camera
-    this.planeBg.rotation.y = -0.5 + 1.0 * this.pointerPos.xNorm(this.el);
-    this.planeBg.rotation.x = -0.5 + 1.0 * this.pointerPos.yNorm(this.el);
-    
+    this.planeBg.rotation.y = this.plane.rotation.y = -0.5 + 1.0 * this.pointerPos.xNorm(this.el);
+    this.planeBg.rotation.x = this.plane.rotation.x = -0.5 + 1.0 * this.pointerPos.yNorm(this.el);
+
     // render!
     if(!!this.composer) {
-      this.threeFBO.render(this.threeScene.getRenderer());
-      this.composer.reset(this.threeFBO.getRenderTarget());   // needed fo chroma filter
+      // render FBO without effects
+      // this.threeFBO.render(this.threeScene.getRenderer());
+      // this.composer.reset(this.threeFBO.getRenderTarget());   // needed for chroma filter
+
+      // render FBO with effects
+      this.threeScene.getRenderer().setClearColor(0xff0000, 1);
+      this.composer.reset(this.threeFBO.getRenderTarget());   // needed for chroma filter
       this.composer.render();
       this.threeScene.render();
     } else {
