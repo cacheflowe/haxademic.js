@@ -12,4 +12,8 @@ class URLUtil {
     return null;
   }
 
+  static removeHash() {
+    history.pushState("", document.title, window.location.pathname + window.location.search);
+  }
+
 }
