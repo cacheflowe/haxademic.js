@@ -8,13 +8,10 @@ class MidiDevice {
   constructor(inputCallback, errorCallback) {
     this.inputCallback = inputCallback;
     this.errorCallback = errorCallback;
-    this.midiOutputs;
-    this.midiInputs;
-    this.deviceInName;
     this.initMidi();
   }
 
-  async initMidi() {
+  initMidi() {
     if (!('requestMIDIAccess' in navigator)) {
       if(this.errorCallback) this.errorCallback('This browser doesn\'t support WebMIDI');
     } else {
