@@ -22,7 +22,7 @@ class MidiDeviceDemo extends DemoBase {
     this.startButton.addEventListener('click', (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
       // init serial device on user interaction
-      this.serialDevice = new MidiDevice(
+      this.midiDevice = new MidiDevice(
         (data) => this.midiInputMessage(data),
         (err) => this.midiError(err)
       );
