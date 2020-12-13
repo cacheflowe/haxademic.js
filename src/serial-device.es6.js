@@ -1,6 +1,7 @@
 class SerialDevice {
 
-  constructor(readCallback, errorCallback) {
+  constructor(baudRate=115200, readCallback=null, errorCallback=null) {
+    this.baudRate = baudRate;
     this.readCallback = readCallback;
     this.errorCallback = errorCallback;
     this.initSerial();
@@ -9,7 +10,7 @@ class SerialDevice {
   async initSerial() {
     try {
       this.port = await navigator.serial.requestPort();   // Request a port and open a connection.
-      await this.port.open({ baudrate: 115200 });         // Wait for the port to open.
+      await this.port.open({baudrate: this.baudRate, baudRate: this.baudRate});         // Wait for the port to open. Use new & old `baudrate` key for different browsers
     } catch(err) {
       if(this.errorCallback) this.errorCallback(err);
       return;
