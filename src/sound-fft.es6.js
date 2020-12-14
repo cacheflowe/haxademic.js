@@ -16,6 +16,7 @@ class SoundFFT {
       beatDecayRate: 0.97,            // beat amp decay. smooths out likeliness of the next beat
       beatMinAmp: 0.15,               // minimum normalized amp for a beat
       beatAmpDirectionThresh: 0.01,   // minimum normalized amplitude direction for a beat
+      beatAmpDirectionSamples: 5,     // number of samples for amplitude direction tracking
     }
     // override default options
     for(let key in options) {
@@ -53,7 +54,7 @@ class SoundFFT {
     this.avgAmp = 0;
     this.avgAmpDirect = 0;
     this.beatAmpDirectionThresh = this.options.beatAmpDirectionThresh;
-    this.ampDirection = new FloatBuffer(5);
+    this.ampDirection = new FloatBuffer(this.options.beatAmpDirectionSamples);
 
     // pitch detection
     this.doCenterClip = true;
@@ -61,6 +62,8 @@ class SoundFFT {
     this.preNormalize = false;
     this.postNormalize = false;
     this.freqAvg = new FloatBuffer(10);
+    this.lastPitchTime = 0;
+    this.pitchTimeThresh = 300;
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -83,6 +86,14 @@ class SoundFFT {
 
   getDetectedBeat() {
     return this.detectedBeat;
+  }
+
+  getPitch() {
+    if(Date.now() - this.lastPitchTime > this.pitchTimeThresh) {
+      return 0;
+    } else {
+      return this.freqAvg.average();
+    }
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -227,6 +238,7 @@ class SoundFFT {
     let freq = this.findFrequency(this.corrBuff);
     if(freq > 0 && freq < 10000 && this.avgAmpDirect > 0.01) {   // if it's a valid freq & signal is loud enough, use it!
       this.freqAvg.update(freq);
+      this.lastPitchTime = Date.now();
     }
   }
 
@@ -339,12 +351,17 @@ class SoundFFT {
 
   buildDebugCanvas() {
     // debug params
+    this.titleH = 16;
+    this.panelLargeH = 70;
+    this.panelMediumH = 35;
+    this.panelSmallH = 20;
     this.debugW = 256;
-    this.debugH = 140;
-    this.fftH = this.debugH * 2/5;
+    this.debugH = this.titleH * 5 + this.panelLargeH * 2 + this.panelMediumH * 1 + this.panelSmallH * 2;
+
     this.colorWhite = '#fff';
     this.colorGreen = 'rgba(0, 255, 0, 1)';
     this.colorYellow = 'rgba(255, 255, 0, 1)';
+    this.colorRed = 'rgba(255, 0, 0, 1)';
     this.colorBlack = '#000';
     this.clearColor = 'rgba(0, 0, 0, 0)';
 
@@ -352,7 +369,8 @@ class SoundFFT {
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.debugW;
     this.canvas.height = this.debugH;
-    this.canvas.setAttribute('style', 'position:absolute;bottom:0;right:0;z-index:9999');
+    this.canvas.setAttribute('class', 'sound-fft-debug');
+    this.canvas.style.setProperty('border', '2px solid #fff');
     document.body.appendChild(this.canvas);
 
     // setup canvas context dfaults
@@ -367,76 +385,149 @@ class SoundFFT {
     return this.canvas;
   }
 
+  drawPanelBg(x, y, w, h) {
+    this.ctx.fillStyle = this.colorBlack;
+    this.ctx.strokeStyle = this.colorWhite;
+    this.ctx.strokeRect(x, y, w, h);
+  }
+
   drawDebug() {
     if(this.ctx == null) this.buildDebugCanvas();
 
-    // background
+    // clear background
+    this.ctx.save();
     this.ctx.fillStyle = this.colorBlack;
     this.ctx.strokeStyle = this.colorWhite;
     this.ctx.fillRect(0, 0, this.debugW, this.debugH);
-    this.ctx.strokeRect(0, 0, this.debugW, this.fftH);
-    this.ctx.strokeRect(0, this.fftH, this.debugW, this.fftH);
-    this.ctx.strokeRect(0, this.fftH * 2, this.debugW, this.fftH/2);
+    // draw panels
+    // this.ctx.strokeRect(0, 0, this.debugW, this.panelLargeH);
+    // this.ctx.strokeRect(0, this.panelLargeH, this.debugW, this.panelLargeH);
+    // this.ctx.strokeRect(0, this.panelLargeH * 2, this.debugW, this.panelMediumH);
+    // this.ctx.strokeRect(0, this.panelLargeH * 2 + this.panelMediumH, this.debugW, this.panelMediumH);
 
     ////////////////////////////////////
     // draw spectrum
     ////////////////////////////////////
+    // fft title
+    this.drawPanelBg(0, 0, this.debugW, this.titleH);
+    this.drawDebugText(`FFT [${this.binCount}]`, 4, 11, this.colorWhite);
+    this.drawDebugText(`sampleRate [${this.context.sampleRate}]`, this.debugW / 2, 11, this.colorWhite);
+
+    // fft bars
+    this.ctx.translate(0, this.titleH);
+    this.drawPanelBg(0, 0, this.debugW, this.panelLargeH);
+
+    // line width
     var barWidth = this.debugW / this.binCount;
-    this.ctx.fillStyle = this.colorWhite;
     this.ctx.lineWidth = barWidth;
+    // decayed fft data
+    this.ctx.fillStyle = this.colorWhite;
     for(var i = 0; i < this.binCount; i++) {
-      this.ctx.fillRect(i * barWidth, this.fftH, barWidth, -this.spectrum[i] * this.fftH);
+      this.ctx.fillRect(i * barWidth, this.panelLargeH, barWidth, -this.spectrum[i] * this.panelLargeH);
+    }
+    // green original data
+    this.ctx.fillStyle = this.colorGreen;
+    for(var i = 0; i < this.binCount; i++) {
+      this.ctx.fillRect(i * barWidth, this.panelLargeH, barWidth, -this.spectrumData[i]/255 * this.panelLargeH);
     }
 
     ////////////////////////////////////
     // draw waveform
     ////////////////////////////////////
+    // waveform title
+    this.ctx.translate(0, this.panelLargeH);
+    this.drawPanelBg(0, 0, this.debugW, this.titleH);
+    this.drawDebugText(`Waveform [${this.binCount}]`, 4, 11, this.colorWhite);
+
+    // waveform data
+    this.ctx.translate(0, this.titleH);
+    this.drawPanelBg(0, 0, this.debugW, this.panelLargeH);
+
     this.ctx.lineWidth = 2;
     this.ctx.strokeStyle = this.colorWhite;
     this.ctx.beginPath();
     for(var i = 0; i < this.binCount; i++) {
-      this.ctx.lineTo(i * barWidth, this.fftH * 1.5 + this.waveform[i] * this.fftH / 2);
+      this.ctx.lineTo(i * barWidth, this.panelLargeH / 2 + this.waveform[i] * this.panelLargeH / 2);
     }
     this.ctx.stroke();
 
-    // draw pitch analysis & value
+    ////////////////////////////////////
+    // draw pitch analysis
+    ////////////////////////////////////
+    // pitch title
+    this.ctx.translate(0, this.panelLargeH);
+    this.drawPanelBg(0, 0, this.debugW, this.titleH);
+    this.drawDebugText(`Pitch: ${this.getPitch().toFixed(2)}hz`, 4, 11, this.colorWhite);
+
+    // pitch data
+    this.ctx.translate(0, this.titleH);
+    this.drawPanelBg(0, 0, this.debugW, this.panelMediumH);
+
     this.ctx.lineWidth = 1;
-    this.ctx.fillText("Pitch: " + this.freqAvg.average().toFixed(2), 6, this.fftH + 10);
     this.ctx.strokeStyle = this.colorYellow;
+    if(Date.now() - this.lastPitchTime > this.pitchTimeThresh) this.ctx.strokeStyle = this.colorRed;
     this.ctx.beginPath();
     for(var i = 0; i < this.binCount; i++) {
-      let pitchOsc = Math.sin(i *  this.freqAvg.average() * 0.0003);
-      this.ctx.lineTo(i * barWidth, this.fftH * 1.5 + pitchOsc * this.fftH * this.avgAmpDirect);
+      let pitchOsc = Math.sin(i * this.getPitch() * 0.0002);
+      this.ctx.lineTo(i * barWidth, this.panelMediumH / 2 + pitchOsc * this.panelMediumH / 2.5);
     }
     this.ctx.stroke();
+
+    ////////////////////////////////////
+    // draw amplitude
+    ////////////////////////////////////
+    // amp title
+    this.ctx.translate(0, this.panelMediumH);
+    this.drawPanelBg(0, 0, this.debugW, this.titleH);
+    this.drawDebugText(`Amplitude: ${this.avgAmpDirect.toFixed(2)}`, 4, 11, this.colorWhite);
+
+    // amp panel
+    this.ctx.translate(0, this.titleH);
+    this.drawPanelBg(0, 0, this.debugW, this.panelSmallH);
+
+    // amp data
+    this.ctx.fillStyle = this.colorGreen;
+    this.ctx.fillRect(0, 0, this.debugW * this.avgAmpDirect, this.panelSmallH);
 
     ////////////////////////////////////
     // draw beat detection
     ////////////////////////////////////
-    // beat detect values
-    this.ctx.fillStyle = this.colorWhite;
-    this.ctx.fillText("ampDirection: " + this.ampDirection.average().toFixed(2), 80, this.fftH * 2 + 10);
+    // amp title
+    this.ctx.translate(0, this.panelSmallH);
+    this.drawPanelBg(0, 0, this.debugW, this.titleH);
+    this.drawDebugText(`Beat Detect amp: ${this.avgAmpDirect.toFixed(2)}`, 4, 11, this.colorWhite);
+    this.drawDebugText(`Amp Up: ${Math.max(0, this.ampDirection.average().toFixed(3))}`, this.debugW / 2, 11, this.colorWhite);
+
+    // amp panel
+    this.ctx.translate(0, this.titleH);
+    this.drawPanelBg(0, 0, this.debugW, this.panelSmallH);
+
+    // amp panel
+    this.ctx.fillStyle = this.colorGreen;
+    this.ctx.fillRect(0, 0, this.debugW * this.avgAmpDirect, this.panelSmallH);
 
     // beat detection amp (this is just the main average of the decayed spectrum array)
+    // beat detect cutoff
+    this.ctx.fillStyle = this.colorYellow;
+    this.ctx.fillRect(this.debugW * this.beatCutOff, 0, 2, this.panelSmallH);
+
     this.ctx.fillStyle = this.colorWhite;
     if (this.beatDetectAvailable() == false && Date.now() < this.beatLastTime + 200) {  // flash green for a moment after beat detection
-      this.ctx.fillStyle = this.colorGreen;
+      this.ctx.fillStyle = this.colorYellow;
     }
-    this.ctx.fillRect(0, this.fftH * 2, this.debugW * this.avgAmp, this.fftH / 2 - 10);
+    this.ctx.fillRect(0, 0, this.debugW * this.avgAmp, this.panelSmallH);
 
-    // beat detect cutoff
-    this.ctx.fillRect(this.debugW * this.beatCutOff, this.fftH * 2, 2, this.fftH / 2);
-
-    // direct average amp bar
-    this.ctx.fillStyle = this.colorYellow;
-    this.ctx.fillRect(0, this.fftH * 2.5 - 10, this.debugW * this.avgAmpDirect, 10);
-    this.drawDebugText(this.avgAmpDirect.toFixed(2), 4, this.debugH - 1, this.colorBlack, this.colorWhite);
+    /////////////////////////////////////
+    // end
+    /////////////////////////////////////
+    // pop
+    this.ctx.restore();
   }
 
   drawDebugText(str, x, y, fill, outline) {
-    this.ctx.strokeStyle = outline;
-    this.ctx.fillStyle = outline;
-    this.ctx.strokeText(str, x, y);
+    // this.ctx.strokeStyle = outline;
+    // this.ctx.fillStyle = outline;
+    // this.ctx.strokeText(str, x, y);
     this.ctx.strokeStyle = this.clearColor;
     this.ctx.fillStyle = fill;
     this.ctx.fillText(str, x, y);
