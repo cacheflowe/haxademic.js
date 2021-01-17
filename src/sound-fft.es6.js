@@ -399,11 +399,6 @@ class SoundFFT {
     this.ctx.fillStyle = this.colorBlack;
     this.ctx.strokeStyle = this.colorWhite;
     this.ctx.fillRect(0, 0, this.debugW, this.debugH);
-    // draw panels
-    // this.ctx.strokeRect(0, 0, this.debugW, this.panelLargeH);
-    // this.ctx.strokeRect(0, this.panelLargeH, this.debugW, this.panelLargeH);
-    // this.ctx.strokeRect(0, this.panelLargeH * 2, this.debugW, this.panelMediumH);
-    // this.ctx.strokeRect(0, this.panelLargeH * 2 + this.panelMediumH, this.debugW, this.panelMediumH);
 
     ////////////////////////////////////
     // draw spectrum
@@ -525,9 +520,6 @@ class SoundFFT {
   }
 
   drawDebugText(str, x, y, fill, outline) {
-    // this.ctx.strokeStyle = outline;
-    // this.ctx.fillStyle = outline;
-    // this.ctx.strokeText(str, x, y);
     this.ctx.strokeStyle = this.clearColor;
     this.ctx.fillStyle = fill;
     this.ctx.fillText(str, x, y);
