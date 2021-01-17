@@ -13,6 +13,7 @@ class MicrophoneNodeDemo extends DemoBase {
 
   init() {
     // setup
+    document.body.style.setProperty('background-color', '#ccc');
     this.fftEl = document.getElementById('fft-container');
     this.fftAttached = false;
 
@@ -32,7 +33,12 @@ class MicrophoneNodeDemo extends DemoBase {
     // init microphone
     this.soundFFT = null;
     this.mic = new MicrophoneNode(null, () => {
-      this.soundFFT = new SoundFFT(this.mic.getContext(), this.mic.getNode());
+      const fftOptions = {
+        fftSize: 512,
+        beatAmpDirectionThresh: 0.007,
+        beatAmpDirectionSamples: 10,
+      };
+      this.soundFFT = new SoundFFT(this.mic.getContext(), this.mic.getNode(), fftOptions);
     }, (error) => {
       this.fftEl.innerHTML = '[MicrophoneNode ERROR] :: ' + error;
     });
@@ -57,7 +63,6 @@ class MicrophoneNodeDemo extends DemoBase {
     if(this.fftAttached) return;
     this.fftAttached = true;
     this.fftEl.appendChild(this.soundFFT.getDebugCanvas());
-    this.soundFFT.getDebugCanvas().setAttribute('style', null);
   }
 
 }
