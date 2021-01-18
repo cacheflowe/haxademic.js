@@ -28,3 +28,5 @@ class EaseToValueCallback {
 }
 
 EaseToValueCallback.noop = () => {};
+
+export default EaseToValueCallback;

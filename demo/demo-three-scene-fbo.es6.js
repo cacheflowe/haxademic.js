@@ -1,22 +1,24 @@
+import DemoBase from './demo--base.es6.js';
+import DragDropUtil from '../src/drag-drop-util.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+import ThreeSceneFBO from '../src/three-scene-fbo.es6.js';
+import ThreeChromaShader from '../src/three-chroma-shader.es6.js';
+
 class ThreeSceneFBODemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../vendor/three/shaders/CopyShader.js",
-      "../vendor/three/shaders/HorizontalBlurShader.js",
-      "../vendor/three/shaders/VerticalBlurShader.js",
-      "../vendor/three/postprocessing/EffectComposer.js",
-      "../vendor/three/postprocessing/RenderPass.js",
-      "../vendor/three/postprocessing/MaskPass.js",
-      "../vendor/three/postprocessing/ShaderPass.js",
-      "../src/drag-drop-util.es6.js",
-      "../src/frame-loop.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-chroma-shader.es6.js",
-      "../src/three-scene-.es6.js",
-      "../src/three-scene-fbo.es6.js",
+      "!../vendor/three/three.min.js",
+      "!../vendor/three/shaders/CopyShader.js",
+      "!../vendor/three/shaders/HorizontalBlurShader.js",
+      "!../vendor/three/shaders/VerticalBlurShader.js",
+      "!../vendor/three/postprocessing/EffectComposer.js",
+      "!../vendor/three/postprocessing/RenderPass.js",
+      "!../vendor/three/postprocessing/MaskPass.js",
+      "!../vendor/three/postprocessing/ShaderPass.js",
     ], `
       <div class="container">
         <style>
@@ -152,7 +154,7 @@ class ThreeSceneFBODemo extends DemoBase {
     this.composer.renderToScreen = false;
 
     // add chroma filter
-    this.chroma = new THREE.ShaderPass( THREE.ChromaShader );
+    this.chroma = new THREE.ShaderPass( ThreeChromaShader );
     this.chroma.material.transparent = true;
     this.chroma.uniforms.thresholdSensitivity.value = 0.1;
     this.chroma.uniforms.smoothing.value = 0.9;

@@ -1,16 +1,17 @@
+import DemoBase from './demo--base.es6.js';
+import * as THREE from '../vendor/three/three.module.js';
+import {ConvexGeometry} from '../vendor/three/ConvexGeometry.js';
+import ConvexHull from '../vendor/three/ConvexHull.js';
+import ColorUtil from '../src/color-util.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+
 class ThreeSceneConvexHullDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../vendor/three/ConvexGeometry.js",
-      "../vendor/three/ConvexHull.js",
-      "../src/color-util.es6.js",
-      "../src/frame-loop.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-scene-.es6.js",
-    ], `
+    super(parentEl, [], `
       <div class="container">
         <h1>ThreeScene | ConvexHull</h1>
         <div id="three-scene-convex-hull" style="width: 100%; height: 500px;"></div>

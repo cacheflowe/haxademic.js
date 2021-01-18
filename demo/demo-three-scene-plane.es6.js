@@ -1,19 +1,21 @@
+import DemoBase from './demo--base.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+import ThreeScenePlane from '../src/three-scene-plane.es6.js';
+import ThreeChromaShader from '../src/three-chroma-shader.es6.js';
+
 class ThreeScenePlaneDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../vendor/three/shaders/CopyShader.js",
-      "../vendor/three/shaders/HorizontalBlurShader.js",
-      "../vendor/three/shaders/VerticalBlurShader.js",
-      "../vendor/three/postprocessing/EffectComposer.js",
-      "../vendor/three/postprocessing/RenderPass.js",
-      "../vendor/three/postprocessing/MaskPass.js",
-      "../vendor/three/postprocessing/ShaderPass.js",
-      "../src/frame-loop.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-chroma-shader.es6.js",
-      "../src/three-scene-plane.es6.js",
+      "!../vendor/three/three.min.js",
+      "!../vendor/three/shaders/CopyShader.js",
+      "!../vendor/three/shaders/HorizontalBlurShader.js",
+      "!../vendor/three/shaders/VerticalBlurShader.js",
+      "!../vendor/three/postprocessing/EffectComposer.js",
+      "!../vendor/three/postprocessing/RenderPass.js",
+      "!../vendor/three/postprocessing/MaskPass.js",
+      "!../vendor/three/postprocessing/ShaderPass.js",
     ], `
       <div class="container">
         <style>
@@ -102,9 +104,9 @@ class ThreeScenePlaneDemo extends DemoBase {
     this.vblur = new THREE.ShaderPass( THREE.VerticalBlurShader );
     this.vblur.uniforms.v.value = 0.005;
     // this.composer.addPass(this.vblur);
-    
-    this.chroma = new THREE.ShaderPass( THREE.ChromaShader );
-    this.chroma.material.transparent = true; 
+
+    this.chroma = new THREE.ShaderPass( ThreeChromaShader );
+    this.chroma.material.transparent = true;
     this.composer.addPass(this.chroma);
     this.chroma.uniforms.thresholdSensitivity.value = 0.2;
     this.chroma.uniforms.smoothing.value = 0.7;
@@ -122,7 +124,7 @@ class ThreeScenePlaneDemo extends DemoBase {
     // if(this.planeMaterial.displacementMap == this.canvasTexture) {
     //   this.canvasTexture.needsUpdate = true;
     // }
-    
+
     // render!
     if(!!this.composer) {
       this.composer.render();

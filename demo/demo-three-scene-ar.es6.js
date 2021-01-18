@@ -1,22 +1,24 @@
+import DemoBase from './demo--base.es6.js';
+import DOMUtil from '../src/dom-util.es6.js';
+import LinearFloat from '../src/linear-float.es6.js';
+import Penner from '../src/penner.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+import ThreeSceneAr from '../src/three-scene-ar.es6.js';
+
 class ThreeSceneArDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../vendor/three/GLTFLoader.js",
-      "../vendor/ar.js/jsartoolkit5/artoolkit.min.js",
-      "../vendor/ar.js/jsartoolkit5/artoolkit.api.js",
-      "../vendor/ar.js/threex/threex-artoolkitsource.js",
-      "../vendor/ar.js/threex/threex-artoolkitcontext.js",
-      "../vendor/ar.js/threex/threex-arbasecontrols.js",
-      "../vendor/ar.js/threex/threex-armarkercontrols.js",
-      "../vendor/ar.js/threex/threex-arsmoothedcontrols.js",
-      "../src/dom-util.es6.js",
-      "../src/linear-float.es6.js",
-      "../src/penner.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-scene-.es6.js",
-      "../src/three-scene-ar.es6.js",
+      "!../vendor/three/three.min.js",
+      "!../vendor/three/GLTFLoader_NonModule.js",
+      "!../vendor/ar.js/jsartoolkit5/artoolkit.min.js",
+      "!../vendor/ar.js/jsartoolkit5/artoolkit.api.js",
+      "!../vendor/ar.js/threex/threex-artoolkitsource.js",
+      "!../vendor/ar.js/threex/threex-artoolkitcontext.js",
+      "!../vendor/ar.js/threex/threex-arbasecontrols.js",
+      "!../vendor/ar.js/threex/threex-armarkercontrols.js",
+      "!../vendor/ar.js/threex/threex-arsmoothedcontrols.js",
     ]);
   }
 

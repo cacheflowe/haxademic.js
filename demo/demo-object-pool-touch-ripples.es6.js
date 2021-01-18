@@ -1,11 +1,13 @@
+import DemoBase from './demo--base.es6.js';
+import DOMUtil from '../src/dom-util.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import ObjectPool from '../src/object-pool.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+
 class ObjectPoolTouchRipplesDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/mobile-util.es6.js",
-      "../src/object-pool.es6.js",
-      "../src/pointer-pos.es6.js",
-    ], `
+    super(parentEl, [], `
     <div class="container">
       <h1>ObjectPool | Touch Ripples</h1>
       <div id="particles"></div>

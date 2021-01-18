@@ -1,17 +1,18 @@
+import DemoBase from './demo--base.es6.js';
+import * as THREE from '../vendor/three/three.module.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+// VideoRecorder is included in DemoBase
+// import VideoRecorder from '../src/video-recorder.es6.js';
+
 class VideoRecorderDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../src/frame-loop.es6.js",
-      "../src/three-scene-.es6.js",
-      // "../src/video-recorder.es6.js", // imported for DemoBase class in index.html
-    ], 'VideoRecorder', 'webgl-container');
+    super(parentEl, [], 'VideoRecorder', 'webgl-container');
   }
 
   init() {
     // setup
-    this.el = document.getElementById('webgl-container');
     this.el.style.height = '500px';
     this.setupScene();
     this.buildCube();

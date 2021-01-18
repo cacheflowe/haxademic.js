@@ -1,9 +1,10 @@
+import DemoBase from './demo--base.es6.js';
+import MidiDevice from '../src/midi-device.es6.js';
+
 class MidiDeviceDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/midi-device.es6.js",
-    ], 'MidiDevice', 'midi-container');
+    super(parentEl, [], 'MidiDevice', 'midi-container');
   }
 
   async init() {

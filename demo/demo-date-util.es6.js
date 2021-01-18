@@ -1,13 +1,13 @@
+import DemoBase from './demo--base.es6.js';
+import DateUtil from '../src/date-util.es6.js';
+
 class DateUtilDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/date-util.es6.js",
-    ], 'DateUtil', 'date-util-container');
+    super(parentEl, [], 'DateUtil', 'date-util-container');
   }
 
   init() {
-    this.el = document.getElementById('date-util-container');
     this.el.innerHTML = `
       <div><code>getMillis</code> = ${DateUtil.getMillis()}</div>
       <div><code>getDateTimeStamp</code> = ${DateUtil.getDateTimeStamp()}</div>

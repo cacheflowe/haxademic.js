@@ -11,7 +11,7 @@ A personal front-end JavaScript toolkit
 
 * MIDI learn - work into dat.gui refactor from old gui library
 * Field trip video textures w/UIControlPanel & LED mapping
-
+* Add utility methods: https://1loc.dev/
 
 * Begin integrating html-experiments repo?
 * Switch to dat.gui. whoops

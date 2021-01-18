@@ -34,3 +34,5 @@ class LinearFloatTo {
   }
 
 }
+
+export default LinearFloatTo;

@@ -1,21 +1,19 @@
+import DemoBase from './demo--base.es6.js';
+import ArrayUtil from '../src/array-util.es6.js';
+import FloatBuffer from '../src/float-buffer.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MathUtil from '../src/math-util.es6.js';
+import SoundFFT from '../src/sound-fft.es6.js';
+
 class SoundFFTVideoDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/array-util.es6.js",
-      "../src/float-buffer.es6.js",
-      "../src/frame-loop.es6.js",
-      "../src/math-util.es6.js",
-      "../src/sound-fft.es6.js",
-    ], 'SoundFFT | Video', 'video-fft-container');
+    super(parentEl, [], 'SoundFFT | Video', 'video-fft-container');
   }
 
   init() {
     // animation loop
     window._frameLoop = (new FrameLoop()).addListener(this);
-
-    // setup
-    this.el = document.getElementById('video-fft-container');
 
     // add video element
     this.videoEl = document.createElement('video');

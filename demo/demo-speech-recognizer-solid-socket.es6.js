@@ -1,10 +1,11 @@
+import DemoBase from './demo--base.es6.js';
+import SolidSocket from '../src/solid-socket.es6.js';
+import SpeechRecognizer from '../src/speech-recognizer.es6.js';
+
 class SpeechRecognizerSolidSocketDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/solid-socket.es6.js",
-      "../src/speech-recognizer.es6.js",
-    ], `
+    super(parentEl, [], `
     <div class="container">
       <h1>SpeechRecognizer + SolidSocket</h1>
       <div>

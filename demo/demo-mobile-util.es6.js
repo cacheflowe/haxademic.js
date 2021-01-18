@@ -1,9 +1,10 @@
+import DemoBase from './demo--base.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+
 class MobileUtilDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/mobile-util.es6.js",
-    ], `
+    super(parentEl, [], `
     <div class="container" style="padding-bottom: 500px">
       <style>
         body.mobile .is-mobile,
@@ -23,7 +24,7 @@ class MobileUtilDemo extends DemoBase {
           border: 5px solid #0f0;
           pointer-events: none;
         }
-        #fullscreen-top, 
+        #fullscreen-top,
         #fullscreen-bottom {
           position: absolute;
           top: 0;
@@ -46,7 +47,7 @@ class MobileUtilDemo extends DemoBase {
   init() {
     this.initButtons();
     this.buildDisplay();
-    
+
     MobileUtil.setDeviceInputClass();
     MobileUtil.enablePseudoStyles();
     MobileUtil.addFullscreenListener();

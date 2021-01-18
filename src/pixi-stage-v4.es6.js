@@ -42,3 +42,5 @@ class PixiStageV4 {
   }
 
 }
+
+export default PixiStageV4;

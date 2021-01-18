@@ -43,3 +43,5 @@ class EasyScroll {
   }
 
 }
+
+export default EasyScroll;

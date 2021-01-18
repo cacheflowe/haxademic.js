@@ -70,3 +70,5 @@ class LinearFloat {
   }
 
 }
+
+export default LinearFloat;

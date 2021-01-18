@@ -1,3 +1,6 @@
+import * as THREE from '../three/three.module.js';
+import ConvexHull from './ConvexHull.js';
+
 // ConvexGeometry
 
 var ConvexGeometry = function ( points ) {
@@ -35,7 +38,7 @@ var ConvexBufferGeometry = function ( points ) {
 
 	var faces = convexHull.faces;
 
-	for ( var i = 0; i < faces.length; i ++ ) { 
+	for ( var i = 0; i < faces.length; i ++ ) {
 
 		var face = faces[ i ];
 		var edge = face.edge;
@@ -64,3 +67,8 @@ var ConvexBufferGeometry = function ( points ) {
 
 ConvexBufferGeometry.prototype = Object.create( THREE.BufferGeometry.prototype );
 ConvexBufferGeometry.prototype.constructor = ConvexBufferGeometry;
+
+export {
+	ConvexGeometry,
+	ConvexBufferGeometry,
+}

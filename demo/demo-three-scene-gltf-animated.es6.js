@@ -4,7 +4,7 @@ import GLTFLoader from '../vendor/three/GLTFLoader.js';
 import PointerPos from '../src/pointer-pos.es6.js';
 import ThreeScene from '../src/three-scene-.es6.js';
 
-class ThreeSceneGltfDemo extends DemoBase {
+class ThreeSceneGltfAnimatedDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [], `
@@ -23,7 +23,8 @@ class ThreeSceneGltfDemo extends DemoBase {
     this.buildCube();
     this.addShadow();
     this.startAnimation();
-    this.loadModel();
+    this.loadTexture();
+    // this.loadModel();
   }
 
   setupScene() {
@@ -31,6 +32,7 @@ class ThreeSceneGltfDemo extends DemoBase {
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
     this.frameCount = 0;
+    this.clock = new THREE.Clock();
   }
 
   startAnimation() {
@@ -97,19 +99,51 @@ class ThreeSceneGltfDemo extends DemoBase {
 		}
   }
 
+  loadTexture() {
+    this.materialLoaded = false;
+    let loader = new THREE.TextureLoader();
+    let texture = loader.load(
+      '../data/maxim.png',
+      (texture) => {  // load success
+        this.texture = texture;
+        // set texture repeat props
+        this.textureZoom = {x: 1, y: 1};
+        this.textureOffset = {x: 0, y: 0};
+        this.textureRotation = 0;
+        this.textureOffsetAmp = 0;
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.center.set(0.5, 0.5);
+        texture.repeat.set(this.textureZoom.x, this.textureZoom.y);
+        // add material to geometry
+        // this.plane.material.map = texture;
+        // this.plane.material.map.needsUpdate = true;
+        // this.scene.add(this.plane);
+        this.materialLoaded = true;
+        // prep UV manipulation
+        this.loadModel();
+      },
+      undefined,    // no progress callback
+      (error) => {  // load error
+        console.log('Couldn\'t load plane texture!');
+      }
+    );
+
+  }
+
   loadModel() {
     // Instantiate a GLTF loader
     var loader = new GLTFLoader();
     loader.load(
       // resource URL
-      '../data/duck.gltf',
+      '../data/Waffle_Shoe1.gltf',
       // called when the resource is loaded
       (gltf) => {
         // add gltf model to scene - extract specific child of gltf scene to add to our ThreeScene
-        this.model = gltf.scene.children[0].children[1];
+        this.model = gltf.scene.children[0];
         this.model.castShadow = true;
         this.model.receiveShadow = true;
-        this.model.material.wireframe = true;
+        // this.model.material.wireframe = true;
 
         // calc scale
         var modelSize = this.model.geometry.boundingBox.min.sub(this.model.geometry.boundingBox.max);
@@ -123,7 +157,27 @@ class ThreeSceneGltfDemo extends DemoBase {
 
         // add model to scene
         this.scene.add(this.model);
-        console.log(this.model);
+        // console.log(this.model);
+
+        // replace texture if we want
+        this.model.material = new THREE.MeshPhongMaterial({
+          color: 0x555555,
+          side: THREE.DoubleSide,
+          wireframe: false,
+          emissive : 0x555555, // 0x000000
+          specular : 0x999999,
+          shininess : 10,
+          map: this.texture,
+          skinning: true,
+          morphTargets: true,
+          // transparent: true,
+          // opacity: 0.8,
+        });
+        this.texture.repeat.set(1, -1);
+
+        // add animation if needed
+        this.mixer = new THREE.AnimationMixer(this.model);
+        this.mixer.clipAction(gltf.animations[0]).setDuration(1).play();
 
         // gltf.animations; // Array<THREE.AnimationClip>
         // gltf.scene; // THREE.Group
@@ -151,6 +205,9 @@ class ThreeSceneGltfDemo extends DemoBase {
     // lighthelper
     // if(this.lightHelper) this.lightHelper.update();
     // this.spotlight.position.y = this.pointerPos.y() * 10;
+
+    // gltf animation
+	  if(this.mixer) this.mixer.update(this.clock.getDelta());
   }
 
   animate() {
@@ -166,4 +223,4 @@ class ThreeSceneGltfDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneGltfDemo(document.body);
+if(window.autoInitDemo) window.demo = new ThreeSceneGltfAnimatedDemo(document.body);

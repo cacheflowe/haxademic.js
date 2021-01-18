@@ -1,6 +1,6 @@
 // dependencies:
-// - ArrayUtil.crossfadeEnds()
-// - FloatBuffer
+import ArrayUtil from './array-util.es6.js';
+import FloatBuffer from './float-buffer.es6.js';
 
 class SoundFFT {
 
@@ -213,20 +213,20 @@ class SoundFFT {
   ///////////////////////////////////////////////////////////////////////////
   /**
    *  Pitch Detection using Auto Correlation.
-   *  
+   *
    *  Auto correlation multiplies each sample in a buffer by all
    *  of the other samples. This emphasizes the fundamental
    *  frequency.
    *
    *  Running the signal through a low pass filter prior to
    *  autocorrelation helps bring out the fundamental frequency.
-   *  
+   *
    *  The visualization is a correlogram, which plots
    *  the autocorrelations.
    *
    *  We calculate the pitch by counting the number of samples
    *  between peaks.
-   *  
+   *
    *  Example by Jason Sigal and Golan Levin.
    *  from: https://therewasaguy.github.io/p5-music-viz/
    *  modified by: @cacheflowe
@@ -258,7 +258,7 @@ class SoundFFT {
 
     var autoCorrBuffer = [];
     for (var lag = 0; lag < nSamples; lag++){
-      var sum = 0; 
+      var sum = 0;
       for (var index = 0; index < nSamples-lag; index++){
         var indexLagged = index+lag;
         var sound1 = timeDomainBuffer[index];
@@ -302,7 +302,7 @@ class SoundFFT {
     var nSamples = buffer.length;
 
     // center clip removes any samples whose abs is less than centerClipThreshold
-    // this.centerClipThreshold = map(mouseY, 0, height, 0,1); 
+    // this.centerClipThreshold = map(mouseY, 0, height, 0,1);
 
     if (this.centerClipThreshold > 0.0) {
       for (var i = 0; i < nSamples; i++) {
@@ -335,7 +335,7 @@ class SoundFFT {
         }
       }
     }
-    
+
     var distanceToNextLargestPeak = indexOfLargestPeakSoFar - 0;
 
     // convert sample count to frequency
@@ -536,3 +536,5 @@ class SoundFFT {
 SoundFFT.FREQUENCIES = 'SoundFFT.FREQUENCIES';
 SoundFFT.WAVEFORM = 'SoundFFT.WAVEFORM';
 SoundFFT.BEAT = 'SoundFFT.BEAT';
+
+export default SoundFFT;

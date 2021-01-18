@@ -1,22 +1,20 @@
+import DemoBase from './demo--base.es6.js';
+import ScreenCapture from '../src/screen-capture.es6.js';
+
 class ScreenCaptureDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/screen-capture.es6.js",
-    ], 'ScreenCapture', 'screen-cap-container');
+    super(parentEl, [], 'ScreenCapture', 'screen-cap-container');
   }
 
   init() {
-    // setup
-    this.screenCapContainer = document.getElementById('screen-cap-container');
-
     // init ScreenCapture
     this.ScreenCapture = new ScreenCapture((videoEl) => {
       // attach to DOM, fit to container
       videoEl.style.width = '100%';
-      this.screenCapContainer.appendChild(videoEl);
+      this.el.appendChild(videoEl);
     }, (error) => {
-      this.screenCapContainer.innerHTML = '[ScreenCapture ERROR] :: ' + error;
+      this.el.innerHTML = '[ScreenCapture ERROR] :: ' + error;
     });
   }
 

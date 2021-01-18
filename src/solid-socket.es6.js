@@ -150,3 +150,5 @@ class SolidSocket {
 }
 
 SolidSocket.RECONNECT_INTERVAL = 2000;
+
+export default SolidSocket;

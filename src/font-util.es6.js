@@ -11,3 +11,5 @@ class FontUtil {
   }
 
 }
+
+export default FontUtil;

@@ -47,7 +47,7 @@ class UIControlPanel {
   // override barebones button styles
 
   fixStyles() {
-    let resetProps = ['font-size', 'font-weight', 'line-height', 'text-transform', 'letter-spacing', 'border-radius']; // 'text-align', 
+    let resetProps = ['font-size', 'font-weight', 'line-height', 'text-transform', 'letter-spacing', 'border-radius']; // 'text-align',
     this.gui.bar.element.childNodes.forEach((el) => {
       resetProps.forEach((prop) => {
         el.style[prop] = 'inherit';
@@ -147,17 +147,17 @@ class UIControlPanel {
     let config = {
       type: componentType,
       label: label,
-      object: this.data, 
+      object: this.data,
       property: key,
       onChange: (data) => {
         this.valueUpdated(key, data);
       }
     }
     if(min != null) config.min = min;
-    if(max != null) config.max = max; 
+    if(max != null) config.max = max;
     if(step != null) config.step = step;
     if(options != null) config.options = options;
-    if(componentType == UIControlPanel.TYPE_COLOR) config.format = (value.indexOf('#') == 0) ? 'hex' : 'rgb'; 
+    if(componentType == UIControlPanel.TYPE_COLOR) config.format = (value.indexOf('#') == 0) ? 'hex' : 'rgb';
     this.gui.Register(config);
   }
 
@@ -200,3 +200,5 @@ UIControlPanel.TYPE_SELECT = 'select';
 UIControlPanel.TYPE_TEXT = 'text';
 UIControlPanel.TYPE_COLOR = 'color';
 UIControlPanel.TYPE_FILE = 'file';
+
+export default UIControlPanel;

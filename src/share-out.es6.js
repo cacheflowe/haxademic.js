@@ -101,3 +101,5 @@ ShareOut.networkShareDimensions = {
   linkedin:   { width: 550, height: 460 },
   yammer:     { width: 600, height: 350 }
 };
+
+export default ShareOut;

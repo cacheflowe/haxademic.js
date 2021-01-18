@@ -1,10 +1,12 @@
+import DemoBase from './demo--base.es6.js';
+
 class P5SketchAudioDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/p5/p5.js",
-      "../vendor/p5/addons/p5.sound.min.js",
-      "../src/p5-sketch.es6.js",
+      "!../vendor/p5/p5.js",  // load non-module code
+      "!../vendor/p5/addons/p5.sound.min.js",
+      '../src/p5-sketch.es6.js',
     ], `
       <div class="container">
         <h1>P5Sketch</h1>
@@ -16,11 +18,14 @@ class P5SketchAudioDemo extends DemoBase {
   init() {
     // init custom sketch subclass
     this.buildSubclass();
-    this.p5El = document.getElementById('p5-sketch');
-    this.p5Sketch = new CustomSketch(this.p5El);
   }
 
-  buildSubclass() {
+  async buildSubclass() {
+    // Dynamically import P5Sketch after loading non-module p5js.
+    // Then create our custom sketch subclass
+    // let {P5Sketch} = await import('../src/p5-sketch.es6.js');
+    let obj = await import('../src/p5-sketch.es6.js');
+    let P5Sketch = obj.default;
 
     // create custom p5 sketch subclass
     class CustomSketch extends P5Sketch {
@@ -39,7 +44,7 @@ class P5SketchAudioDemo extends DemoBase {
         }
 
         // load shaders
-        this.lightLeakShader = p.createShader(P5Sketch.defaultVertShader, `
+        this.lightLeakShader = P.p.createShader(P5Sketch.defaultVertShader, `
           // from: http://glslsandbox.com/e#24303.0
           precision mediump float;
           varying vec2 vTexCoord;
@@ -121,7 +126,7 @@ class P5SketchAudioDemo extends DemoBase {
 
           // create pg for post-processing
           this.pg = this.createGraphics(p.width, p.height);//, p5.prototype.WEBGL, this);
-          this.pg.background(0);
+          this.pg.background(0)
       }
 
       draw() {
@@ -137,14 +142,14 @@ class P5SketchAudioDemo extends DemoBase {
         p.translate(-p.width/2, -p.height/2, 1);
         p.circle(p.width/2 + p.width * 0.25 * Math.sin(p.frameCount * 0.05), p.height/2, 100);
 
-        if(this.micInput == true) {
-          let spectrum = this.fft.analyze();
-          this.drawAudioSpectrum(spectrum);
-          this.drawAudioDots(spectrum);
+        if(p.micInput == true) {
+          let spectrum = p.fft.analyze();
+          p.drawAudioSpectrum(spectrum);
+          p.drawAudioDots(spectrum);
         }
 
         // copy main canvas to pg for shader texture input
-        this.pg.image(this.mainCanvas, 0, 0, this.pg.width, this.pg.height); // -this.pg.width/2, -this.pg.height/2);
+        p.pg.image(p.mainCanvas, 0, 0, p.pg.width, p.pg.height); // -this.pg.width/2, -this.pg.height/2);
         // this.pg.image(this.drawingContext, 0, 0);
         // this.pg.copy(p, 0, 0, this.pg.width, this.pg.height, 0, 0, this.pg.width, this.pg.height);
 
@@ -154,7 +159,7 @@ class P5SketchAudioDemo extends DemoBase {
         // p.text(p.frameRate+"", 20, 20);
 
         // run shader. rect supplies geometry to affect
-        if(this.frameCount % 100 < 50) {
+        if(p.frameCount % 100 < 50) {
           // test shader
           // this.lumaShader.setUniform('tex', this.pg);
           // p.shader(this.lumaShader);
@@ -162,11 +167,11 @@ class P5SketchAudioDemo extends DemoBase {
           // p.resetShader();
 
           // apply glitch shader
-          this.glitchShader.setUniform('tex', this.pg);
-          this.glitchShader.setUniform('iTime', this.frameCount * 0.1);
-          this.glitchShader.setUniform('amp', 1.);
-          p.shader(this.glitchShader);
-          p.rect(0, 0, this.width, this.height);
+          p.glitchShader.setUniform('tex', p.pg);
+          p.glitchShader.setUniform('iTime', p.frameCount * 0.1);
+          p.glitchShader.setUniform('amp', 1.);
+          p.shader(p.glitchShader);
+          p.rect(0, 0, p.width, p.height);
           p.resetShader();
         }
       }
@@ -203,7 +208,9 @@ class P5SketchAudioDemo extends DemoBase {
         }
       }
     }
-    window.CustomSketch = CustomSketch;
+
+    this.p5El = document.getElementById('p5-sketch');
+    this.p5Sketch = new CustomSketch(this.p5El);
   }
 }
 

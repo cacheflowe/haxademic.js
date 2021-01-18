@@ -57,8 +57,9 @@ class DOMUtil {
     window.dispatchEvent(new Event('resize'));
   }
 
-  static loadJavascript(url, callback) {
+  static loadJavascript(url, callback, type=null) {
     const script = document.createElement("script");
+    if(!!type) script.setAttribute('type', type);
     if(callback) script.addEventListener('load', callback);
     script.src = url;
     document.head.appendChild(script);
@@ -71,5 +72,7 @@ class DOMUtil {
     document.head.append(styleEl);
     return styleEl;
   }
-  
+
 }
+
+export default DOMUtil;

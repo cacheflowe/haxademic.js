@@ -139,3 +139,5 @@ class CanvasFilters {
 
 CanvasFilters.tmpCanvas = document.createElement('canvas');
 CanvasFilters.tmpCtx = CanvasFilters.tmpCanvas.getContext('2d');
+
+export default CanvasFilters;

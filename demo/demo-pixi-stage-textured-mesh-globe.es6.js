@@ -1,14 +1,15 @@
+import DemoBase from './demo--base.es6.js';
+import PixiStage from '../src/pixi-stage.es6.js';
+
 class PixiStageTexturedMeshGlobeDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/pixi/pixi.min.js",
-      // "../src/webcam.es6.js",
-      "../src/pixi-stage.es6.js",
+      '!../vendor/pixi/pixi.min.js'
     ], 'PixiStage | Textured Mesh Globe', 'pixi-stage-textured-mesh-globe-container');
   }
 
-  init() {
+  async init() {
     // create PIXI stage object
     this.pixiContainer = document.getElementById('pixi-stage-textured-mesh-globe-container');
     this.pixiContainer.setAttribute('style', 'height: 500px;');
@@ -59,7 +60,7 @@ class PixiStageTexturedMeshGlobeDemo extends DemoBase {
     this.videoEl.play();
     this.videoEl.style.setProperty('width', '320px');   // for debug view
     this.videoEl.style.setProperty('border', '1px solid #090');
-    document.body.addChild(this.video);
+    document.body.appendChild(this.videoEl);
 
     this.texture = new PIXI.Texture.from(this.videoEl);
     this.texture.once('update', (texture) => {    // use `once` instead of `on`, since event can fire twice. this is noted in the PIXI docs

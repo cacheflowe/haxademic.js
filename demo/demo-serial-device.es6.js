@@ -1,14 +1,13 @@
+import DemoBase from './demo--base.es6.js';
+import SerialDevice from '../src/serial-device.es6.js';
+
 class SerialDeviceDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/serial-device.es6.js",
-    ], 'SerialDevice', 'serial-container');
+    super(parentEl, [], 'SerialDevice', 'serial-container');
   }
 
   async init() {
-    // setup
-    this.serialContainer = document.getElementById('serial-container');
     this.startWithButton();
   }
 
@@ -16,13 +15,14 @@ class SerialDeviceDemo extends DemoBase {
     // add button to start everything
     this.startButton = document.createElement('button');
     this.startButton.innerText = 'Start';
-    this.serialContainer.appendChild(this.startButton);
+    this.el.appendChild(this.startButton);
 
     // click to init serial device selector
     this.startButton.addEventListener('click', (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
       // init serial device on user interaction
       this.serialDevice = new SerialDevice(
+        115200,
         (data) => this.serialRead(data),
         (err) => this.serialError(err)
       );
@@ -32,12 +32,12 @@ class SerialDeviceDemo extends DemoBase {
   serialRead(data) {
     let val = data;
     if(data.length && data.length > 0 && data[0] == 'a') {
-      this.serialContainer.innerHTML = `<p>Distance: ${data.substring(1)}mm</p>`;
+      this.el.innerHTML = `<p>Distance: ${data.substring(1)}mm</p>`;
     }
   }
 
   serialError(err) {
-    this.serialContainer.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+    this.el.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
   }
 
 }

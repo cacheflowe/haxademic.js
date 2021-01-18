@@ -15,3 +15,5 @@ class Oscillations {
   }
 
 }
+
+export default Oscillations;

@@ -69,3 +69,5 @@ class PixiStage {
     return this.app.renderer.generateTexture(graphics);
   }
 }
+
+export default PixiStage;

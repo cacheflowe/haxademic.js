@@ -1,3 +1,7 @@
+import DemoBase from './demo--base.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+
 class FrameLoopDemo extends DemoBase {
 
   constructor(parentEl) {
@@ -13,8 +17,8 @@ class FrameLoopDemo extends DemoBase {
           -moz-user-select: none;
         }
         #specific-el {
-          width:100%; 
-          padding: 2rem; 
+          width:100%;
+          padding: 2rem;
           background: rgba(0,0,0,0.25);
         }
         #specific-el.entered {

@@ -42,3 +42,5 @@ class SerialDevice {
   }
 
 }
+
+export default SerialDevice;

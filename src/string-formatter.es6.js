@@ -166,3 +166,5 @@ class StringFormatter {
   }
 
 }
+
+export default StringFormatter;

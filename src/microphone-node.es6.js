@@ -24,5 +24,4 @@ class MicrophoneNode {
 
 }
 
-// only export if we want to treat this as a module
-// export { MicrophoneNode };
+export default MicrophoneNode;

@@ -38,3 +38,5 @@ class PixiSpriteScale {
   }
 
 }
+
+export default PixiSpriteScale;

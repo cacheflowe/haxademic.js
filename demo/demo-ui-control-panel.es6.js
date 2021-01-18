@@ -1,9 +1,11 @@
+import DemoBase from './demo--base.es6.js';
+import UIControlPanel from '../src/ui-control-panel.es6.js';
+
 class UIControlPanelDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/guify.min.js",
-      "../src/ui-control-panel.es6.js",
+      "!../vendor/guify.min.js",
     ], `
       <div class="container">
         <div id="gui-container" style="position: fixed; top: 0; right: 0; width: 300px;"></div>

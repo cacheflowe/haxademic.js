@@ -49,3 +49,5 @@ class AppStoreDistributed extends AppStore {
 }
 
 AppStoreDistributed.CONNECTED = "AppStoreDistributed_CONNECTED";
+
+export default AppStoreDistributed;

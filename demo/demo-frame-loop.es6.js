@@ -1,13 +1,13 @@
+import DemoBase from './demo--base.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+
 class FrameLoopDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/frame-loop.es6.js",
-    ], 'FrameLoop', 'frame-loop-container');
+    super(parentEl, [], 'FrameLoop', 'frame-loop-container');
   }
 
   init() {
-    this.el = document.getElementById('frame-loop-container');
     window._frameLoop = new FrameLoop(180, 4);
     _frameLoop.addListener(this);
   }

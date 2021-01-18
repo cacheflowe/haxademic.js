@@ -18,3 +18,5 @@ class ObjectUtil {
   }
 
 }
+
+export default ObjectUtil;

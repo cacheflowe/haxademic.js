@@ -1,3 +1,5 @@
+import * as THREE from '../vendor/three/three.module.js';
+
 class ThreeSceneFBO {
 
   constructor(width, height, bgColor=0xff0000) {
@@ -27,14 +29,14 @@ class ThreeSceneFBO {
   buildRenderer() {
     let options = {
       format: THREE.RGBAFormat,
-      minFilter: THREE.LinearFilter, 
+      minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
-      depthBuffer: false, 
+      depthBuffer: false,
       stencilBuffer: false,
     };
     this.renderBuffer = new THREE.WebGLRenderTarget(this.width, this.height, options);
     this.renderBuffer.background = this.bgColor;
-    // console.log(this.renderBuffer);
+    console.log(this.renderBuffer);
   }
 
   setMaterial(material) {
@@ -52,7 +54,7 @@ class ThreeSceneFBO {
   getPlane() {
     return this.plane;
   }
-  
+
   getScene() {
     return this.scene;
   }
@@ -82,3 +84,5 @@ class ThreeSceneFBO {
   }
 
 }
+
+export default ThreeSceneFBO;

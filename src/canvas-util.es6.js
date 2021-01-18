@@ -229,3 +229,5 @@ class CanvasUtil {
 
 CanvasUtil.clearColor = 'rgba(0,0,0,0)';
 CanvasUtil.dataImgPrefix = 'data:image/png;base64,';
+
+export default CanvasUtil;

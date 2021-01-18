@@ -38,3 +38,5 @@ class DragDropUtil {
   }
 
 }
+
+export default DragDropUtil;

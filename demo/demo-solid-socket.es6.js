@@ -1,3 +1,9 @@
+import DemoBase from './demo--base.es6.js';
+import EventLog from '../src/event-log.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import SolidSocket from '../src/solid-socket.es6.js';
+
 class SolidSocketDemo extends DemoBase {
 
   constructor(parentEl) {

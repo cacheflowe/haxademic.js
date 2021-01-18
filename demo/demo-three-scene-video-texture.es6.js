@@ -1,16 +1,17 @@
-class ThreeSceneVideoTextureDemo extends DemoBase {
+import DemoBase from './demo--base.es6.js';
+import * as THREE from '../vendor/three/three.module.js';
+import DragDropUtil from '../src/drag-drop-util.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+import UIControlPanel from '../src/ui-control-panel.es6.js';
+
+class ThreeSceneVideoDisplaceTextureDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/guify.min.js",
-      "../vendor/three/three.min.js",
-      "../src/drag-drop-util.es6.js",
-      "../src/frame-loop.es6.js",
-      // "../src/math-util.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-scene-.es6.js",
-      "../src/ui-control-panel.es6.js",
+      "!../vendor/guify.min.js",
     ], `
       <div class="container">
         <style>
@@ -143,10 +144,10 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     // update displacement
     let displaceRange = _ui.value('displaceRange');
     this.planeMaterial.displacementScale = _frameLoop.osc(0.03, displaceRange[0], displaceRange[1]);
-    
+
     this.threeScene.render();
   }
 
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneVideoTextureDemo(document.body);
+if(window.autoInitDemo) window.demo = new ThreeSceneVideoDisplaceTextureDemo(document.body);

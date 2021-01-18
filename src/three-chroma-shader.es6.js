@@ -1,6 +1,7 @@
 // from: https://github.com/BradLarson/GPUImage/blob/master/framework/Source/GPUImageChromaKeyFilter.m
+import * as THREE from '../vendor/three/three.module.js';
 
-THREE.ChromaShader = {
+var ThreeChromaShader = {
 
 	uniforms: {
 		tDiffuse: { value: null },
@@ -34,3 +35,5 @@ THREE.ChromaShader = {
     }
   `
 };
+
+export default ThreeChromaShader;

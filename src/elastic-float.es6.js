@@ -47,3 +47,5 @@ class ElasticFloat {
     return this.val;
   }
 }
+
+export default ElasticFloat;

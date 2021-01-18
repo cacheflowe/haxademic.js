@@ -85,3 +85,5 @@ class FloatBuffer {
   }
 
 }
+
+export default FloatBuffer;

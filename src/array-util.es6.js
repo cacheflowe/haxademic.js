@@ -1,3 +1,5 @@
+import MathUtil from './math-util.es6.js';
+
 class ArrayUtil {
 
   static removeElement(array, element) {
@@ -49,3 +51,5 @@ class ArrayUtil {
   }
 
 }
+
+export default ArrayUtil;

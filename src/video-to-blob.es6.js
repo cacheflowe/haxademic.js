@@ -52,3 +52,5 @@ class VideoToBlob {
   // }
 
 }
+
+export default VideoToBlob;

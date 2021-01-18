@@ -354,3 +354,5 @@ Main.prototype = {
     ));
 
 */
+
+export default MathUtil;

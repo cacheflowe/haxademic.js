@@ -1,14 +1,15 @@
+import DemoBase from './demo--base.es6.js';
+import * as THREE from '../vendor/three/three.module.js';
+import CanvasUtil from '../src/canvas-util.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MathUtil from '../src/math-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+
 class ThreeSceneTextTextureDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../src/canvas-util.es6.js",
-      "../src/frame-loop.es6.js",
-      "../src/math-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-scene-.es6.js",
-    ], `
+    super(parentEl, [], `
       <div class="container">
         <style>
           @font-face{

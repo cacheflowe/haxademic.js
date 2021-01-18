@@ -25,7 +25,7 @@ class VideoRecorder {
     // get mimtype from file extension
     const mimeTypes = {
       mkv: 'video/x-matroska;codecs=avc1',
-      mp4: 'video/mp4', 
+      mp4: 'video/mp4',
       webm: 'video/webm',
     };
     this.mimeType = mimeTypes[fileType];
@@ -112,3 +112,5 @@ class VideoRecorder {
     };
   }
 }
+
+export default VideoRecorder;

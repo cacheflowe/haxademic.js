@@ -1,16 +1,17 @@
+import DemoBase from './demo--base.es6.js';
+import * as THREE from '../vendor/three/three.module.js';
+import DragDropUtil from '../src/drag-drop-util.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+import ThreeSceneFBO from '../src/three-scene-fbo.es6.js';
+import ThreeChromaShader from '../src/three-chroma-shader.es6.js';
+
 class ThreeSceneFBODemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../src/drag-drop-util.es6.js",
-      "../src/frame-loop.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-chroma-shader.es6.js",
-      "../src/three-scene-.es6.js",
-      "../src/three-scene-fbo.es6.js",
-    ], `
+    super(parentEl, [], `
       <div class="container">
         <style>
           .drop-over {
@@ -92,8 +93,8 @@ class ThreeSceneFBODemo extends DemoBase {
     this.planeGeometry = new THREE.PlaneGeometry(400*0.5, 320*0.5, planeResolution, planeResolution);
     this.planeMaterial = new THREE.ShaderMaterial({
       side: THREE.FrontSide,
-      vertexShader: THREE.ChromaShader.vertexShader,
-      fragmentShader: THREE.ChromaShader.fragmentShader,
+      vertexShader: ThreeChromaShader.vertexShader,
+      fragmentShader: ThreeChromaShader.fragmentShader,
       transparent: true,
       uniforms: {
         tDiffuse: { value: this.threeFBO.getRenderTargetTexture() },

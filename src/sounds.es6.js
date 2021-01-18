@@ -80,3 +80,5 @@ Sounds.PLAY_SOUND = 'PLAY_SOUND';
 Sounds.audioFiles = {
   MENU_LOOP:        './audio/loop.mp3',
 }
+
+export default Sounds;

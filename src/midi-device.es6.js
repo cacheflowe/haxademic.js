@@ -13,7 +13,7 @@ class MidiDevice {
 
   initMidi() {
     if (!('requestMIDIAccess' in navigator)) {
-      if(this.errorCallback) this.errorCallback('This browser doesn\'t support WebMIDI');
+      if(this.errorCallback) this.errorCallback('This browser doesn\'t support WebMIDI. Try Chrome for now.');
     } else {
       navigator.requestMIDIAccess().then((midi) => {
         this.parseMidiDevices(midi);
@@ -47,3 +47,5 @@ class MidiDevice {
 
 MidiDevice.NOTE_ON = 9;
 MidiDevice.NOTE_OFF = 8;
+
+export default MidiDevice;

@@ -23,3 +23,5 @@ class UserInteractionTimeout {
   }
 
 }
+
+export default UserInteractionTimeout;

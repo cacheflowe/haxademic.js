@@ -41,3 +41,5 @@ class PageVisibility {
   }
 
 }
+
+export default PageVisibility;

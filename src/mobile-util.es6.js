@@ -175,3 +175,5 @@ class MobileUtil {
 }
 
 MobileUtil.FULLSCREEN_LISTENING = false;
+
+export default MobileUtil;

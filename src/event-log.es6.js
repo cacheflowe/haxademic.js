@@ -1,5 +1,5 @@
 class EventLog {
-  
+
   constructor(debugEl=null, maxItems=20) {
     this.debugEl = debugEl;
     this.maxItems = maxItems;
@@ -15,3 +15,5 @@ class EventLog {
     }
   }
 }
+
+export default EventLog;

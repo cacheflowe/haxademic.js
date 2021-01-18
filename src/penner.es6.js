@@ -148,3 +148,5 @@ class Penner {
     }
   }
 }
+
+export default Penner;

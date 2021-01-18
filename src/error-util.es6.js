@@ -49,3 +49,5 @@ class ErrorUtil {
 ErrorUtil.INITIALIZED = false;
 ErrorUtil.TIMEOUT = null;
 ErrorUtil.TIMEOUT_DURATION = 60000;
+
+export default ErrorUtil;

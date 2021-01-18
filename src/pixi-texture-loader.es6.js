@@ -51,3 +51,5 @@ class PixiTextureLoader {
   }
 
 }
+
+export default PixiTextureLoader;

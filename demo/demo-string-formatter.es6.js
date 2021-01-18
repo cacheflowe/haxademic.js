@@ -1,18 +1,18 @@
+import DemoBase from './demo--base.es6.js';
+import StringFormatter from '../src/string-formatter.es6.js';
+
 class StringFormatterDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/string-formatter.es6.js",
-    ], 'StringFormatter', 'string-formatter');
+    super(parentEl, [], 'StringFormatter', 'string-formatter');
   }
 
   init() {
     this.printTests();
     this.runUnitTests();
-  } 
+  }
 
   printTests() {
-    this.el = document.getElementById('string-formatter');
     this.el.innerHTML = `
       <div><code>StringFormatter.formatPhone('3035558888')</code> ${StringFormatter.formatPhone('3035558888')}</div>
       <div><code>StringFormatter.formatSSN('333002222')</code> ${StringFormatter.formatSSN('333002222')}</div>

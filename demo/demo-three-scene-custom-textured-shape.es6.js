@@ -1,12 +1,13 @@
-class ThreeSceneDemo extends DemoBase {
+import DemoBase from './demo--base.es6.js';
+import * as THREE from '../vendor/three/three.module.js';
+import MathUtil from '../src/math-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+
+class ThreeSceneTexturedShapeDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../vendor/three/three.min.js",
-      "../src/math-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-scene-.es6.js",
-    ], `
+    super(parentEl, [], `
       <div class="container">
         <h1>ThreeScene</h1>
         <p>Custom textured shape w/UV & vertex displacement on the CPU</p>
@@ -201,4 +202,4 @@ class ThreeSceneDemo extends DemoBase {
 
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneDemo(document.body);
+if(window.autoInitDemo) window.demo = new ThreeSceneTexturedShapeDemo(document.body);

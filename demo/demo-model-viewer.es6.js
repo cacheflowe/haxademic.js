@@ -1,9 +1,11 @@
+import DemoBase from './demo--base.es6.js';
+
 class ModelViewerDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
       // "https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js",
-      "https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js",
+      "!https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js",
     ], `
       <div class="container">
         <style>

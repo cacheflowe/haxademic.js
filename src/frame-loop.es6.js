@@ -56,7 +56,7 @@ class FrameLoop {
       this.loopCurFrame = this.frame % this.loopFrames;
       this.progress = this.loopCurFrame / this.loopFrames;
       this.progressRads = this.progress * Math.PI * 2;
-      
+
       // update ticks
       let newTick = Math.floor(this.ticks * this.progress);
       this.isTick = (this.curTick != newTick);
@@ -116,3 +116,5 @@ class FrameLoop {
     return this.isTick;
   }
 }
+
+export default FrameLoop;

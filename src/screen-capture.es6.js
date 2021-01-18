@@ -19,3 +19,5 @@ class ScreenCapture {
   }
 
 }
+
+export default ScreenCapture;

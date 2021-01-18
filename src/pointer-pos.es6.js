@@ -193,3 +193,5 @@ class PointerPos {
   }
 
 }
+
+export default PointerPos;

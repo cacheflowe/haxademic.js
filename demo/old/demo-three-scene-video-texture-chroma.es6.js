@@ -1,24 +1,27 @@
+import DemoBase from './demo--base.es6.js';
+import * as THREE from '../vendor/three/three.module.js';
+import DragDropUtil from '../src/drag-drop-util.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+import ThreeScene from '../src/three-scene-.es6.js';
+import ThreeSceneFBO from '../src/three-scene-fbo.es6.js';
+import ThreeChromaShader from '../src/three-chroma-shader.es6.js';
+import UIControlPanel from '../src/ui-control-panel.es6.js';
+
 class ThreeSceneVideoTextureDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/guify.min.js",
-      "../vendor/three/three.min.js",
-      "../vendor/three/shaders/CopyShader.js",
-      "../vendor/three/shaders/HorizontalBlurShader.js",
-      "../vendor/three/shaders/VerticalBlurShader.js",
-      "../vendor/three/postprocessing/EffectComposer.js",
-      "../vendor/three/postprocessing/RenderPass.js",
-      "../vendor/three/postprocessing/MaskPass.js",
-      "../vendor/three/postprocessing/ShaderPass.js",
-      "../src/drag-drop-util.es6.js",
-      "../src/frame-loop.es6.js",
-      // "../src/math-util.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/three-chroma-shader.es6.js",
-      "../src/three-scene-.es6.js",
-      "../src/ui-control-panel.es6.js",
+      "!../vendor/guify.min.js",
+      "!../vendor/three/three.min.js",
+      "!../vendor/three/shaders/CopyShader.js",
+      "!../vendor/three/shaders/HorizontalBlurShader.js",
+      "!../vendor/three/shaders/VerticalBlurShader.js",
+      "!../vendor/three/postprocessing/EffectComposer.js",
+      "!../vendor/three/postprocessing/RenderPass.js",
+      "!../vendor/three/postprocessing/MaskPass.js",
+      "!../vendor/three/postprocessing/ShaderPass.js",
     ], `
       <div class="container">
         <style>
@@ -151,7 +154,7 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     // update displacement
     let displaceRange = _ui.value('displaceRange');
     this.planeMaterial.displacementScale = _frameLoop.osc(0.03, displaceRange[0], displaceRange[1]);
-    
+
     this.threeScene.render();
   }
 

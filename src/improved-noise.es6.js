@@ -66,4 +66,6 @@ class ImprovedNoise {
            this.lerp(u, this.grad(this.p[AB + 1], x, yMinus1, zMinus1),
            this.grad(this.p[BB + 1], xMinus1, yMinus1, zMinus1))));
   }
-};
+}
+
+export default ImprovedNoise;

@@ -1,9 +1,10 @@
+import DemoBase from './demo--base.es6.js';
+import SpeechRecognizer from '../src/speech-recognizer.es6.js';
+
 class SpeechRecognizerDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/speech-recognizer.es6.js",
-    ], `
+    super(parentEl, [], `
     <div class="container">
       <h1>SpeechRecognizer</h1>
       <div>

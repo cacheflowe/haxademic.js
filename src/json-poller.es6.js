@@ -26,3 +26,5 @@ class JsonPoller {
   }
 
 }
+
+export default JsonPoller;

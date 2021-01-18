@@ -1,3 +1,6 @@
+import * as THREE from '../vendor/three/three.module.js';
+import ThreeScene from './three-scene-.es6.js';
+
 class ThreeSceneAr extends ThreeScene {
 
   // TODO:
@@ -43,7 +46,7 @@ class ThreeSceneAr extends ThreeScene {
 
     // init source listener
     this.arToolkitSource.init(
-      () => this.cameraSourceReady(), 
+      () => this.cameraSourceReady(),
       (e) => this.cameraSourceError(e)
     );
   }
@@ -233,3 +236,5 @@ class ThreeSceneAr extends ThreeScene {
 }
 
 ThreeSceneAr.WEBCAM = "webcam";
+
+export default ThreeSceneAr;

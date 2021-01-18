@@ -47,3 +47,5 @@ class AppStoreDebug {
   }
 
 }
+
+export default AppStoreDebug;

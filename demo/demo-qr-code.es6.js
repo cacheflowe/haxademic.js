@@ -1,8 +1,10 @@
+import DemoBase from './demo--base.es6.js';
+
 class QRCodeDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/qrcode.min.js",
+      "!../vendor/qrcode.min.js",
     ], 'QRCode', 'qr-container');
   }
 

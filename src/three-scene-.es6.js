@@ -1,3 +1,5 @@
+import * as THREE from '../vendor/three/three.module.js';
+
 class ThreeScene {
 
   constructor(el=document.body, bgColor=0xffffff, transparent=false) {
@@ -86,3 +88,5 @@ class ThreeScene {
   }
 
 }
+
+export default ThreeScene;

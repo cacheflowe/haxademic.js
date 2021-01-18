@@ -22,7 +22,7 @@ class KeyboardUtil {
       if(el.value.length > 0) el.value = el.value.substring(0, el.value.length - 1);
     }
   }
-  
+
 }
 
 KeyboardUtil.KEYCODES = [
@@ -283,3 +283,5 @@ KeyboardUtil.KEYCODES = [
   "WIN_OEM_CLEAR", // [254]
   "" // [255]
 ];
+
+export default KeyboardUtil;

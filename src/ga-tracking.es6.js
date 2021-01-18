@@ -28,3 +28,5 @@ class GATracking {
   }
 
 }
+
+export default GATracking;

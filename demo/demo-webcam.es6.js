@@ -1,19 +1,17 @@
+import DemoBase from './demo--base.es6.js';
+import Webcam from '../src/webcam.es6.js';
+
 class WebcamDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/webcam.es6.js",
-    ], 'Webcam', 'webcam-container');
+    super(parentEl, [], 'Webcam', 'webcam-container');
   }
 
   init() {
-    // setup
-    this.webcamContainer = document.getElementById('webcam-container');
-
     // add button to start everything
     this.startButton = document.createElement('button');
     this.startButton.innerText = 'Start';
-    this.webcamContainer.appendChild(this.startButton);
+    this.el.appendChild(this.startButton);
 
     // click video to load webcam
     this.startButton.addEventListener('click', (e) => {
@@ -22,10 +20,10 @@ class WebcamDemo extends DemoBase {
       // init webcam
       this.webcam = new Webcam((videoEl) => {
         // attach to DOM and flip to mirror the video
-        this.webcamContainer.appendChild(videoEl);
+        this.el.appendChild(videoEl);
         Webcam.flipH(videoEl);
       }, (error) => {
-        this.webcamContainer.innerHTML = '[Webcam ERROR] :: ' + error;
+        this.el.innerHTML = '[Webcam ERROR] :: ' + error;
       });
     });
 

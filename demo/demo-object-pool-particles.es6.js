@@ -1,13 +1,14 @@
+import DemoBase from './demo--base.es6.js';
+import EventLog from '../src/event-log.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
+import ObjectPool from '../src/object-pool.es6.js';
+import PointerPos from '../src/pointer-pos.es6.js';
+
 class ObjectPoolParticlesDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/event-log.es6.js",
-      "../src/frame-loop.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/object-pool.es6.js",
-      "../src/pointer-pos.es6.js",
-    ], `
+    super(parentEl, [], `
     <div class="container">
       <style>
         #particles {
@@ -127,7 +128,7 @@ class Particle {
     this.active = true;
     this.attached = false;
     this.el.style.setProperty('background-color', `rgba(${Math.round(20 + Math.random() * 70)}, ${Math.round(140 + Math.random() * 70)}, ${Math.round(170 + Math.random() * 85)}, 1)`);
-    
+
   }
 
   update() {

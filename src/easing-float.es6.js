@@ -97,3 +97,5 @@ class EasingFloat {
 }
 
 EasingFloat.TWO_PI = Math.PI * 2;
+
+export default EasingFloat;

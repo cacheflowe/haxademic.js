@@ -1,14 +1,11 @@
+import DemoBase from './demo--base.es6.js';
+import SoundFFT from '../src/sound-fft.es6.js';
+import MicrophoneNode from '../src/microphone-node.es6.js';
+
 class MicrophoneNodeDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/array-util.es6.js",
-      "../src/dom-util.es6.js",
-      "../src/float-buffer.es6.js",
-      "../src/math-util.es6.js",
-      "../src/sound-fft.es6.js",
-      "../src/microphone-node.es6.js",
-    ], 'MicrophoneNode', 'fft-container');
+    super(parentEl, [], 'MicrophoneNode', 'fft-container');
   }
 
   init() {

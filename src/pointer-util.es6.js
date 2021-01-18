@@ -28,13 +28,13 @@ class PointerUtil {
   }
 
   static dispatchPointerEvent(el, eventType) {
-    const event = document.createEvent('UIEvent');    
+    const event = document.createEvent('UIEvent');
     event.initUIEvent(eventType, true, true, window, 0);
     let touches = [{target: el}];
     if(!!eventType.match(/touch/)) {
       Object.defineProperties(event, {
         changedTouches: {value: touches}
-      });    
+      });
     }
     el.dispatchEvent(event);
   }
@@ -49,3 +49,5 @@ class PointerUtil {
   }
 
 }
+
+export default PointerUtil;

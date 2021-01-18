@@ -32,3 +32,5 @@ class IframeUrlLoader {
     // return `https://www.facebook.com/sharer/sharer.php?u=${this.getShareUrl()}`; // use this if the page redirects
   }
 }
+
+export default IframeUrlLoader;

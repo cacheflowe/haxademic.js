@@ -17,3 +17,5 @@ class URLUtil {
   }
 
 }
+
+export default URLUtil;

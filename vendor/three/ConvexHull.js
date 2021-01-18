@@ -1,3 +1,5 @@
+import * as THREE from '../three/three.module.js';
+
 /**
  * Ported from: https://github.com/maurizzzio/quickhull3d/ by Mauricio Poppe (https://github.com/maurizzzio)
  */
@@ -1311,3 +1313,5 @@ var ConvexHull = ( function () {
 	return ConvexHull;
 
 } )();
+
+export default ConvexHull;

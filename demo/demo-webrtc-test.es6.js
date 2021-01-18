@@ -1,16 +1,15 @@
+import DemoBase from './demo--base.es6.js';
+import URLUtil from '../src/url-util.es6.js';
+
 class WebRtcTest extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js",
-      // "../src/webcam.es6.js",
+      "!https://unpkg.com/peerjs@1.2.0/dist/peerjs.min.js",
     ], 'WebRTC', 'webrtc-container');
   }
 
   init() {
-    // setup
-    this.el = document.getElementById('webrtc-container');
-
     // is there an offer in the URL?
     let offer = URLUtil.getHashQueryVariable('offer');
     if(offer) {
@@ -24,7 +23,7 @@ class WebRtcTest extends DemoBase {
     // listen for connection
     this.peer.on('open', (id) => {
       // if no offer, we're the host! so advertise the link
-      if(!offer) { 
+      if(!offer) {
         let offerLink = document.createElement('a');
         offerLink.href = `${window.location.href}&offer=${id}`;
         offerLink.innerText = offerLink.href;

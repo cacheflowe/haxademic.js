@@ -103,3 +103,5 @@ class LazyImageLoader {
 	}
 
 }
+
+export default LazyImageLoader;

@@ -1,3 +1,5 @@
+import * as THREE from '../vendor/three/three.module.js';
+
 class ThreeScenePlane {
 
   constructor(width, height, bgColor=0xff0000, transparent=false) {
@@ -28,8 +30,8 @@ class ThreeScenePlane {
   buildRenderer() {
     // See: view-source:https://threejs.org/examples/webgl_rtt.html
     let options = {
-      antialias: true, 
-      depthBuffer: false, 
+      antialias: true,
+      depthBuffer: false,
       stencilBuffer: false
     };
     if(this.transparent) options.alpha = true;
@@ -55,7 +57,7 @@ class ThreeScenePlane {
   getPlane() {
     return this.plane;
   }
-  
+
   getScene() {
     return this.scene;
   }
@@ -77,3 +79,5 @@ class ThreeScenePlane {
   }
 
 }
+
+export default ThreeScenePlane;

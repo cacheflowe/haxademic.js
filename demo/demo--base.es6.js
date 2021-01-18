@@ -1,3 +1,6 @@
+import DOMUtil from '../src/dom-util.es6.js';
+import VideoRecorder from '../src/video-recorder.es6.js';
+
 class DemoBase {
 
   constructor(parentEl, jsFiles, layoutHtml=null, elId=null) {
@@ -6,8 +9,22 @@ class DemoBase {
       this.buildLayout(layoutHtml);
     } else if(elId != null) {
       this.buildLayoutBasic(layoutHtml, elId);
+      if(!!elId) this.el = document.getElementById(elId);
     }
     this.loadJsDependenciesSerial(jsFiles);
+    this.addBackLink();
+  }
+
+  addBackLink() {
+    let btn = document.createElement('a');
+    btn.innerText = '🔙 All Demos';
+    btn.setAttribute('href', '#');
+    // btn.setAttribute('style', 'position: fixed; top: 0; left: 0; padding: 2rem;');
+    btn.setAttribute('style', 'margin: 0 0 2rem 0; display: inline-block;');
+    let container = document.querySelector('.container');
+    if(!!container) {
+      container.prepend(btn);
+    }
   }
 
   /*
@@ -42,12 +59,14 @@ class DemoBase {
     if(this.jsFiles.length > 0) {
         // load from front of array
       let nextJsFile = this.jsFiles.shift();
-      if(nextJsFile.indexOf('dom-util.es6') != -1) {  // don't reload dom-util (TODO: check any others that might overlap)
-        this.loadNextScript();
-      } else {
-        nextJsFile += `?v=${Math.round(Math.random() * 9999999)}`;
-        DOMUtil.loadJavascript(nextJsFile, () => this.loadNextScript());
+      var moduleStatus = 'module';
+      if(nextJsFile.indexOf('!') == 0) {
+        nextJsFile = nextJsFile.substring(1);
+        moduleStatus = null;
       }
+      console.log('nextJsFile', nextJsFile);
+      nextJsFile += `?v=${Math.round(Math.random() * 9999999)}`;
+      DOMUtil.loadJavascript(nextJsFile, () => this.loadNextScript(), moduleStatus);
     } else {
       this.init();
     }
@@ -71,8 +90,9 @@ class DemoBase {
     // please override
   }
 
-
+  /////////////////////////////
   // RECORD
+  /////////////////////////////
 
   initRecording(el, loopFrames, startFrame, extraFrames=1) {
     this.recordEl = el;
@@ -112,3 +132,5 @@ class DemoBase {
     }
   }
 }
+
+export default DemoBase;

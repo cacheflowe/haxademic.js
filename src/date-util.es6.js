@@ -26,3 +26,5 @@ class DateUtil {
 }
 
 DateUtil.midnightTimeSuffix = 'T00:00:00Z';
+
+export default DateUtil;

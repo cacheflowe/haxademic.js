@@ -1,11 +1,12 @@
+import DemoBase from './demo--base.es6.js';
+import PixiStage from '../src/pixi-stage.es6.js';
+import PixiSpriteScale from '../src/pixi-sprite-scale.es6.js';
+
 class PixiStageDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      "../vendor/pixi/pixi.min.js",
-      // "../src/webcam.es6.js",
-      "../src/pixi-stage.es6.js",
-      "../src/pixi-sprite-scale.es6.js",
+      '!../vendor/pixi/pixi.min.js'
     ], 'PixiStage', 'pixi-stage-container');
   }
 

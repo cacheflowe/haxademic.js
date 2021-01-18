@@ -8,7 +8,7 @@ class SpeechRecognizer {
   // - https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/continuous
 
   // Right now we're sending back all potential matches
-  // to cast a wider net. Another mode could watch the current 
+  // to cast a wider net. Another mode could watch the current
   // `transcript` and return the confirmed sentences as they build
 
   constructor(wordCallback=null, debugEl=null) {
@@ -127,3 +127,5 @@ class SpeechRecognizer {
   }
 
 }
+
+export default SpeechRecognizer;
