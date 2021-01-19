@@ -16,6 +16,10 @@ class URLUtil {
     history.pushState("", document.title, window.location.pathname + window.location.search);
   }
 
+  static reloadOnHashChange() {
+    window.addEventListener('popstate', () => document.location.reload());
+  }
+
 }
 
 export default URLUtil;

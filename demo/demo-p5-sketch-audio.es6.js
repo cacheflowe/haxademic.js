@@ -6,10 +6,9 @@ class P5SketchAudioDemo extends DemoBase {
     super(parentEl, [
       "!../vendor/p5/p5.js",  // load non-module code
       "!../vendor/p5/addons/p5.sound.min.js",
-      '../src/p5-sketch.es6.js',
     ], `
       <div class="container">
-        <h1>P5Sketch</h1>
+        <h1>P5Sketch | Audio</h1>
         <div id="p5-sketch" style="height: 400px;"></div>
       </div>
     `);

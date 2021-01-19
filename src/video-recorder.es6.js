@@ -54,12 +54,12 @@ class VideoRecorder {
   }
 
   start() {
-    console.log('- VideoRecorder started -----------');
+    console.log('- VideoRecorder started (Chrome Only) ---');
     console.log('- fileType:', this.fileType);
     console.log('- fps:', this.frameRate);
     console.log('- audioBitsPerSecond:', this.audioBitsPerSecond);
     console.log('- videoBitsPerSecond:', this.videoBitsPerSecond);
-    console.log('-----------------------------------');
+    console.log('-----------------------------------------');
     this.isRecording = true;
     this.recorder.start();
   }

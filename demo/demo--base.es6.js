@@ -18,7 +18,7 @@ class DemoBase {
   addBackLink() {
     let btn = document.createElement('a');
     btn.innerText = '🔙 All Demos';
-    btn.setAttribute('href', '#');
+    btn.setAttribute('href', '../');
     // btn.setAttribute('style', 'position: fixed; top: 0; left: 0; padding: 2rem;');
     btn.setAttribute('style', 'margin: 0 0 2rem 0; display: inline-block;');
     let container = document.querySelector('.container');

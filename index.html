@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Haxademic.js</title>
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/barebones.css">
@@ -14,18 +15,63 @@
   <body>
     <div class="container">
       <h1 style="margin-top: 4rem">Haxademic.js</h1>
-      <p>A personal JavaScript toolkit. On GitHub: <a href="https://github.com/cacheflowe/haxademic.js">https://github.com/cacheflowe/haxademic.js</a></p>
-      <p>Check the console for unit tests output.</p>
+      <p>A personal JavaScript toolkit of general utility and realtime/graphics helper classes.</p>
+      <p>On GitHub: <a href="https://github.com/cacheflowe/haxademic.js">https://github.com/cacheflowe/haxademic.js</a></p>
+      <h2>Demos</h2>
+      <div>
+        <ul>
+          <li><a href="./demo/#date-util">DateUtil</a></li>
+          <li><a href="./demo/#frame-loop">FrameLoop</a></li>
+          <li><a href="./demo/#midi-device">MidiDevice</a></li>
+          <li><a href="./demo/#microphone-node">MicrophoneNode | SoundFFT</a></li>
+          <li><a href="./demo/#mobile-util">MobileUtil</a></li>
+          <li><a href="./demo/#model-viewer">ModelViewer</a></li>
+          <li><a href="./demo/#object-pool-particles">ObjectPool | Particles</a></li>
+          <li><a href="./demo/#object-pool-touch-ripples">ObjectPool | Touch Ripples</a></li>
+          <li><a href="./demo/#p5-sketch-audio">P5Sketch | Audio</a></li>
+          <li><a href="./demo/#p5-sketch-basic">P5Sketch | Basic</a></li>
+          <li><a href="./demo/#pixi-stage">PixiStage</a></li>
+          <li><a href="./demo/#pixi-stage-textured-mesh">PixiStage | Textured Mesh</a></li>
+          <li><a href="./demo/#pixi-stage-textured-mesh-globe">PixiStage | Textured Mesh Globe</a></li>
+          <li><a href="./demo/#pixi-stage-textured-mesh-webcam">PixiStage | Textured Mesh Webcam</a></li>
+          <li><a href="./demo/#pointer-pos">PointerPos</a></li>
+          <li><a href="./demo/#qr-code">QRCode</a></li>
+          <li><a href="./demo/#screen-capture">ScreenCapture</a></li>
+          <li><a href="./demo/#scroll-viz">ScrollViz</a></li>
+          <li><a href="./demo/#serial-device">SerialDevice</a></li>
+          <li><a href="./demo/#solid-socket">SolidSocket</a></li>
+          <li><a href="./demo/#sound-fft-video">SoundFFT | Video</a></li>
+          <li><a href="./demo/#speech-recognizer">SpeechRecognizer</a></li>
+          <li><a href="./demo/#speech-recognizer-solid-socket">SpeechRecognizer SolidSocket</a></li>
+          <li><a href="./demo/#string-formatter">StringFormatter</a></li>
+          <li><a href="./demo/#three-scene">ThreeScene</a></li>
+          <li><a href="./demo/#three-scene-billboard-particles">ThreeScene | Billboard Particles</a></li>
+          <li><a href="./demo/#three-scene-convex-hull">ThreeScene | ConvexHull</a></li>
+          <li><a href="./demo/#three-scene-gltf">ThreeScene | glTF</a></li>
+          <li><a href="./demo/#three-scene-gltf-animated">ThreeScene | glTF Animated</a></li>
+          <li><a href="./demo/#three-scene-custom-textured-shape">[To Fix] ThreeScene | Textured shape UV animation</a></li>
+          <li><a href="./demo/#three-scene-text-texture">[To Fix] ThreeScene | Canvas text texture</a></li>
+          <li><a href="./demo/#three-scene-video-texture">ThreeScene | Video displace texture</a></li>
+          <li><a href="./demo/#three-scene-ar">ThreeSceneAr</a></li>
+          <li><a href="./demo/#three-scene-fbo">ThreeSceneFbo | Chroma EffectComposer Attempt</a></li>
+          <li><a href="./demo/#three-scene-fbo-chroma">ThreeSceneFbo | Chroma Shader</a></li>
+          <li><a href="./demo/#three-scene-plane">ThreeScenePlane</a></li>
+          <li><a href="./demo/#ui-control-panel">UIControlPanel</a></li>
+          <li><a href="./demo/#video-recorder">VideoRecorder</a></li>
+          <li><a href="./demo/#webcam">Webcam</a></li>
+        </ul>
+      </div>
+      <!-- <p>Check the console for unit tests output.</p> -->
       <div class="row">
         <div id="main" class="twelve columns"></div>
       </div>
     </div>
 
     <!-- Vendor -->
-    <script src="./vendor/pixi/pixi.min.js"></script>
     <script src="./vendor/zora.js"></script>
 
     <!-- Library -->
+    <!-- 
     <script src="./src/array-util.es6.js"></script>
     <script src="./src/console.es6.js"></script>
     <script src="./src/dom-util.es6.js"></script>
@@ -52,9 +98,11 @@
     <script src="./src/sound-fft.es6.js"></script>
     <script src="./src/string-formatter.es6.js"></script>
     <script src="./src/svg-util.es6.js"></script>
-    <script src="./src/user-interaction-timeout.es6.js"></script>
+    <script src="./src/user-interaction-timeout.es6.js"></script> 
+    -->
 
     <!-- Tests -->
+    <!--
     <script>
       // load test runner
       console.important('Running tests:');
@@ -81,6 +129,6 @@
     <script src="./tests/pointer-pos-tests.es6.js"></script>
     <script src="./tests/svg-util-tests.es6.js"></script>
     <script src="./tests/user-interaction-timeout-tests.es6.js"></script>
-
+    -->
   </body>
 </html>

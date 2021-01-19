@@ -5,7 +5,6 @@ class P5Sketch extends p5 {
       // do any setup in here that needs to happen before the sketch starts
       // `p` refers to the instance that becomes `this` after the super() call
       // store elements
-      console.log('1');
       p.el = el;
       p.elSize = p.el.getBoundingClientRect();
 
@@ -18,11 +17,9 @@ class P5Sketch extends p5 {
     // this.start = this.start.bind(this);
     // this.stop = this.stop.bind(this);
     this.windowResized = this.windowResized.bind(this);
-
   }
 
   setup() {
-    console.log('2');
     this.createCanvas(this.elSize.width, this.elSize.height, p5.prototype.WEBGL);
     this.el.appendChild(this.canvas);
     this.background(0);

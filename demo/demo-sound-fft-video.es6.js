@@ -1,8 +1,5 @@
 import DemoBase from './demo--base.es6.js';
-import ArrayUtil from '../src/array-util.es6.js';
-import FloatBuffer from '../src/float-buffer.es6.js';
 import FrameLoop from '../src/frame-loop.es6.js';
-import MathUtil from '../src/math-util.es6.js';
 import SoundFFT from '../src/sound-fft.es6.js';
 
 class SoundFFTVideoDemo extends DemoBase {
@@ -20,6 +17,7 @@ class SoundFFTVideoDemo extends DemoBase {
     this.videoEl.src = '../data/wash-your-hands.mp4';
     this.videoEl.style.setProperty('width', '100%');
     this.videoEl.setAttribute('loop', 'true');
+    this.videoEl.setAttribute('playsinline', 'true');
     this.videoEl.volume = 0.3;
     this.el.appendChild(this.videoEl);
 
@@ -35,6 +33,7 @@ class SoundFFTVideoDemo extends DemoBase {
       this.startButton.parentNode.removeChild(this.startButton);
 
       // init video & fft
+      if(window.webkitAudioContext) window.AudioContext = window.webkitAudioContext;  // mobile safari fix
       var audioCtx = new AudioContext();
       var source = audioCtx.createMediaElementSource(this.videoEl);
       this.soundFFT = new SoundFFT(audioCtx, source);
