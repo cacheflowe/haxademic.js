@@ -69,7 +69,7 @@ class ThreeSceneDemo extends DemoBase {
         vec3 trTime = vec3(translate.x + time, translate.y + time, translate.z + time);
         float scale = 1.0 + 0.5 * sin( trTime.x * 12.1 ) + sin( trTime.y * 13.2 ) + sin( trTime.z * 14.3 );
         vScale = scale;
-        vec3 posOffset = 20. * vec3(0, 0, 2. * sin(trTime.y * 3.2) + 1. * sin(time));
+        vec3 posOffset = vec3(0, 0, 15. * sin(trTime.y * 10.) + 5. * sin(time/5.));
         mvPosition.xyz += (position + posOffset) * scale;
         vUv = uv;
         gl_Position = projectionMatrix * mvPosition;
@@ -185,8 +185,8 @@ class ThreeSceneDemo extends DemoBase {
     // rotate shape
     // this.mesh.rotation.x = time * 0.2;
     // this.mesh.rotation.y = time * 0.4;
-    this.mesh.rotation.y = -1 + 2 * this.pointerPos.xNorm(this.el);
-    this.mesh.rotation.x = -1 + 2 * this.pointerPos.yNorm(this.el);
+    this.mesh.rotation.y = -0.1 + 0.2 * this.pointerPos.xNorm(this.el);
+    this.mesh.rotation.x = -0.1 + 0.2 * this.pointerPos.yNorm(this.el);
   }
 
   animate() {
