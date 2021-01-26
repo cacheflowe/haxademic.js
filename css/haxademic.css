@@ -1,8 +1,16 @@
+/* Demos */
+
 .container {
   max-width: 760px;
   margin: 0 auto;
   padding: 2rem;
 }
+
+.container.dark {
+  color: #fff;
+}
+
+/* Glow/shadow effects */
 
 .shadow {
   filter: drop-shadow( 0 0.1rem 0.6rem rgba(0,0,0,0.5) );
@@ -12,6 +20,7 @@
   box-shadow: 0px 3px 4px rgba(0,0,0,0.3);
 }
 
+/* Vertical centering */
 
 .vertical-center {
   display: flex;
@@ -35,6 +44,7 @@
   -webkit-touch-callout: none;
 }
 
+/* Disable Safari mobile tap highlight */
 
 input,
 textarea,
@@ -45,10 +55,26 @@ a {
   -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
-* {
+/* Some global resets */
+
+.reset * {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-touch-callout: none;
   box-sizing: border-box;
+  -moz-font-feature-settings: "liga" 0; /* Ligature fix for Firefox */
 }
 
+/* Full background canvas */
+
+.fullscreen-bg {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -9999;
+}
 
 /* Fade anim */
 
@@ -86,11 +112,3 @@ a {
   -webkit-box-orient: vertical;
 }
 
-/* Some global resets */
-
-.reset * {
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-  -webkit-touch-callout: none;
-  box-sizing: border-box;
-  -moz-font-feature-settings: "liga" 0; /* Ligature fix for Firefox */
-}
