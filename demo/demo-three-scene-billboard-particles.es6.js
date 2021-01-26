@@ -8,9 +8,9 @@ class ThreeSceneDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [], `
-      <div class="container">
-        <h1>ThreeScene | Billboard Particles</h1>
-        <div id="three-scene" style="width: 100%; height: 500px;"></div>
+      <div class="container dark">
+        <!--<h1>ThreeScene | Billboard Particles</h1>-->
+        <div id="three-scene" class="fullscreen-bg"></div>
       </div>
     `);
   }
@@ -67,9 +67,10 @@ class ThreeSceneDemo extends DemoBase {
       void main() {
         vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
         vec3 trTime = vec3(translate.x + time, translate.y + time, translate.z + time);
-        float scale = 6.0 + 4.0 * sin( trTime.x * 2.1 ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
+        float scale = 1.0 + 0.5 * sin( trTime.x * 12.1 ) + sin( trTime.y * 13.2 ) + sin( trTime.z * 14.3 );
         vScale = scale;
-        mvPosition.xyz += position * scale;
+        vec3 posOffset = 20. * vec3(0, 0, 2. * sin(trTime.y * 3.2) + 1. * sin(time));
+        mvPosition.xyz += (position + posOffset) * scale;
         vUv = uv;
         gl_Position = projectionMatrix * mvPosition;
       }
@@ -112,9 +113,9 @@ class ThreeSceneDemo extends DemoBase {
 
     let stats;
 
-    // const buffGeom = new THREE.PlaneBufferGeometry( 1, 1, 1 );
-    const buffGeom = new THREE.CircleBufferGeometry( 1, 8 );
-
+    // build geometry for particles 
+    // const buffGeom = new THREE.CircleBufferGeometry( 1, 8 );
+    const buffGeom = new THREE.PlaneBufferGeometry( 1, 1, 1 );
     let geometry = new THREE.InstancedBufferGeometry();
     geometry.index = buffGeom.index;
     geometry.attributes = buffGeom.attributes;
@@ -123,18 +124,37 @@ class ThreeSceneDemo extends DemoBase {
 
     // create positions
     const translateArray = new Float32Array( particleCount * 3 );
+    var radius = 0.15;
+    var radiusOscRads = 0;
+    var radiusOscFreq = 0.1;
+    var rads = 0;
+    var radInc = Math.PI/180;
+    var z = -1;
+    var zInc = 0.00003;
     for ( let i = 0, i3 = 0, l = particleCount; i < l; i ++, i3 += 3 ) {
+      // random positions
       translateArray[ i3 + 0 ] = Math.random() * 2 - 1;
       translateArray[ i3 + 1 ] = Math.random() * 2 - 1;
       translateArray[ i3 + 2 ] = Math.random() * 2 - 1;
+      // spiral
+      var curRadius = radius * (1. + 0.25 * Math.sin(radiusOscRads));
+      radiusOscRads += radiusOscFreq;
+      // curRadius = radius;
+      var x = Math.cos(rads) * curRadius;
+      var y = Math.sin(rads) * curRadius;
+      translateArray[ i3 + 0 ] = x;
+      translateArray[ i3 + 1 ] = y;
+      translateArray[ i3 + 2 ] = z;
+      rads += radInc;
+      z += zInc;
     }
 
     geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
 
     this.material = new THREE.RawShaderMaterial( {
       uniforms: {
-        "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
-        // "map": { value: new THREE.TextureLoader().load('../data/particle-circle-no-alpha.png')},
+        // "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
+        "map": { value: new THREE.TextureLoader().load('../data/particle-circle-no-alpha.png')},
         "time": { value: 0.0 }
       },
       vertexShader: this.vshader,
@@ -161,8 +181,12 @@ class ThreeSceneDemo extends DemoBase {
   updateObjects() {
     const time = performance.now() * 0.0001;
     this.material.uniforms[ "time" ].value = time;
-    this.mesh.rotation.x = time * 0.2;
-    this.mesh.rotation.y = time * 0.4;
+
+    // rotate shape
+    // this.mesh.rotation.x = time * 0.2;
+    // this.mesh.rotation.y = time * 0.4;
+    this.mesh.rotation.y = -1 + 2 * this.pointerPos.xNorm(this.el);
+    this.mesh.rotation.x = -1 + 2 * this.pointerPos.yNorm(this.el);
   }
 
   animate() {
