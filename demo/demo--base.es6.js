@@ -1,7 +1,24 @@
 import DOMUtil from '../src/dom-util.es6.js';
+import ErrorUtil from '../src/error-util.es6.js';
 import VideoRecorder from '../src/video-recorder.es6.js';
 
 class DemoBase {
+
+  static loadDemo() {
+      // demos should auto-init to append to <body>
+      window.autoInitDemo = true;
+
+      // get demo name & turn into javascript include
+      let demo = (document.location.hash.indexOf('&') == -1) ? document.location.hash : document.location.hash.split('&')[0]; // URLUtil.getHashQueryVariable('demo')
+      let demoJsFile = `./demo-${demo.substring(1)}.es6.js?v=${Math.round(Math.random() * 9999999)}`;
+      if(demo) {
+        console.log("Loading demo: ", demoJsFile);
+        ErrorUtil.initErrorCatching();
+        DOMUtil.loadJavascript(demoJsFile, null, 'module');
+      } else {
+        document.location.href = '../';
+      }
+  }
 
   constructor(parentEl, jsFiles, layoutHtml=null, elId=null) {
     this.parentEl = parentEl;

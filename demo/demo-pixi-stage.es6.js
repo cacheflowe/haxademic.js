@@ -13,7 +13,8 @@ class PixiStageDemo extends DemoBase {
   init() {
     // create PIXI stage object
     this.pixiContainer = document.getElementById('pixi-stage-container');
-    this.pixiContainer.setAttribute('style', 'height: 500px;');
+    // this.pixiContainer.setAttribute('style', 'height: 500px;');
+    this.pixiContainer.classList.add('fullscreen-bg');
     this.pixiStage = new PixiStage(this.pixiContainer); // , 0xff000000, 'pixi', 2);
 
     // load image before building other objects

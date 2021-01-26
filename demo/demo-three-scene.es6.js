@@ -10,7 +10,7 @@ class ThreeSceneDemo extends DemoBase {
     super(parentEl, [], `
       <div class="container">
         <h1>ThreeScene</h1>
-        <div id="three-scene" style="width: 100%; height: 500px;"></div>
+        <div id="three-scene" class="fullscreen-bg"></div>
       </div>
     `);
   }

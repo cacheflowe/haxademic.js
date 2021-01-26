@@ -37,7 +37,7 @@ class MicrophoneNodeDemo extends DemoBase {
       };
       this.soundFFT = new SoundFFT(this.mic.getContext(), this.mic.getNode(), fftOptions);
     }, (error) => {
-      this.fftEl.innerHTML = '[MicrophoneNode ERROR] :: ' + error;
+      this.fftEl.innerHTML = '[MicrophoneNode ERROR] :: ' + error + '<br>Are you https:// ?';
     });
 
     // kick off sound updates & debug animation

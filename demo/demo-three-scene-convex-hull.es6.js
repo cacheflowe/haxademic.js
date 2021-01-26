@@ -14,7 +14,7 @@ class ThreeSceneConvexHullDemo extends DemoBase {
     super(parentEl, [], `
       <div class="container">
         <h1>ThreeScene | ConvexHull</h1>
-        <div id="three-scene-convex-hull" style="width: 100%; height: 500px;"></div>
+        <div id="three-scene-convex-hull" class="fullscreen-bg"></div>
       </div>
     `);
   }
