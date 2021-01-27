@@ -21,8 +21,8 @@ class WheelUtilDemo extends DemoBase {
 
     // listen on document, no override (via default args)
     // positive delta is up, negative is down
-    WheelUtil.addWheelListener((e) => {
-      this.bgCol += e.deltaY / 5;
+    WheelUtil.addWheelListener((deltaY, e) => {
+      this.bgCol += deltaY * 5;
       this.bgCol = Math.min(Math.max(0, this.bgCol), 255);  // clamp 0-255
       document.body.style.setProperty('background-color', `rgba(${this.bgCol}, ${this.bgCol}, ${this.bgCol}, 1)`);
       this.updateDebug();
@@ -40,8 +40,8 @@ class WheelUtilDemo extends DemoBase {
     this.scrollBox.style.setProperty('transition', `all 0.2s linear`);
     this.el.appendChild(this.scrollBox);
 
-    WheelUtil.addWheelListener((e) => {
-      this.scale += e.deltaY / 200;
+    WheelUtil.addWheelListener((deltaY, e) => {
+      this.scale += deltaY / 10;
       this.scale = Math.min(Math.max(0.5, this.scale), 1.5);  // clamp 0-1
       this.scrollBox.style.setProperty('transform', `scale(${this.scale})`);
       this.updateDebug();
