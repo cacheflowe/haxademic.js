@@ -20,13 +20,14 @@ class DemoBase {
       }
   }
 
-  constructor(parentEl, jsFiles, layoutHtml=null, elId=null) {
+  constructor(parentEl, jsFiles, layoutHtml=null, elId=null, desc=null) {
     this.parentEl = parentEl;
     if(layoutHtml != null && elId == null) {
       this.buildLayout(layoutHtml);
     } else if(elId != null) {
-      this.buildLayoutBasic(layoutHtml, elId);
-      if(!!elId) this.el = document.getElementById(elId);
+      this.buildLayoutBasic(layoutHtml, elId, desc);
+      this.el = document.getElementById(elId);
+      this.debugEl = document.getElementById('debug');
     }
     this.loadJsDependenciesSerial(jsFiles);
     this.addBackLink();
@@ -94,11 +95,14 @@ class DemoBase {
     this.parentEl.appendChild(layoutNode);
   }
 
-  buildLayoutBasic(title, elId) {
+  buildLayoutBasic(title, elId, desc) {
+    let descTag = (!!desc) ? `<p>${desc}</p>` : '';
     this.buildLayout(`
       <div class="container">
         <h1>${title}</h1>
+        ${descTag}
         <div id="${elId}"></div>
+        <div id="debug"></div>
       </div>
     `);
   }
