@@ -1,5 +1,6 @@
 import DemoBase from './demo--base.es6.js';
 import * as THREE from '../vendor/three/three.module.js';
+import EasingFloat from '../src/easing-float.es6.js';
 import PointerPos from '../src/pointer-pos.es6.js';
 import MobileUtil from '../src/mobile-util.es6.js';
 import ThreeScene from '../src/three-scene-.es6.js';
@@ -49,11 +50,22 @@ class ThreeSceneDemo extends DemoBase {
   // - Original code: https://threejs.org/examples/webgl_buffergeometry_instancing_billboards.html
   // - Additional attributes: https://stackoverflow.com/questions/35328937/how-to-tween-10-000-particles-in-three-js/35373349#35373349
   // - Alpha fixes? : https://discourse.threejs.org/t/threejs-and-the-transparent-problem/11553
+  // - Why did the particles slow down? Particle size should stay below 4
+  // - Rebuild back cup curve - spread out particles in back
+  // - Fade between particle textures
+  // --- Attempt adding DoF effect with texture fading based on position
+  // --- Distance from z == 0?
+  // - Add gradient canvas as texture sampler & apply to particles
+  // - Add a little zoom via scroll listener
+  // - Pass in modelViewInv so displacement is always relative to the camera position
 
   buildParticles() {
     this.vshader = `
       precision highp float;
+      uniform mat4 modelMatrix;
       uniform mat4 modelViewMatrix;
+      // uniform mat4 modelViewMatrixInverse;
+      uniform mat3 normalMatrix;
       uniform mat4 projectionMatrix;
       uniform float time;
 
@@ -67,9 +79,14 @@ class ThreeSceneDemo extends DemoBase {
       void main() {
         vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
         vec3 trTime = vec3(translate.x + time, translate.y + time, translate.z + time);
-        float scale = 1.0 + 0.5 * sin( trTime.x * 12.1 ) + sin( trTime.y * 13.2 ) + sin( trTime.z * 14.3 );
+        float scale = 4.0 + 1. * sin( trTime.x * 15. ) + sin( trTime.y * 13.2 ) + sin( trTime.z * 14.3 );
         vScale = scale;
-        vec3 posOffset = vec3(0, 0, 15. * sin(trTime.y * 10.) + 5. * sin(time/5.));
+        vec3 posOffset = vec3(
+          0, 
+          0,
+          10. * sin(trTime.y * 10.) + 10. * sin(time/5.)
+        );
+        // posOffset.z = 0.;
         mvPosition.xyz += (position + posOffset) * scale;
         vUv = uv;
         gl_Position = projectionMatrix * mvPosition;
@@ -100,10 +117,9 @@ class ThreeSceneDemo extends DemoBase {
 
       void main() {
         vec4 diffuseColor = texture2D( map, vUv );
-        gl_FragColor = vec4( diffuseColor.a * HSLtoRGB(vec3(vScale/5.0, 1.0, 0.5)), diffuseColor.w );
+        gl_FragColor = vec4( diffuseColor.a * HSLtoRGB(vec3(vScale/7.0, 1.0, 0.85)), diffuseColor.w );
         // gl_FragColor = vec4( diffuseColor.xyz, 1.0 );
         // gl_FragColor = vec4(diffuseColor.a);
-        // WHY DOESN'T ALPHA WORK?!
         // gl_FragColor = vec4( 0.5, 0.5, 0.9, 1.0 );
 
         if ( diffuseColor.a < 0.1 ) discard;
@@ -124,38 +140,60 @@ class ThreeSceneDemo extends DemoBase {
 
     // create positions
     const translateArray = new Float32Array( particleCount * 3 );
-    var radius = 0.15;
+    var radius = 0.35;
     var radiusOscRads = 0;
     var radiusOscFreq = 0.1;
     var rads = 0;
     var radInc = Math.PI/180;
-    var z = -1;
-    var zInc = 0.00003;
+    this.meshRadius = 200;
+    this.meshDepth = 800;
+    var cupDepth = particleCount / 3;
+    var backSideCup = true;
+    var curZ = -1;
+    var zInc = 1/particleCount * 1.85; // * 2 if we want it to have even depth behind the camera
     for ( let i = 0, i3 = 0, l = particleCount; i < l; i ++, i3 += 3 ) {
       // random positions
+      /*
       translateArray[ i3 + 0 ] = Math.random() * 2 - 1;
       translateArray[ i3 + 1 ] = Math.random() * 2 - 1;
       translateArray[ i3 + 2 ] = Math.random() * 2 - 1;
+      */
       // spiral
       var curRadius = radius * (1. + 0.25 * Math.sin(radiusOscRads));
+      // var curRadius = radius + (radius * (0.5 * Math.sin(radiusOscRads)));
       radiusOscRads += radiusOscFreq;
+
+      // cup on the backside
+      if(backSideCup) {
+        let growProgress = (i/cupDepth);
+        let radiusGrow = 0.05 + 0.85 * Math.sin(growProgress * Math.PI/2);
+        // let radiusGrow = Math.sin(growProgress * Math.PI/2);
+        if(growProgress > 1) radiusGrow = 1;
+        curRadius *= radiusGrow;
+      }
       // curRadius = radius;
       var x = Math.cos(rads) * curRadius;
       var y = Math.sin(rads) * curRadius;
+      // var z = curZ;
+      var z = curZ + (0.01 * Math.sin(i/10));
       translateArray[ i3 + 0 ] = x;
       translateArray[ i3 + 1 ] = y;
       translateArray[ i3 + 2 ] = z;
+
+      // step
       rads += radInc;
-      z += zInc;
+      curZ += zInc;
     }
 
     geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
+    this.mat4 = new THREE.Matrix4();
 
     this.material = new THREE.RawShaderMaterial( {
       uniforms: {
-        // "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
-        "map": { value: new THREE.TextureLoader().load('../data/particle-circle-no-alpha.png')},
-        "time": { value: 0.0 }
+        "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
+        // "map": { value: new THREE.TextureLoader().load('../data/particle-circle-no-alpha.png')},
+        "time": { value: 0.0 },
+        // "modelViewMatrixInverse": { value: this.mat4 }   // https://gist.github.com/spite/9110247
       },
       vertexShader: this.vshader,
       fragmentShader: this.fshader,
@@ -171,22 +209,42 @@ class ThreeSceneDemo extends DemoBase {
     });
 
     this.mesh = new THREE.Mesh( geometry, this.material );
-    this.mesh.scale.set( 500, 500, 500 );
+    this.mesh.scale.set(this.meshRadius, this.meshRadius, this.meshDepth);
     this.scene.add( this.mesh );
 
     // stats = new Stats();
-    // container.appendChild( stats.dom );
+    // this.el.appendChild( stats.dom );
+
+    this.cameraXEase = new EasingFloat(0, 0.08);
+    this.cameraYEase = new EasingFloat(0, 0.08);
   }
 
   updateObjects() {
+    /*
+    // update inverse matrix
+    var m = new THREE.Matrix4();
+    m.copy( this.mesh.matrixWorld );
+    m.multiply( this.threeScene.getCamera().matrixWorldInverse );
+    // var mInv = new THREE.Matrix4().getInverse( m );
+    var mInv = m.invert();
+    // matrixInv.copy( matrix ).invert()
+    // this.material.uniforms['modelViewMatrixInverse'] = mInv;
+    // console.log(mInv);
+    // this.material.uniforms['modelViewMatrixInverse'] = mInv;
+    this.mat4.copy(mInv);
+    */ 
+
+    // update shader
     const time = performance.now() * 0.0001;
     this.material.uniforms[ "time" ].value = time;
 
     // rotate shape
-    // this.mesh.rotation.x = time * 0.2;
-    // this.mesh.rotation.y = time * 0.4;
-    this.mesh.rotation.y = -0.1 + 0.2 * this.pointerPos.xNorm(this.el);
-    this.mesh.rotation.x = -0.1 + 0.2 * this.pointerPos.yNorm(this.el);
+    const cameraAmp = 0.08;
+    this.cameraYEase.setTarget(-cameraAmp + cameraAmp*2 * this.pointerPos.xNorm(this.el)).update();
+    this.cameraXEase.setTarget(-cameraAmp + cameraAmp*2 * this.pointerPos.yNorm(this.el)).update();
+    this.mesh.rotation.x = this.cameraXEase.value();
+    this.mesh.rotation.y = this.cameraYEase.value();
+    this.mesh.position.set(0, 0, 0 + 600 * Math.sin(time*2));
   }
 
   animate() {
