@@ -42,7 +42,7 @@ class WheelUtilDemo extends DemoBase {
 
     WheelUtil.addWheelListener((deltaY, e) => {
       this.scale += deltaY / 10;
-      this.scale = Math.min(Math.max(0.5, this.scale), 1.5);  // clamp 0-1
+      this.scale = Math.min(Math.max(0.5, this.scale), 1.5);  // clamp 0.5-1.5
       this.scrollBox.style.setProperty('transform', `scale(${this.scale})`);
       this.updateDebug();
     }, this.scrollBox, true);

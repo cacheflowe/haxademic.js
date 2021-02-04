@@ -4,14 +4,16 @@ import VideoRecorder from '../src/video-recorder.es6.js';
 
 class DemoBase {
 
-  static loadDemo() {
+  static loadDemo(demoJsFile=null) {
       // demos should auto-init to append to <body>
       window.autoInitDemo = true;
 
       // get demo name & turn into javascript include
       let demo = (document.location.hash.indexOf('&') == -1) ? document.location.hash : document.location.hash.split('&')[0]; // URLUtil.getHashQueryVariable('demo')
-      let demoJsFile = `./demo-${demo.substring(1)}.es6.js?v=${Math.round(Math.random() * 9999999)}`;
-      if(demo) {
+      if(!demoJsFile) {
+        demoJsFile = `./demo-${demo.substring(1)}.es6.js?v=${Math.round(Math.random() * 9999999)}`;
+      }
+      if(demoJsFile && demo.length > 1) {
         console.log("Loading demo: ", demoJsFile);
         ErrorUtil.initErrorCatching();
         DOMUtil.loadJavascript(demoJsFile, null, 'module');
@@ -20,13 +22,15 @@ class DemoBase {
       }
   }
 
-  constructor(parentEl, jsFiles, layoutHtml=null, elId=null, desc=null) {
+  constructor(parentEl, jsFiles, layoutHtmlOrTitle=null, elId=null, desc=null, fullscreen=false) {
     this.parentEl = parentEl;
-    if(layoutHtml != null && elId == null) {
-      this.buildLayout(layoutHtml);
+    if(layoutHtmlOrTitle != null && elId == null) {
+      this.buildLayout(layoutHtmlOrTitle);
     } else if(elId != null) {
-      this.buildLayoutBasic(layoutHtml, elId, desc);
+      let title = layoutHtmlOrTitle;
+      this.buildLayoutBasic(elId, title, desc);
       this.el = document.getElementById(elId);
+      if(fullscreen) this.el.classList.add('fullscreen-bg');
       this.debugEl = document.getElementById('debug');
     }
     this.loadJsDependenciesSerial(jsFiles);
@@ -95,7 +99,8 @@ class DemoBase {
     this.parentEl.appendChild(layoutNode);
   }
 
-  buildLayoutBasic(title, elId, desc) {
+  buildLayoutBasic(elId, title, desc) {
+    document.title += ` | ${title}`;
     let descTag = (!!desc) ? `<p>${desc}</p>` : '';
     this.buildLayout(`
       <div class="container">

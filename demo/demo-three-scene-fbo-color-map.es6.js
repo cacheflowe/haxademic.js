@@ -1,20 +1,24 @@
 import DemoBase from './demo--base.es6.js';
 import * as THREE from '../vendor/three/three.module.js';
+import Stats from '../vendor/stats.module.js';
 import EasingFloat from '../src/easing-float.es6.js';
 import PointerPos from '../src/pointer-pos.es6.js';
 import MobileUtil from '../src/mobile-util.es6.js';
 import ThreeScene from '../src/three-scene-.es6.js';
+import ThreeSceneFBO from '../src/three-scene-fbo.es6.js';
 
 class ThreeSceneDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeScene | Billboard Particles', 'three-scene-billboard-particles', null, true);
+    super(parentEl, [], 'ThreeSceneFbo | Shader Color Map', 'three-scene-fbo-color-map', "Use a 2d shader render target as the color map uniform for a particle system.", true);
   }
 
   init() {
     // setup
     this.setupInput();
     this.setupScene();
+    this.buildStats();
+    this.buildFbo();
     this.buildParticles();
     this.startAnimation();
   }
@@ -31,8 +35,13 @@ class ThreeSceneDemo extends DemoBase {
     this.camera = this.threeScene.getCamera();
   }
 
+  buildStats() {
+    this.stats = new Stats();
+    this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( this.stats.dom );
+  }
+
   startAnimation() {
-    this.frameCount = 0;
     this.animate();
     window.addEventListener('resize', () => this.resize());
     setTimeout(() => {
@@ -40,18 +49,78 @@ class ThreeSceneDemo extends DemoBase {
     }, 400);
   }
 
-  // TODO:
-  // - Original code: https://threejs.org/examples/webgl_buffergeometry_instancing_billboards.html
-  // - Additional attributes: https://stackoverflow.com/questions/35328937/how-to-tween-10-000-particles-in-three-js/35373349#35373349
-  // - Alpha fixes? : https://discourse.threejs.org/t/threejs-and-the-transparent-problem/11553
-  // - Why did the particles slow down? Particle size should stay below 4
+  buildFbo() {
+    this.threeFBO = new ThreeSceneFBO(512, 512, 0x00ffff);
+
+    // shaders
+    const vShader = `
+      precision highp float;
+      uniform mat4 modelMatrix;
+      uniform mat4 modelViewMatrix;
+      uniform mat3 normalMatrix;
+      uniform mat4 projectionMatrix;
+      uniform float time;
+      attribute vec3 position;
+      attribute vec2 uv;
+
+      varying vec2 vUv;
+      varying vec3 vPos;
+      void main() {
+        vUv = uv;
+        vPos = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+      }
+    `;
+
+    const fShader = `
+      precision highp float;
+
+      uniform float time;
+      varying vec2 vUv;
+      varying vec3 vPos;
+
+      void main() {
+        // x-axis gradient
+        gl_FragColor = vec4(
+          0.5 + 0.5 * sin(time*20. + vUv.x * 5.),
+          0.5 + 0.5 * sin(time*30. + vUv.x * 4.),
+          0.5 + 0.5 * sin(time*10. + vUv.x * 3.),
+          1.);
+      }
+    `;
+
+    // create shader material
+    this.gradientMaterial = new THREE.RawShaderMaterial( {
+      uniforms: {
+        "time": { value: 0.0 },
+      },
+      vertexShader: vShader,
+      fragmentShader: fShader,
+    });
+    this.threeFBO.setMaterial(this.gradientMaterial);
+
+    // add debug plane
+    // build shape
+    let planeResolution = 1;
+    this.planeGeometry = new THREE.PlaneGeometry(80, 80, planeResolution, planeResolution);
+    this.planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      side: THREE.DoubleSide,
+      wireframe: false,
+      map: this.threeFBO.getRenderTargetTexture(),
+      transparent: true,
+    });
+    this.plane = new THREE.Mesh( this.planeGeometry, this.planeMaterial );
+    this.plane.position.set(0, 0, 0);
+    this.scene.add( this.plane );
+
+  }
 
   buildParticles() {
     this.vshader = `
       precision highp float;
       uniform mat4 modelMatrix;
       uniform mat4 modelViewMatrix;
-      // uniform mat4 modelViewMatrixInverse;
       uniform mat3 normalMatrix;
       uniform mat4 projectionMatrix;
       uniform float time;
@@ -59,9 +128,11 @@ class ThreeSceneDemo extends DemoBase {
       attribute vec3 position;
       attribute vec2 uv;
       attribute vec3 translate;
+      attribute float colorU;
 
       varying vec2 vUv;
       varying float vScale;
+      varying float vColorU;
 
       void main() {
         vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
@@ -73,9 +144,10 @@ class ThreeSceneDemo extends DemoBase {
           0,
           10. * sin(trTime.y * 10.) + 10. * sin(time/5.)
         );
-        // posOffset.z = 0.;
+        posOffset.z = 0.;
         mvPosition.xyz += (position + posOffset) * scale;
         vUv = uv;
+        vColorU = colorU;
         gl_Position = projectionMatrix * mvPosition;
       }
     `;
@@ -83,38 +155,20 @@ class ThreeSceneDemo extends DemoBase {
       precision highp float;
 
       uniform sampler2D map;
+      uniform sampler2D colorMap;
 
       varying vec2 vUv;
       varying float vScale;
-
-      // HSL to RGB Convertion helpers
-      vec3 HUEtoRGB(float H){
-        H = mod(H,1.0);
-        float R = abs(H * 6.0 - 3.0) - 1.0;
-        float G = 2.0 - abs(H * 6.0 - 2.0);
-        float B = 2.0 - abs(H * 6.0 - 4.0);
-        return clamp(vec3(R,G,B),0.0,1.0);
-      }
-
-      vec3 HSLtoRGB(vec3 HSL){
-        vec3 RGB = HUEtoRGB(HSL.x);
-        float C = (1.0 - abs(2.0 * HSL.z - 1.0)) * HSL.y;
-        return (RGB - 0.5) * C + HSL.z;
-      }
+      varying float vColorU;
+      
 
       void main() {
         vec4 diffuseColor = texture2D( map, vUv );
-        gl_FragColor = vec4( diffuseColor.a * HSLtoRGB(vec3(vScale/7.0, 1.0, 0.85)), diffuseColor.w );
-        // gl_FragColor = vec4( diffuseColor.xyz, 1.0 );
-        // gl_FragColor = vec4(diffuseColor.a);
-        // gl_FragColor = vec4( 0.5, 0.5, 0.9, 1.0 );
-
-        if ( diffuseColor.a < 0.1 ) discard;
+        // vec4 diffuseColor2 = texture2D( colorMap, vUv );
+        vec4 diffuseColor2 = texture2D( colorMap, vec2(vColorU, 0.5) );
+        gl_FragColor = vec4(diffuseColor2.rgb, diffuseColor.a);
       }
     `;
-
-
-    let stats;
 
     // build geometry for particles 
     // const buffGeom = new THREE.CircleBufferGeometry( 1, 8 );
@@ -127,103 +181,47 @@ class ThreeSceneDemo extends DemoBase {
 
     // create positions
     const translateArray = new Float32Array( particleCount * 3 );
-    var radius = 0.35;
-    var radiusOscRads = 0;
-    var radiusOscFreq = 0.1;
-    var rads = 0;
-    var radInc = Math.PI/180;
+    const colorUArray = new Float32Array( particleCount );
     this.meshRadius = 200;
     this.meshDepth = 800;
-    var cupDepth = particleCount / 3;
-    var backSideCup = true;
-    var curZ = -1;
-    var zInc = 1/particleCount * 1.85; // * 2 if we want it to have even depth behind the camera
     for ( let i = 0, i3 = 0, l = particleCount; i < l; i ++, i3 += 3 ) {
       // random positions
-      /*
       translateArray[ i3 + 0 ] = Math.random() * 2 - 1;
       translateArray[ i3 + 1 ] = Math.random() * 2 - 1;
       translateArray[ i3 + 2 ] = Math.random() * 2 - 1;
-      */
-      // spiral
-      var curRadius = radius * (1. + 0.25 * Math.sin(radiusOscRads));
-      // var curRadius = radius + (radius * (0.5 * Math.sin(radiusOscRads)));
-      radiusOscRads += radiusOscFreq;
-
-      // cup on the backside
-      if(backSideCup) {
-        let growProgress = (i/cupDepth);
-        let radiusGrow = 0.05 + 0.85 * Math.sin(growProgress * Math.PI/2);
-        // let radiusGrow = Math.sin(growProgress * Math.PI/2);
-        if(growProgress > 1) radiusGrow = 1;
-        curRadius *= radiusGrow;
-      }
-      // curRadius = radius;
-      var x = Math.cos(rads) * curRadius;
-      var y = Math.sin(rads) * curRadius;
-      // var z = curZ;
-      var z = curZ + (0.01 * Math.sin(i/10));
-      translateArray[ i3 + 0 ] = x;
-      translateArray[ i3 + 1 ] = y;
-      translateArray[ i3 + 2 ] = z;
-
-      // step
-      rads += radInc;
-      curZ += zInc;
+      colorUArray[i] = i/particleCount;
     }
 
     geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
+    geometry.setAttribute( 'colorU', new THREE.InstancedBufferAttribute( colorUArray, 1 ) );
     this.mat4 = new THREE.Matrix4();
 
     this.material = new THREE.RawShaderMaterial( {
       uniforms: {
         "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
-        // "map": { value: new THREE.TextureLoader().load('../data/particle-circle-no-alpha.png')},
+        "colorMap": { value: this.threeFBO.getRenderTargetTexture()},
         "time": { value: 0.0 },
-        // "modelViewMatrixInverse": { value: this.mat4 }   // https://gist.github.com/spite/9110247
       },
       vertexShader: this.vshader,
       fragmentShader: this.fshader,
-      depthTest: true,
-      depthWrite: false,
-      // blending: THREE.SubtractiveBlending,
-      blending: THREE.AdditiveBlending,
-
-      // trying - https://discourse.threejs.org/t/threejs-and-the-transparent-problem/11553/7
       depthWrite: false,
       depthTest: true,
-
+      blending: THREE.AdditiveBlending, // handle z-stacking, instead of more difficult measures: https://discourse.threejs.org/t/threejs-and-the-transparent-problem/11553/7
     });
 
     this.mesh = new THREE.Mesh( geometry, this.material );
     this.mesh.scale.set(this.meshRadius, this.meshRadius, this.meshDepth);
     this.scene.add( this.mesh );
 
-    // stats = new Stats();
-    // this.el.appendChild( stats.dom );
-
     this.cameraXEase = new EasingFloat(0, 0.08, 0.00001);
     this.cameraYEase = new EasingFloat(0, 0.08, 0.00001);
   }
 
   updateObjects() {
-    /*
-    // update inverse matrix
-    var m = new THREE.Matrix4();
-    m.copy( this.mesh.matrixWorld );
-    m.multiply( this.threeScene.getCamera().matrixWorldInverse );
-    // var mInv = new THREE.Matrix4().getInverse( m );
-    var mInv = m.invert();
-    // matrixInv.copy( matrix ).invert()
-    // this.material.uniforms['modelViewMatrixInverse'] = mInv;
-    // console.log(mInv);
-    // this.material.uniforms['modelViewMatrixInverse'] = mInv;
-    this.mat4.copy(mInv);
-    */ 
-
     // update shader
     const time = performance.now() * 0.0001;
     this.material.uniforms[ "time" ].value = time;
+    this.gradientMaterial.uniforms[ "time" ].value = time;
 
     // rotate shape
     const cameraAmp = 0.08;
@@ -231,17 +229,19 @@ class ThreeSceneDemo extends DemoBase {
     this.cameraXEase.setTarget(-cameraAmp + cameraAmp*2 * this.pointerPos.yNorm(this.el)).update();
     this.mesh.rotation.x = this.cameraXEase.value();
     this.mesh.rotation.y = this.cameraYEase.value();
-    this.mesh.position.set(0, 0, 0 + 600 * Math.sin(time*2));
+    // this.mesh.position.set(0, 0, 0 + 600 * Math.sin(time*2));
   }
 
   animate() {
+    if(this.stats) this.stats.begin();
     this.updateObjects();
+    // this.threeFBO.setDebugCtx(this.ctx);
+    this.threeFBO.render(this.threeScene.getRenderer());
     this.threeScene.render();
-    // stats.update();
-    this.frameCount++;
     requestAnimationFrame(() => this.animate());
+    if(this.stats) this.stats.end();
   }
-
+  
   resize() {
     this.threeScene.resize();
   }

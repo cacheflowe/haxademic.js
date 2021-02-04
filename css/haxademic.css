@@ -10,6 +10,13 @@
   color: #fff;
 }
 
+h1,
+p {
+  background-color: rgba(255,255,255,0.7);
+  padding: 1rem;
+  margin: -1rem 0 2rem -1rem;
+}
+
 /* Glow/shadow effects */
 
 .shadow {

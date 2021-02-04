@@ -7,17 +7,12 @@ import PointerPos from '../src/pointer-pos.es6.js';
 class ObjectPoolTouchRipplesDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], `
-    <div class="container">
-      <h1>ObjectPool | Touch Ripples</h1>
-      <div id="particles"></div>
-    </div>
-    `);
+    super(parentEl, [], 'ObjectPool | Touch Ripples', 'object-pool-touch-ripples', 'Click in the box to launch a particle');
   }
 
   addCSS() {
     DOMUtil.injectCSS(`
-      #particles {
+      #object-pool-touch-ripples {
         background: #eee;
         border: 1px solid #999;
         height: 400px;
@@ -34,7 +29,7 @@ class ObjectPoolTouchRipplesDemo extends DemoBase {
         margin-left: -30px;
         margin-top: -30px;
         border: 6px solid #ff0000;
-        border-radius: 30px;
+        border-radius: 50%;
         display: inline-block;
         animation-iteration-count: 1;
         opacity: 0;
@@ -55,19 +50,17 @@ class ObjectPoolTouchRipplesDemo extends DemoBase {
 
   init() {
     this.addCSS();
-    this.el = document.querySelector('.container');
-    this.particlesEl = document.querySelector('#particles');
-    MobileUtil.disableTextSelect(this.particlesEl, true);
+    MobileUtil.disableTextSelect(this.el, true);
     this.pointerPos = new PointerPos();
     this.particlePool = new ObjectPool(RippleParticle);
-    this.particlesEl.addEventListener('click', this.onClick.bind(this));
+    this.el.addEventListener('click', this.onClick.bind(this));
   }
 
   onClick(e) {
-    let x = this.pointerPos.x(this.particlesEl);
-    let y = this.pointerPos.y(this.particlesEl);
+    let x = this.pointerPos.x(this.el);
+    let y = this.pointerPos.y(this.el);
     let newParticle = this.particlePool.getObject();
-    newParticle.launch(this.particlesEl, x, y);
+    newParticle.launch(this.el, x, y);
   }
 
 }

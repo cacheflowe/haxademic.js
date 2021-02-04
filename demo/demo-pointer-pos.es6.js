@@ -5,10 +5,7 @@ import PointerPos from '../src/pointer-pos.es6.js';
 class FrameLoopDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/frame-loop.es6.js",
-      "../src/pointer-pos.es6.js",
-    ], `
+    super(parentEl, [], `
     <div class="container">
       <style>
         * {

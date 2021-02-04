@@ -11,17 +11,11 @@ import ThreeScene from '../src/three-scene-.es6.js';
 class ThreeSceneConvexHullDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], `
-      <div class="container">
-        <h1>ThreeScene | ConvexHull</h1>
-        <div id="three-scene-convex-hull" class="fullscreen-bg"></div>
-      </div>
-    `);
+    super(parentEl, [], 'ThreeScene | ConvexHull', 'three-scene-convex-hull', null, true);
   }
 
   init() {
     // setup
-    this.el = document.getElementById('three-scene-convex-hull');
     this.setupInput();
     this.setupScene();
     this.buildConvexHullShape();
