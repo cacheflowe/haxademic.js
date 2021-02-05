@@ -97,7 +97,7 @@ class ThreeSceneFBODemo extends DemoBase {
       fragmentShader: ThreeChromaShader.fragmentShader,
       transparent: true,
       uniforms: {
-        tDiffuse: { value: this.threeFBO.getRenderTargetTexture() },
+        tDiffuse: { value: this.threeFBO.getTexture() },
         thresholdSensitivity: { value: 0.2 },
         smoothing: { value: 0.8 },
         colorToReplace: { value: new THREE.Color( 0x000000 ) }

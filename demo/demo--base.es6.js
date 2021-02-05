@@ -107,7 +107,7 @@ class DemoBase {
         <h1>${title}</h1>
         ${descTag}
         <div id="${elId}"></div>
-        <div id="debug"></div>
+        <p id="debug"></p>
       </div>
     `);
   }

@@ -8,7 +8,6 @@ A personal front-end JavaScript toolkit
 
 # TODO
 
-* Build extra renderer into ThreeSceneFbo in case we want to show Texture objects in the DOM
 * Add a link per demo that links to the demo source .js file
 * Switch to dat.gui. whoops
   * MIDI learn - work into dat.gui refactor from old gui library

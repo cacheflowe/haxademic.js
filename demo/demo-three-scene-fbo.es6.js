@@ -104,7 +104,7 @@ class ThreeSceneFBODemo extends DemoBase {
       color: 0xffffff,
       side: THREE.DoubleSide,
       wireframe: false,
-      map: this.threeFBO.getRenderTargetTexture(),
+      map: this.threeFBO.getTexture(),
       blending: THREE.MultiplyBlending,  // use this if not using chroma shader postprocessing
       transparent: true,
     });
