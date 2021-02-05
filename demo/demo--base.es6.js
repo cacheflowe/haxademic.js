@@ -9,10 +9,8 @@ class DemoBase {
       window.autoInitDemo = true;
 
       // get demo name & turn into javascript include
-      let demo = (document.location.hash.indexOf('&') == -1) ? document.location.hash : document.location.hash.split('&')[0]; // URLUtil.getHashQueryVariable('demo')
-      if(!demoJsFile) {
-        demoJsFile = `./demo-${demo.substring(1)}.es6.js?v=${Math.round(Math.random() * 9999999)}`;
-      }
+      let demo = DemoBase.getDemoId();
+      if(!demoJsFile) demoJsFile = DemoBase.demoJsFile();
       if(demoJsFile && demo.length > 1) {
         console.log("Loading demo: ", demoJsFile);
         ErrorUtil.initErrorCatching();
@@ -20,6 +18,17 @@ class DemoBase {
       } else {
         document.location.href = '../';
       }
+  }
+
+  static getDemoId() {
+    let id = (document.location.hash.indexOf('&') == -1) ? 
+      document.location.hash : 
+      document.location.hash.split('&')[0]; // URLUtil.getHashQueryVariable('demo');
+    return id.substring(1);
+  }
+
+  static demoJsFile() {
+    return `./demo-${DemoBase.getDemoId()}.es6.js?v=${Math.round(Math.random() * 9999999)}`;
   }
 
   constructor(parentEl, jsFiles, layoutHtmlOrTitle=null, elId=null, desc=null, fullscreen=false) {
@@ -38,14 +47,26 @@ class DemoBase {
   }
 
   addBackLink() {
+    // add back button
     let btn = document.createElement('a');
     btn.innerText = '🔙 All Demos';
     btn.setAttribute('href', '../');
     // btn.setAttribute('style', 'position: fixed; top: 0; left: 0; padding: 2rem;');
-    btn.setAttribute('style', 'margin: 0 0 2rem 0; display: inline-block;');
+    btn.setAttribute('style', 'margin: 0 0 2rem 0; display: inline-block; background: var(--white-trans); padding: 1rem;');
+
+    // add src link
+    let srcBtn = document.createElement('a');
+    srcBtn.innerText = 'Demo source';
+    srcBtn.setAttribute('href', DemoBase.demoJsFile());
+    srcBtn.setAttribute('target', '_blank');
+    // srcBtn.setAttribute('style', 'position: fixed; top: 0; left: 0; padding: 2rem;');
+    srcBtn.setAttribute('style', 'float: right; margin: 0 0 2rem 0; display: inline-block; background: var(--white-trans); padding: 1rem;');
+
+    // add to DOM
     let container = document.querySelector('.container');
     if(!!container) {
       container.prepend(btn);
+      container.prepend(srcBtn);
     }
   }
 
