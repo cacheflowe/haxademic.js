@@ -36,7 +36,7 @@ class ThreeSceneFBO {
     };
     this.renderBuffer = new THREE.WebGLRenderTarget(this.width, this.height, options);
     this.renderBuffer.background = this.bgColor;
-    console.log(this.renderBuffer);
+    // console.log(this.renderBuffer);
   }
 
   setMaterial(material) {
@@ -63,16 +63,27 @@ class ThreeSceneFBO {
     return this.camera;
   }
 
-  canvasEl() {
-    return this.renderBuffer.domElement;
-  }
-
   getRenderTarget() {
     return this.renderBuffer;
   }
 
-  getRenderTargetTexture() {
+  getTexture() {
     return this.renderBuffer.texture;
+  }
+
+  addDebugCanvas(el=document.body, transparent=false) {
+    let options = {antialias: true};
+    if(transparent) options.alpha = true;
+    this.debugRenderer = new THREE.WebGLRenderer(options);
+    this.debugRenderer.setClearColor(0xff000000, (transparent) ? 0 : 1);
+		this.debugRenderer.setPixelRatio(window.devicePixelRatio || 1);
+    this.debugRenderer.setSize(this.width, this.height);
+
+    // add to DOM
+    let newGLCanvas = this.debugRenderer.domElement;
+    el.appendChild(newGLCanvas);
+
+    return newGLCanvas; 
   }
 
   render(mainRenderer, scene=this.scene, camera=this.camera) {
@@ -81,8 +92,33 @@ class ThreeSceneFBO {
     mainRenderer.setRenderTarget(this.renderBuffer);
     mainRenderer.render(scene, camera);
     mainRenderer.setRenderTarget(null);
+
+    // render debug view if we have one
+    if(this.debugRenderer) {
+      this.debugRenderer.render( scene, camera );
+    }
   }
 
 }
+
+ThreeSceneFBO.defaultVertShader = `
+  precision highp float;
+  
+  uniform mat4 modelMatrix;
+  uniform mat4 modelViewMatrix;
+  uniform mat3 normalMatrix;
+  uniform mat4 projectionMatrix;
+
+  attribute vec3 position;
+  attribute vec2 uv;
+
+  varying vec2 vUv;
+  varying vec3 vPos;
+  void main() {
+    vUv = uv;
+    vPos = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+  }
+`;
 
 export default ThreeSceneFBO;
