@@ -1,8 +1,9 @@
 import DemoBase from './demo--base.es6.js';
 import * as THREE from '../vendor/three/three.module.js';
-import CanvasUtil from '../src/canvas-util.es6.js';
+// import CanvasUtil from '../src/canvas-util.es6.js';
+import FontUtil from '../src/font-util.es6.js';
 import FrameLoop from '../src/frame-loop.es6.js';
-import MathUtil from '../src/math-util.es6.js';
+// import MathUtil from '../src/math-util.es6.js';
 import PointerPos from '../src/pointer-pos.es6.js';
 import ThreeScene from '../src/three-scene-.es6.js';
 
@@ -33,7 +34,10 @@ class ThreeSceneTextTextureDemo extends DemoBase {
     // setup
     this.el = document.getElementById('three-scene');
     this.pointerPos = new PointerPos();
-    document.fonts.load('1rem "Roboto-Black"').then(() => this.onFontsLoaded());
+
+    // wait for font to load
+    FontUtil.fontLoadListener("Roboto-Black", () => this.onFontsLoaded());
+    // document.fonts.load('1rem "Roboto-Black"').then(() => this.onFontsLoaded());
   }
 
   onFontsLoaded() {
@@ -154,7 +158,7 @@ class TextCylinder {
       side: THREE.DoubleSide,
       wireframe: false,
       emissive : 0x000000, // 0x000000
-      specular : 0x000000,
+      // specular : 0x000000,
       map : this.canvasTexture,
       // shininess : 10,
       // transparent: true,
@@ -166,19 +170,10 @@ class TextCylinder {
     this.mesh.rotation.set(this.rotX, 0, 0);
 
     // prep material
-    this.prepUVs();
     this.canvasTexture.wrapS = THREE.RepeatWrapping;
     this.canvasTexture.wrapT = THREE.RepeatWrapping;
     this.textureZoom = {x: this.textureZoomX, y: 0.8};
     this.textureOffset = {x: 0, y: 0.12};
-  }
-
-  prepUVs() {
-    // copy original & modified mesh data
-    this.verticesCur = this.meshGeometry.vertices;
-    this.verticesOrig = this.deepCopy(this.verticesCur);
-    this.faceUVsCur = this.meshGeometry.faceVertexUvs[0];  // only one group of faces, so we use the first(?)
-    this.faceUVsOrig = this.deepCopy(this.faceUVsCur);
   }
 
   updateUVs() {
@@ -186,11 +181,6 @@ class TextCylinder {
     this.textureOffset.x = _frameLoop.getProgress() * this.textureOffsetSpeedX;
     this.canvasTexture.offset.set(this.textureOffset.x, this.textureOffset.y);
     this.canvasTexture.repeat.set(this.textureZoom.x, this.textureZoom.y);
-  }
-
-  deepCopy(obj) {
-    let newObj = JSON.parse(JSON.stringify(obj));
-    return newObj;
   }
 
 }

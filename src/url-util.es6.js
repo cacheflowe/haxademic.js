@@ -20,6 +20,12 @@ class URLUtil {
     window.addEventListener('popstate', () => document.location.reload());
   }
 
+  static setLocalhost() {
+    if(window.location.href.match('localhost')) {
+      document.body.classList.add('localhost');
+    }
+  }
+
 }
 
 export default URLUtil;
