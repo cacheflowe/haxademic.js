@@ -115,6 +115,14 @@ class FrameLoop {
   getIsTick() {
     return this.isTick;
   }
+
+  getMillis() {
+    return Date.now();
+  }
+
+  getMillisFine() {
+    return performance.now();
+  }
 }
 
 export default FrameLoop;
