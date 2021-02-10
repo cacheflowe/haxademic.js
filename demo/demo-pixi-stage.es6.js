@@ -61,7 +61,7 @@ class PixiStageDemo extends DemoBase {
   buildShaders() {
     // add a shader. can we load from a text file?
     var shaderFragTint = `
-      precision mediump float;
+      precision highp float;
 
       varying vec2 vTextureCoord;
       uniform sampler2D uSampler;
@@ -85,7 +85,7 @@ class PixiStageDemo extends DemoBase {
     // this.pixiStage.container().filters = [this.tint];
 
     this.patternShader = `
-      precision mediump float;
+      precision highp float;
 
       varying vec2 vTextureCoord;
       uniform float iTime;
