@@ -3,7 +3,6 @@ class LazyImageLoader {
   constructor(el) {
     this.el = el;
     this.scrollHandler = null;
-    // this.imgQueue = null;
     let imgNodes = this.el.querySelectorAll('[data-src]');
     this.imageEls = [];
     for(let i=0; i < imgNodes.length; i++) this.imageEls.push(imgNodes[i]);
@@ -16,17 +15,19 @@ class LazyImageLoader {
   // scroll handling
 
   addScrollHandler() {
-    this.scrollHandler = this.scrolled.bind(this);
+    this.scrollHandler = this.checkForLazyImages.bind(this);
     window.addEventListener('scroll', this.scrollHandler);
+    window.addEventListener('resize', this.scrollHandler);
   }
 
   removeScrollHandler() {
     if(this.scrollHandler == null) return;
     window.removeEventListener('scroll', this.scrollHandler);
+    window.removeEventListener('resize', this.scrollHandler);
     this.scrollHandler = null;
   }
 
-  scrolled() {
+  checkForLazyImages() {
     this.queueVisibleImages();
   }
 

@@ -6,15 +6,14 @@ class PixiStageDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      '!../vendor/pixi/pixi.min.js'
-    ], 'PixiStage', 'pixi-stage-container');
+      '!../vendor/pixi/pixi.min.js',
+    ], 'PixiStage', 'pixi-stage-container', null, true);
   }
 
   init() {
     // create PIXI stage object
     this.pixiContainer = document.getElementById('pixi-stage-container');
     // this.pixiContainer.setAttribute('style', 'height: 500px;');
-    this.pixiContainer.classList.add('fullscreen-bg');
     this.pixiStage = new PixiStage(this.pixiContainer); // , 0xff000000, 'pixi', 2);
 
     // load image before building other objects
@@ -126,6 +125,7 @@ class PixiStageDemo extends DemoBase {
       // update this.bg with window resizes
       this.bg.width = this.pixiStage.width();
       this.bg.height = this.pixiStage.height();
+      this.bg.position.set(this.pixiStage.width() * 0.5, this.pixiStage.height() * 0.5);
 
       // position & oscillate logo
       this.sprite.position.set(this.pixiStage.width() * 0.5, this.pixiStage.height() * 0.5);

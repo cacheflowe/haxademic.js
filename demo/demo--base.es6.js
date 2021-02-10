@@ -1,5 +1,6 @@
 import DOMUtil from '../src/dom-util.es6.js';
 import ErrorUtil from '../src/error-util.es6.js';
+import MobileUtil from '../src/mobile-util.es6.js';
 import VideoRecorder from '../src/video-recorder.es6.js';
 
 class DemoBase {
@@ -39,7 +40,11 @@ class DemoBase {
       let title = layoutHtmlOrTitle;
       this.buildLayoutBasic(elId, title, desc);
       this.el = document.getElementById(elId);
-      if(fullscreen) this.el.classList.add('fullscreen-bg');
+      if(fullscreen) {
+        this.el.classList.add('fullscreen-bg');
+        MobileUtil.addFullscreenListener();
+        MobileUtil.addFullscreenEl(this.el);
+      }
       this.debugEl = document.getElementById('debug');
     }
     this.loadJsDependenciesSerial(jsFiles);

@@ -8,8 +8,11 @@ A personal front-end JavaScript toolkit
 
 ## TODO
 
+* If using full screen bg css, add MobileUtil fillscreen helper to properly set container size
+* performance.now() to FrameLoop. Date.now() too?
 * Update AR.js with THREE module version: https://skarredghost.com/2019/08/29/how-to-seamless-mobile-ar-js/
 * Switch to dat.gui. whoops
+  * https://github.com/dataarts/dat.gui/blob/master/API.md
   * MIDI learn - work into dat.gui refactor from old gui library
 * Add new page.js & demo
   * https://github.com/visionmedia/page.js/blob/master/page.mjs
@@ -17,6 +20,12 @@ A personal front-end JavaScript toolkit
 * Begin integrating html-experiments repo?
 * Add utility methods: https://1loc.dev/
 * Integrate with SimpleSite & new es6 build system
+  * Copy Me+You static site + gulp starter & replace StaticSite
+* PIXI.js 
+  * Why does PixiStage demo w/shader start slowing down so hard on mobile?
+  * Update to PIXI module version
+  * Add a tiny shader example for: http://twgljs.org/#examples - would be nice to have lightweight shader views inline
+    * Or is PIXI.js good for this now?
 * Assimilate & remove:
   * [Done? added to PointerPos] did-drag repos
   * imagexpander
@@ -24,8 +33,6 @@ A personal front-end JavaScript toolkit
     * make inline version in addition to global player
 * Someday convert class constants to static fields: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Class_fields#Browser_compatibility
 * Bring in Howler.js & Tone.js & wavesurfer.js
-* Add a tiny shader example for: http://twgljs.org/#examples - would be nice to have lightweight shader views inline
-  * Or is PIXI.js good for this now?
 * Distributed surround audio
 
 ## To Investigate
@@ -48,6 +55,11 @@ A personal front-end JavaScript toolkit
 * THREE.js
   * RenderTargets
     * https://tympanus.net/codrops/2020/06/02/kinetic-typography-with-three-js/
+  * Lines
+    * https://threejs.org/examples/webgl_buffergeometry_lines.html
+    * https://jsfiddle.net/Ldynhxkq/
+      * Updated w/shader: https://jsfiddle.net/f5kae7yr/
+    * https://threejs.org/examples/#webgl_lines_sphere
   * Particles
     * https://medium.com/@joshmarinacci/particles-go-wild-with-textures-8b81fdd93ba2
     * https://vr.josh.earth/webxr-experiments/boilerplate/pointer.js

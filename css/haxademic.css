@@ -19,6 +19,10 @@ p {
   padding: 1rem;
   margin: -1rem 0 2rem 0;
 }
+h1:empty,
+p:empty {
+  display: none;
+}
 
 /* Glow/shadow effects */
 

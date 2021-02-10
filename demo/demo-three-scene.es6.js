@@ -7,17 +7,11 @@ import ThreeScene from '../src/three-scene-.es6.js';
 class ThreeSceneDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], `
-      <div class="container">
-        <h1>ThreeScene</h1>
-        <div id="three-scene" class="fullscreen-bg"></div>
-      </div>
-    `);
+    super(parentEl, [], 'ThreeScene', 'three-scene', 'A basic THREE.js scene wrapper with a resize listener', true);
   }
 
   init() {
     // setup
-    this.el = document.getElementById('three-scene');
     this.setupInput();
     this.setupScene();
     this.buildCube();
