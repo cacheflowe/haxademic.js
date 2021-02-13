@@ -11,21 +11,19 @@ A personal front-end JavaScript toolkit
 * If using full screen bg css, add MobileUtil fillscreen helper to properly set container size
 * performance.now() to FrameLoop. Date.now() too?
 * Update AR.js with THREE module version: https://skarredghost.com/2019/08/29/how-to-seamless-mobile-ar-js/
-* Switch to dat.gui. whoops
-  * https://github.com/dataarts/dat.gui/blob/master/API.md
-  * MIDI learn - work into dat.gui refactor from old gui library
-* Add new page.js & demo
-  * https://github.com/visionmedia/page.js/blob/master/page.mjs
+* Update es6 module versions of
+  * Switch to dat.gui. whoops
+    * https://github.com/dataarts/dat.gui/blob/master/API.md
+    * MIDI learn - work into dat.gui refactor from old gui library
+  * Add new page.js & demo
+    * https://github.com/visionmedia/page.js/blob/master/page.mjs
+  * Zora
+  * PIXI.jss
 * Convert more old haxademic.js demos
 * Begin integrating html-experiments repo?
 * Add utility methods: https://1loc.dev/
 * Integrate with SimpleSite & new es6 build system
   * Copy Me+You static site + gulp starter & replace StaticSite
-* PIXI.js 
-  * Why does PixiStage demo w/shader start slowing down so hard on mobile?
-  * Update to PIXI module version
-  * Add a tiny shader example for: http://twgljs.org/#examples - would be nice to have lightweight shader views inline
-    * Or is PIXI.js good for this now?
 * Assimilate & remove:
   * [Done? added to PointerPos] did-drag repos
   * imagexpander
@@ -43,15 +41,6 @@ A personal front-end JavaScript toolkit
 * es6 modules
   * https://v8.dev/features/modules
   * https://ccoenraets.github.io/es6-tutorial/classes/
-* Rollup
-  * Build tools
-    * https://rollupjs.org/guide/en/
-      * https://www.npmjs.com/package/@rollup/stream
-      * https://www.sitepoint.com/rollup-javascript-bundler-introduction/
-      * Look at these rollup configs: 
-        * https://github.com/gnikoloff/webgl2-2d-metaballs
-        * https://github.com/pschroen/alien.js
-    * https://github.com/terser/terser
 * THREE.js
   * RenderTargets
     * https://tympanus.net/codrops/2020/06/02/kinetic-typography-with-three-js/
@@ -99,3 +88,14 @@ A personal front-end JavaScript toolkit
     * https://stemkoski.github.io/Three.js/ParticleSystem-Shader.html
     * https://2pha.com/blog/experimenting-threejs-shaders-and-shadermaterial/
 
+## Done
+
+* Rollup
+  * Build tools
+    * https://rollupjs.org/guide/en/
+      * https://www.npmjs.com/package/@rollup/stream
+      * https://www.sitepoint.com/rollup-javascript-bundler-introduction/
+      * Look at these rollup configs: 
+        * https://github.com/gnikoloff/webgl2-2d-metaballs
+        * https://github.com/pschroen/alien.js
+    * https://github.com/terser/terser

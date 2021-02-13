@@ -1,3 +1,4 @@
+import * as PIXI from '../vendor/pixi/pixi.module.js'
 import DemoBase from './demo--base.es6.js';
 import PixiStage from '../src/pixi-stage.es6.js';
 
@@ -5,7 +6,7 @@ class PixiStageTexturedMeshDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      '!../vendor/pixi/pixi.min.js'
+    //  '!../vendor/pixi/pixi.min.js'
     ], 'PixiStage | Textured Mesh', 'pixi-stage-textured-mesh-container');
   }
 

@@ -1,3 +1,4 @@
+import * as PIXI from '../vendor/pixi/pixi.module.js'
 import DemoBase from './demo--base.es6.js';
 import PixiStage from '../src/pixi-stage.es6.js';
 import PixiSpriteScale from '../src/pixi-sprite-scale.es6.js';
@@ -7,7 +8,7 @@ class PixiStageWebcamDemo extends DemoBase {
 
   constructor(parentEl) {
     super(parentEl, [
-      '!../vendor/pixi/pixi.min.js'
+      // '!../vendor/pixi/pixi.min.js'
     ], 'PixiStage | Webcam', 'pixi-stage-webcam-mesh-container');
   }
 

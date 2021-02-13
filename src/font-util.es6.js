@@ -12,7 +12,7 @@ class FontUtil {
 
   static fontLoadListener(fontName, callback) {
     document.fonts.load(`1rem "${fontName}"`).then(() => {
-      callback();
+      callback(fontName);
     });
   }
 

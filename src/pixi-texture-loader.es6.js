@@ -1,3 +1,5 @@
+import * as PIXI from '../vendor/pixi/pixi.module.js'
+
 class PixiTextureLoader {
 
   constructor(assetsLoadedCallback, keepFinalCallback=false) {

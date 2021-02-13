@@ -1,3 +1,5 @@
+import * as PIXI from '../vendor/pixi/pixi.module.js'
+
 class PixiStage {
 
   constructor(el=document.body, bgColor=0x000000, id='pixi', pixelRatio=(window.devicePixelRatio || 1)) {
@@ -12,7 +14,7 @@ class PixiStage {
         width: this.elSize.width,
         height: this.elSize.height,
         backgroundColor: bgColor,
-        transparent: false,
+        backgroundAlpha: true,
         resizeTo: this.el,
         autoDensity: true,
         antialias: true,
