@@ -9,16 +9,14 @@ A personal front-end JavaScript toolkit
 ## TODO
 
 * If using full screen bg css, add MobileUtil fillscreen helper to properly set container size
-* performance.now() to FrameLoop. Date.now() too?
-* Update AR.js with THREE module version: https://skarredghost.com/2019/08/29/how-to-seamless-mobile-ar-js/
 * Update es6 module versions of
+  * AR.js: https://skarredghost.com/2019/08/29/how-to-seamless-mobile-ar-js/
   * Switch to dat.gui. whoops
     * https://github.com/dataarts/dat.gui/blob/master/API.md
     * MIDI learn - work into dat.gui refactor from old gui library
   * Add new page.js & demo
     * https://github.com/visionmedia/page.js/blob/master/page.mjs
   * Zora
-  * PIXI.jss
 * Convert more old haxademic.js demos
 * Begin integrating html-experiments repo?
 * Add utility methods: https://1loc.dev/
