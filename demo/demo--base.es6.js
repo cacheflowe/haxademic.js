@@ -1,5 +1,6 @@
 import DOMUtil from '../src/dom-util.es6.js';
 import ErrorUtil from '../src/error-util.es6.js';
+import KeyboardUtil from '../src/keyboard-util.es6.js';
 import MobileUtil from '../src/mobile-util.es6.js';
 import VideoRecorder from '../src/video-recorder.es6.js';
 
@@ -49,6 +50,7 @@ class DemoBase {
     }
     this.loadJsDependenciesSerial(jsFiles);
     this.addBackLink();
+    window.addEventListener('keydown', (e) => this.keyDown(e.keyCode ? e.keyCode : e.which));
   }
 
   addBackLink() {
@@ -73,6 +75,10 @@ class DemoBase {
       container.prepend(btn);
       container.prepend(srcBtn);
     }
+  }
+
+  keyDown(key) {
+    // override
   }
 
   /*
