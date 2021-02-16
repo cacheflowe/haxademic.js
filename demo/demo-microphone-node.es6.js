@@ -15,33 +15,57 @@ class MicrophoneNodeDemo extends DemoBase {
     this.fftAttached = false;
 
     // add button to start everything
+    // ...because we need uer input to request a mic node
     this.startButton = document.createElement('button');
     this.startButton.innerText = 'Start';
     this.fftEl.appendChild(this.startButton);
-
-    // click video to add audio response
     this.startButton.addEventListener('click', (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
       this.startMic();
+    });
+
+    // add pause button
+    this.pauseButton = document.createElement('button');
+    this.pauseButton.innerText = 'Pause';
+    this.debugEl.appendChild(this.pauseButton);
+    this.pauseButton.addEventListener('click', (e) => {
+      this.pauseToggle();
     });
   }
 
   startMic() {
     // init microphone
     this.soundFFT = null;
+    this.muted = false;
     this.mic = new MicrophoneNode(null, () => {
-      const fftOptions = {
-        fftSize: 512,
-        beatAmpDirectionThresh: 0.007,
-        beatAmpDirectionSamples: 10,
-      };
-      this.soundFFT = new SoundFFT(this.mic.getContext(), this.mic.getNode(), fftOptions);
+      if(!this.soundFFT) { // in case we've paused & restarted
+        const fftOptions = {
+          fftSize: 512,
+          beatAmpDirectionThresh: 0.007,
+          beatAmpDirectionSamples: 10,
+        };
+        this.soundFFT = new SoundFFT(this.mic.getContext(), this.mic.getNode(), fftOptions);
+      } else {
+        this.soundFFT.setNewSourceAudioNode(this.mic.getNode());
+      }
     }, (error) => {
       this.fftEl.innerHTML = '[MicrophoneNode ERROR] :: ' + error + '<br>Are you https:// ?';
     });
 
     // kick off sound updates & debug animation
     this.animateFFT();
+  }
+
+  pauseToggle() {
+    this.muted = (this.muted) ? false : true;
+    this.mic.setPaused(this.muted);   // handles mic disconnect, but upon unpausing, goes through initialization callback in MicrophoneNode above
+  }
+
+  keyDown(key) {
+    if(key == 77) { // 'm' key
+      this.pauseToggle();
+    }
+    // console.log('keyDown', key);
   }
 
   // animate fft debug canvas

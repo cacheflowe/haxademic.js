@@ -4,9 +4,9 @@ import FloatBuffer from './float-buffer.es6.js';
 
 class SoundFFT {
 
-  constructor(context, audioNode, options={}) { // Howler.ctx, sound._sounds[0]._node
+  constructor(context, sourceAudioNode, options={}) { // Howler.ctx, sound._sounds[0]._node
     this.context = context;
-    this.audioNode = audioNode;
+    this.sourceAudioNode = sourceAudioNode;
     this.debug = false;
     this.options = {
       fftSize: 512,                   // eq bands. analysis resolution
@@ -27,7 +27,7 @@ class SoundFFT {
     this.analyser = this.context.createAnalyser();
     this.analyser.fftSize = this.options.fftSize;
     this.analyser.smoothingTimeConstant = 0.1;
-    this.audioNode.connect(this.analyser);
+    this.sourceAudioNode.connect(this.analyser);
 
     // build audio data array
     this.binCount = this.analyser.frequencyBinCount;
@@ -71,6 +71,17 @@ class SoundFFT {
   // Public API
   ///////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////
+
+  setNewSourceAudioNode(newAudioNode) {
+    // remove old audio source from analyzer chain
+    if(this.sourceAudioNode) {
+      this.sourceAudioNode.disconnect(this.analyser);
+    }
+
+    // store & set new source in audio chain
+    this.sourceAudioNode = newAudioNode;
+    this.sourceAudioNode.connect(this.analyser);
+  }
 
   setDebug(isDebug) {
     this.debug = isDebug;
