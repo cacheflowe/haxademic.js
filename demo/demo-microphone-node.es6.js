@@ -37,16 +37,16 @@ class MicrophoneNodeDemo extends DemoBase {
     // init microphone
     this.soundFFT = null;
     this.muted = false;
-    this.mic = new MicrophoneNode(null, () => {
+    this.mic = new MicrophoneNode(null, (audioContext, micNode) => {
       if(!this.soundFFT) { // in case we've paused & restarted
         const fftOptions = {
           fftSize: 512,
           beatAmpDirectionThresh: 0.007,
           beatAmpDirectionSamples: 10,
         };
-        this.soundFFT = new SoundFFT(this.mic.getContext(), this.mic.getNode(), fftOptions);
+        this.soundFFT = new SoundFFT(audioContext, micNode, fftOptions);
       } else {
-        this.soundFFT.setNewSourceAudioNode(this.mic.getNode());
+        this.soundFFT.setNewSourceAudioNode(micNode);
       }
     }, (error) => {
       this.fftEl.innerHTML = '[MicrophoneNode ERROR] :: ' + error + '<br>Are you https:// ?';

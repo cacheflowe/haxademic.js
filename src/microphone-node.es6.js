@@ -17,7 +17,7 @@ class MicrophoneNode {
         this.stream = stream;
         this.micNode = this.context.createMediaStreamSource(stream);
         window.micNode = this.micNode; // fix for FF bug: https://stackoverflow.com/questions/22860468/html5-microphone-capture-stops-after-5-seconds-in-firefox
-        this.successCallback(this.micNode);
+        this.successCallback(this.context, this.micNode);
       })
       .catch((err) => {
         if(this.errorCallback) this.errorCallback(err);
@@ -27,8 +27,10 @@ class MicrophoneNode {
 
   setPaused(isPaused) {
     if(isPaused) {
+      // this.context.suspend();
       this.stream.getAudioTracks()[0].stop();
     } else {
+      // this.context.resume();
       this.initAudioDevice();
     }
   }
