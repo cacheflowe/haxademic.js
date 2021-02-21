@@ -74,9 +74,9 @@ class ThreeSceneDemo extends DemoBase {
         void main() {
           // x-axis gradient
           gl_FragColor = vec4(
-            0.25 + 0.25 * sin(time*10. + vUv.x * 5.),
+            0.45 + 0.25 * sin(time*10. + vUv.x * 5.),
             0.75 + 0.25 * sin(time*7. + vUv.x * 4.),
-            0.85 + 0.15 * sin(time*5. + vUv.x * 3.),
+            0.65 + 0.35 * sin(time*5. + vUv.x * 3.),
             1.);
         }
       `,
@@ -117,7 +117,7 @@ class ThreeSceneDemo extends DemoBase {
 
     // create attributes arrays & assign to geometry
     const translateArray = new Float32Array( particleCount * 3 );
-    const colorUArray = new Float32Array( particleCount );
+    const colorUVArray = new Float32Array( particleCount * 2 );
     // spehere helpers
     var inc = Math.PI * (3 - Math.sqrt(5));
     var x = 0;
@@ -126,7 +126,7 @@ class ThreeSceneDemo extends DemoBase {
     var r = 0;
     var phi = 0;
     var radius = 0.6;
-    for ( let i = 0, i3 = 0, l = particleCount; i < l; i ++, i3 += 3 ) {
+    for ( let i = 0, i2 = 0, i3 = 0, l = particleCount; i < l; i++, i2 += 2, i3 += 3 ) {
       // random positions inside a unit cube
       translateArray[ i3 + 0 ] = Math.random() * 2 - 1;
       translateArray[ i3 + 1 ] = Math.random() * 2 - 1;
@@ -147,11 +147,12 @@ class ThreeSceneDemo extends DemoBase {
       // translateArray[ i3 + 2 ] = z;
 
       // color map progress
-      colorUArray[i] = i/particleCount;
+      colorUVArray[i2 + 0] = i/particleCount;
+      colorUVArray[i2 + 1] = 0.5;
     }
 
     geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
-    geometry.setAttribute( 'colorU', new THREE.InstancedBufferAttribute( colorUArray, 1 ) );
+    geometry.setAttribute( 'colorUV', new THREE.InstancedBufferAttribute( colorUVArray, 2 ) );
 
     this.material = new THREE.RawShaderMaterial( {
       uniforms: {
@@ -175,11 +176,11 @@ class ThreeSceneDemo extends DemoBase {
         attribute vec3 position;
         attribute vec2 uv;
         attribute vec3 translate;
-        attribute float colorU;
+        attribute vec2 colorUV;
 
         varying vec2 vUv;
         varying float vScale;
-        varying float vColorU;
+        varying vec2 vColorUV;
 
         void main() {
           vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
@@ -204,7 +205,7 @@ class ThreeSceneDemo extends DemoBase {
 
           // pass values to frag
           vUv = uv;
-          vColorU = colorU;
+          vColorUV = colorUV;
 
           // set final vert position
           mvPosition.xyz += (position + posOffset) * scale;
@@ -219,13 +220,13 @@ class ThreeSceneDemo extends DemoBase {
 
         varying vec2 vUv;
         varying float vScale;
-        varying float vColorU;
+        varying vec2 vColorUV;
         
 
         void main() {
           vec4 diffuseColor = texture2D( map, vUv );
           // vec4 diffuseColor2 = texture2D( colorMap, vUv );
-          vec4 diffuseColor2 = texture2D( colorMap, vec2(vColorU, 0.5) );
+          vec4 diffuseColor2 = texture2D( colorMap, vColorUV );
           gl_FragColor = vec4(diffuseColor2.rgb, diffuseColor.a);
         }
       `,
