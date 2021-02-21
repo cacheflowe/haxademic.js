@@ -68,10 +68,15 @@ class MobileUtil {
     });
   }
 
-  static addFullscreenEl(el) {
+  static addFullscreenEl(el, isBackground=false) {
     // use in conjunction with addFullscreenListener()
     // helps stick an element to fullscreen, no matter where mobile Safari's browser bars are
     el.style.setProperty('height', 'calc(var(--vh, 1vh) * 100)');
+    el.style.setProperty('width', '100%');
+    el.style.setProperty('position', 'fixed');
+    el.style.setProperty('top', '0');
+    el.style.setProperty('left', '0');
+    if(isBackground) el.style.setProperty('z-index', '-9999');
   }
 
   static addFullscreenListener() {
@@ -80,10 +85,17 @@ class MobileUtil {
     // from: https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
     // look into `viewport-fit=cover` in the future. also: `min-height: -webkit-fill-available`
     window.addEventListener('resize', () => {
-      let vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      MobileUtil.updateFullscreenHeight();
+      // debounce it too, as iOS Firefox gets stuck
+      // requestAnimationFrame didn't fix it on FF iOS, but setTimeout() did
+      setTimeout(() => MobileUtil.updateFullscreenHeight(), 20);
     });
     window.dispatchEvent(new Event('resize'));
+  }
+
+  static updateFullscreenHeight() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
   }
 
   static hideSoftKeyboard() {
