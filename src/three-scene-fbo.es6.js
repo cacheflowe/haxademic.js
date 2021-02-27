@@ -2,13 +2,20 @@ import * as THREE from '../vendor/three/three.module.js';
 
 class ThreeSceneFBO {
 
-  constructor(width, height, bgColor=0xff0000) {
+  constructor(width, height, bgColor=0xff0000, material=null, isDataTexture=false) {
     this.width = width;
     this.height = height;
     this.bgColor = bgColor;
+    this.material = material;
+    this.isDataTexture = isDataTexture;
     this.devicePixelRatio = window.devicePixelRatio || 1;
-    this.buildScene();
-    this.buildRenderer();
+    if(this.isDataTexture) {
+      this.buildSceneOrtho();
+      this.buildDataRenderer();
+    } else {
+      this.buildScene();
+      this.buildRenderer();
+    }
   }
 
   buildScene() {
@@ -20,7 +27,21 @@ class ThreeSceneFBO {
     // camera-filling plane
     this.plane = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(this.width, this.height),
-      new THREE.MeshBasicMaterial({ color: 0x00ffff })
+      this.material || new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    );
+    this.plane.position.set(0, 0, 0);
+    this.scene.add(this.plane);
+  }
+
+  buildSceneOrtho() {
+    // scene & camera
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 1);
+
+    // camera-filling plane
+    this.plane = new THREE.Mesh(
+      new THREE.PlaneBufferGeometry(1, 1),
+      this.material || new THREE.MeshBasicMaterial({ color: 0x00ff00 })
     );
     this.plane.position.set(0, 0, 0);
     this.scene.add(this.plane);
@@ -29,6 +50,8 @@ class ThreeSceneFBO {
   buildRenderer() {
     let options = {
       format: THREE.RGBAFormat,
+      wrapS: THREE.RepeatWrapping,
+      wrapT: THREE.RepeatWrapping,
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       depthBuffer: false,
@@ -36,11 +59,24 @@ class ThreeSceneFBO {
     };
     this.renderBuffer = new THREE.WebGLRenderTarget(this.width, this.height, options);
     this.renderBuffer.background = this.bgColor;
-    // console.log(this.renderBuffer);
+  }
+
+  buildDataRenderer() {
+    let options = {
+      format: THREE.RGBAFormat,
+      wrapS: THREE.ClampToEdgeWrapping,
+      wrapT: THREE.ClampToEdgeWrapping,
+      minFilter: THREE.NearestFilter,
+      magFilter: THREE.NearestFilter,
+      type: THREE.FloatType,
+      stencilBuffer: false,
+    }
+    this.renderBuffer = new THREE.WebGLRenderTarget(this.width, this.height, options);
+    this.renderBuffer.background = this.bgColor;
   }
 
   setMaterial(material) {
-    return this.plane.material = material;
+    this.plane.material = material;
   }
 
   getWidth() {
@@ -101,7 +137,7 @@ class ThreeSceneFBO {
 
 }
 
-ThreeSceneFBO.defaultVertShader = `
+ThreeSceneFBO.defaultRawVertShader = `
   precision highp float;
   
   uniform mat4 modelMatrix;
