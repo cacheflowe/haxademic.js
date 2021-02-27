@@ -13,7 +13,7 @@ import FrameLoop from '../src/frame-loop.es6.js';
 class ThreeSceneDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeSceneFbo | Shader Color Map GPU', 'three-scene-fbo-color-map', "Use a 2d shader render target as the color map uniform for a particle system.", true);
+    super(parentEl, [], 'ThreeSceneFbo | GPU Particles', 'three-scene-gpu-particles', "One particle per pixel position.", true);
   }
 
   init() {
@@ -149,9 +149,10 @@ class ThreeSceneDemo extends DemoBase {
         finalColor = lastFrameZoomed; // override mix with test pattern
         
         // add color & loop
-        finalColor.r += 0.001 + snoise(vUvOrig) * 0.012;
-        finalColor.g += 0.001 + snoise(vUvOrig) * 0.008;
-        finalColor.b += 0.001 + snoise(vUvOrig) * 0.0016;
+        float noiseVal = snoise(vUvOrig);
+        finalColor.r += 0.001 + noiseVal * 0.012;
+        finalColor.g += 0.001 + noiseVal * 0.008;
+        finalColor.b += 0.001 + noiseVal * 0.0016;
         if(finalColor.r > 1.) finalColor.r = 0.;
         if(finalColor.g > 1.) finalColor.g = 0.;
         if(finalColor.b > 1.) finalColor.b = 0.;
