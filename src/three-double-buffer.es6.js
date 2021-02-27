@@ -2,14 +2,14 @@ import * as THREE from '../vendor/three/three.module.js';
 
 class ThreeDoubleBuffer {
 
-  constructor(width, height, bufferMaterial, bgColor=0xff0000, transparent=false) {
+  constructor(width, height, bufferMaterial, isData=false, bgColor=0xff0000, transparent=false) {
     this.width = width;
     this.height = height;
     this.bufferMaterial = bufferMaterial;
     this.bgColor = bgColor;
     this.transparent = transparent;
     this.devicePixelRatio = window.devicePixelRatio || 1;
-    this.buildBuffers();
+    this.buildBuffers(isData);
   }
 
 
@@ -40,15 +40,16 @@ class ThreeDoubleBuffer {
     };
   }
 
-  buildBuffers() {
+  buildBuffers(isData) {
     // FBO scene & camera
     this.bufferScene = new THREE.Scene();
 		this.bufferCamera = new THREE.OrthographicCamera( this.width / - 2, this.width / 2, this.height / 2, this.height / - 2, 1, 1000 );
 		this.bufferCamera.position.z = 1;
 
     // build render targets
-    this.bufferA = new THREE.WebGLRenderTarget(this.width, this.height, this.getOptions());
-    this.bufferB = new THREE.WebGLRenderTarget(this.width, this.height, this.getOptions());
+    let options = (isData) ? this.getOptionsDataTexture() : this.getOptions();
+    this.bufferA = new THREE.WebGLRenderTarget(this.width, this.height, options);
+    this.bufferB = new THREE.WebGLRenderTarget(this.width, this.height, options);
 
     // camera-filling plane
     this.planeGeom = new THREE.PlaneBufferGeometry(this.width, this.height, 1);
@@ -91,6 +92,14 @@ class ThreeDoubleBuffer {
 
   getCamera() {
     return this.bufferCamera;
+  }
+
+  getTexture() {
+    return this.bufferB.texture;
+  }
+
+  getTextureOld() {
+    return this.bufferA.texture;
   }
 
   render(renderer) {

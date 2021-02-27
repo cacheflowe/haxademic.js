@@ -23,7 +23,6 @@ class ThreeScenePlane {
       new THREE.PlaneBufferGeometry(this.width, this.height, 1),
       new THREE.MeshBasicMaterial({ color: 0x00ffff })
     );
-    this.plane.position.set(0, 0, 0);
     this.scene.add(this.plane);
   }
 

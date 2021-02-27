@@ -38,25 +38,16 @@ class ThreeDoubleBufferDemo extends DemoBase {
         vec2 vUvOrig = gl_FragCoord.xy / res;
         vec4 imgColor = texture2D(imgTex, vUvOrig);
 
-        // apply zoom & rotate
+        // apply zoom & rotate displacement
         vec2 vUv = gl_FragCoord.xy / res;
         vUv -= 0.5; // center coords
         vUv *= zoom;
         vUv *= mat2(cos(rotation), sin(rotation), -sin(rotation), cos(rotation));
-        vUv += 0.5; // reset from centering        
-
+        vUv += 0.5; // reset from centering
         vec4 lastFrameZoomed = texture2D(lastFrame, vUv + offset);
 
         // mix soomed with original 
         vec4 finalColor = mix(lastFrameZoomed, imgColor, mixOriginal);
-
-        // add image texture color, for cycling effect, and loop color back around
-        // finalColor += imgColor * 0.001;
-        // if(finalColor.r > 1.) finalColor.r -= 1.;
-        // if(finalColor.g > 1.) finalColor.g -= 1.;
-        // if(finalColor.b > 1.) finalColor.b -= 1.;
-
-        // finalColor.a = 1.;
         gl_FragColor = finalColor;
       }
     `;
@@ -89,7 +80,7 @@ class ThreeDoubleBufferDemo extends DemoBase {
       this.doubleBuffer.setUniform('rotation', _frameLoop.osc(0.01, -0.001, 0.001));
       this.doubleBuffer.setUniform('zoom', _frameLoop.osc(0.01, 0.998, 1.002));
       // this.offset.x = _frameLoop.osc(0.01, -0.001, 0.001);
-      // this.offset.y = _frameLoop.osc(0.01, -0.001, 0.001);
+      this.offset.y = 1;// _frameLoop.osc(0.01, -0.002, 0.002);
       this.doubleBuffer.setUniform('mixOriginal', _frameLoop.osc(0.01, 0, 0.01));
       this.doubleBuffer.render(this.threeScene.getRenderer());
     }
