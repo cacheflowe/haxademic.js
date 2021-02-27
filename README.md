@@ -9,6 +9,7 @@ A personal front-end JavaScript toolkit
 ## TODO
 
 * If using full screen bg css, add MobileUtil fillscreen helper to properly set container size
+  * Also, check this for iOS `vh`: https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API
 * Update es6 module versions of
   * AR.js: https://skarredghost.com/2019/08/29/how-to-seamless-mobile-ar-js/
   * Switch to dat.gui. whoops
@@ -42,6 +43,9 @@ A personal front-end JavaScript toolkit
 * THREE.js
   * RenderTargets
     * https://tympanus.net/codrops/2020/06/02/kinetic-typography-with-three-js/
+    * https://leclub.github.io/2016/06/ThreeJS-Gray-Scott-Reaction-Diffusion/
+    * https://codepen.io/haangglide/pen/YzqmZwz?editors=1010
+    * https://github.com/TimvanScherpenzeel/Thesis/blob/master/scripts/gpgpu.js
   * Lines
     * https://threejs.org/examples/webgl_buffergeometry_lines.html
     * https://jsfiddle.net/Ldynhxkq/
