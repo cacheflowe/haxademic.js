@@ -7,7 +7,7 @@ import ThreeDoubleBuffer from '../src/three-double-buffer.es6.js';
 class ThreeDoubleBufferDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeScene', 'three-scene-double-buffer', 'A basic double buffer helper.', false);
+    super(parentEl, [], 'ThreeScene | ThreeDouble Buffer', 'three-scene-double-buffer', 'A basic double buffer helper.', false);
   }
 
   init() {
