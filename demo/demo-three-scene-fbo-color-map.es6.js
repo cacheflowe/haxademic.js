@@ -52,6 +52,8 @@ class ThreeSceneDemo extends DemoBase {
     // build FBO and debug renderer
     this.threeFBO = new ThreeSceneFBO(512, 8, 0x00ffff);
     let debugFboCanvas = this.threeFBO.addDebugCanvas();
+
+    // add debug renderer to DOM
     this.debugEl.appendChild(debugFboCanvas);
     debugFboCanvas.style.setProperty('width', '100%');
     debugFboCanvas.style.setProperty('height', '32px');
@@ -63,7 +65,7 @@ class ThreeSceneDemo extends DemoBase {
       uniforms: {
         "time": { value: 0.0 },
       },
-      vertexShader: ThreeSceneFBO.defaultVertShader,
+      vertexShader: ThreeSceneFBO.defaultRawVertShader,
       fragmentShader: `
         precision highp float;
 
