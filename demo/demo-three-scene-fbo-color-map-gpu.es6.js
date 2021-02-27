@@ -17,7 +17,7 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   init() {
-    this.simSize = 512;
+    this.simSize = 256;
     this.setupInput();
     this.setupScene();
     this.buildStats();
@@ -62,7 +62,7 @@ class ThreeSceneDemo extends DemoBase {
     this.addRendererToDOM(this.gradientFBO, 300, 32);
 
     // create shader material
-    this.gradientMaterial = new THREE.RawShaderMaterial( {
+    this.gradientMaterial = new THREE.ShaderMaterial( {
       uniforms: {
         "time": { value: 0.0 },
       },
@@ -97,6 +97,37 @@ class ThreeSceneDemo extends DemoBase {
       uniform float rotation;
       uniform float mixOriginal;
       uniform vec2 offset;
+
+      // Simplex 2D noise
+      //
+      vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+      float snoise(vec2 v){
+        const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                -0.577350269189626, 0.024390243902439);
+        vec2 i  = floor(v + dot(v, C.yy) );
+        vec2 x0 = v -   i + dot(i, C.xx);
+        vec2 i1;
+        i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+        vec4 x12 = x0.xyxy + C.xxzz;
+        x12.xy -= i1;
+        i = mod(i, 289.0);
+        vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+        + i.x + vec3(0.0, i1.x, 1.0 ));
+        vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy),
+          dot(x12.zw,x12.zw)), 0.0);
+        m = m*m ;
+        m = m*m ;
+        vec3 x = 2.0 * fract(p * C.www) - 1.0;
+        vec3 h = abs(x) - 0.5;
+        vec3 ox = floor(x + 0.5);
+        vec3 a0 = x - ox;
+        m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+        vec3 g;
+        g.x  = a0.x  * x0.x  + h.x  * x0.y;
+        g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+        return 130.0 * dot(m, g);
+      }
       
       void main() {
         vec2 texel = 1. / res;
@@ -115,16 +146,21 @@ class ThreeSceneDemo extends DemoBase {
 
         // mix soomed with original 
         vec4 finalColor = mix(lastFrameZoomed, imgColor, mixOriginal);
+        finalColor = lastFrameZoomed; // override mix with test pattern
         
-        // add color
-        finalColor.rgb += imgColor.rgb * 0.01;
-        if(finalColor.r > 1.) finalColor.r -= 1.;
-        if(finalColor.g > 1.) finalColor.g -= 1.;
-        if(finalColor.b > 1.) finalColor.b -= 1.;
+        // add color & loop
+        finalColor.r += 0.001 + snoise(vUvOrig) * 0.012;
+        finalColor.g += 0.001 + snoise(vUvOrig) * 0.008;
+        finalColor.b += 0.001 + snoise(vUvOrig) * 0.0016;
+        if(finalColor.r > 1.) finalColor.r = 0.;
+        if(finalColor.g > 1.) finalColor.g = 0.;
+        if(finalColor.b > 1.) finalColor.b = 0.;
+        if(finalColor.r < 0.) finalColor.r = 1.;
+        if(finalColor.g < 0.) finalColor.g = 1.;
+        if(finalColor.b < 0.) finalColor.b = 1.;
 
-        // finalColor.a = 1.;
+        // set final color
         gl_FragColor = finalColor;
-        // gl_FragColor = vec4(1.0);
       }
     `;
 
@@ -133,7 +169,6 @@ class ThreeSceneDemo extends DemoBase {
       uniforms: {
         lastFrame: { type: "t", value: null },
         imgTex : { type: "t", value: new THREE.TextureLoader().load('../images/checkerboard-16-9.png') },
-        // imgTex : { type: "t", value: new THREE.TextureLoader().load('../data/images/bb.jpg') },
         res : {type: "v2", value: new THREE.Vector2(this.simSize, this.simSize)},
         time: {type: "f", value: 0},
         zoom: {type: "f", value: 1},
@@ -143,23 +178,32 @@ class ThreeSceneDemo extends DemoBase {
       }, 
       fragmentShader: fshader
     });
-    this.doubleBuffer = new ThreeDoubleBuffer(this.simSize, this.simSize, bufferMaterial, false);
+    this.doubleBuffer = new ThreeDoubleBuffer(this.simSize, this.simSize, bufferMaterial, true);
 
     // add double buffer plane to main THREE scene
     this.scene.add(this.doubleBuffer.displayMesh);
     this.doubleBuffer.displayMesh.scale.set(0.2, 0.2, 0.2);
+
+    // add debug rednerer & add to DOM
+    if(this.debugRender) {
+      this.debugRenderer = new THREE.WebGLRenderer({antialias: false, alpha: false});
+      this.debugRenderer.setClearColor(0xff000000, 0);
+      this.debugRenderer.setPixelRatio(window.devicePixelRatio || 1);
+      this.debugRenderer.setSize(this.simSize, this.simSize);
+      this.debugEl.appendChild(this.debugRenderer.domElement);
+    }
   }
 
   updateSimulation() {
     // update uniforms & re-render double buffer
     // for(let i=0; i < 5; i++) {
       this.doubleBuffer.setUniform('time', _frameLoop.count(0.001));
-      this.doubleBuffer.setUniform('rotation', _frameLoop.osc(0.03, -0.001, 0.001));
-      this.doubleBuffer.setUniform('zoom', _frameLoop.osc(0.02, 0.998, 1.002));
+      // this.doubleBuffer.setUniform('rotation', _frameLoop.osc(0.03, -0.003, 0.003));
+      // this.doubleBuffer.setUniform('zoom', _frameLoop.osc(0.02, 0.998, 1.004));
       // this.offset.x = _frameLoop.osc(0.01, -0.001, 0.001);
-      this.offset.y = 0.001;// _frameLoop.osc(0.01, -0.002, 0.002);
-      this.doubleBuffer.setUniform('mixOriginal', _frameLoop.osc(0.03, 0, 0.02));
-      this.doubleBuffer.render(this.threeScene.getRenderer());
+      // this.offset.y = 0.001;// _frameLoop.osc(0.01, -0.002, 0.002);
+      this.doubleBuffer.setUniform('mixOriginal', _frameLoop.osc(0.03, 0, 0.004));
+      this.doubleBuffer.render(this.threeScene.getRenderer(), this.debugRenderer);
     // }
   }
 
@@ -231,7 +275,7 @@ class ThreeSceneDemo extends DemoBase {
     geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
     geometry.setAttribute( 'colorUV', new THREE.InstancedBufferAttribute( colorUVArray, 2 ) );
 
-    this.particleMaterial = new THREE.RawShaderMaterial( {
+    this.particleMaterial = new THREE.ShaderMaterial( {
       uniforms: {
         "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
         "colorMap": { value: this.gradientFBO.getTexture()},
@@ -239,21 +283,13 @@ class ThreeSceneDemo extends DemoBase {
         "time": { value: 0.0 },
       },
       vertexShader: `
-        precision highp float;
-        
-        // THREE.js uniforms
-        uniform mat4 modelMatrix;
-        uniform mat4 modelViewMatrix;
-        uniform mat3 normalMatrix;
-        uniform mat4 projectionMatrix;
+        precision mediump float;
 
         // custom uniforms
         uniform float time;
         uniform sampler2D colorMap;
         uniform sampler2D positionsMap;
 
-        attribute vec3 position;
-        attribute vec2 uv;
         attribute vec3 translate;
         attribute vec2 colorUV;
 
@@ -261,39 +297,45 @@ class ThreeSceneDemo extends DemoBase {
         varying float vScale;
         varying vec2 vColorUV;
 
+        float map(float value, float low1, float high1, float low2, float high2) {
+          return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+        }
+
         void main() {
-          vec4 mvPosition = modelViewMatrix * vec4( translate, 1.0 );
-
-          // oscillate position w/trig
-          vec3 trTime = vec3(translate.x + time, translate.y + time, translate.z + time);
-          float scale = 2.0 + 1. * sin( trTime.x * 5. ) + sin( trTime.y * 3.2 ) + sin( trTime.z * 4.3 );
-          vScale = scale;
-          vec3 posOffset = vec3(
-            3. * sin(trTime.x * 10.) + 10. * sin(time/15.),
-            3. * sin(trTime.y * 10.) + 10. * sin(time/10.),
-            3. * sin(trTime.z * 10.) + 10. * sin(time/5.)
-          );
-
-          // oscillate position w/color map
+          // get color map
           vec4 diffuseColor = texture2D( colorMap, vUv );
-          posOffset += vec3(
-            3. + -0.5 + diffuseColor.r,
-            3. + -0.5 + diffuseColor.g,
-            3. + -0.5 + diffuseColor.b
+
+          // get map position from double buffer
+          vec4 mapPosition = texture2D(positionsMap, colorUV);
+          vec3 offsetAmp = vec3(0.0, 0.0, 0.5);
+          vec3 posOffset = vec3(
+            (-0.5 + mapPosition.x) * offsetAmp.x, 
+            (-0.5 + mapPosition.y) * offsetAmp.y, 
+            (-0.5 + mapPosition.z) * offsetAmp.z
           );
 
-          // test map position
-          // map position
-          vec4 mapPosition = texture2D(positionsMap, colorUV);
-          posOffset = vec3((-0.5 + mapPosition.x) * 10., (-0.5 + mapPosition.y) * 10., mapPosition.z * 60.);
+          // apply offset within modelViewMatrix multiplication
+          // for correct inheritance of mesh position/rotation. 
+          // doing this afterwards was losing coordinate system rotation
+          vec4 mvPosition = modelViewMatrix * vec4( translate + posOffset, 1.0 );
 
-          // pass values to frag
-          vUv = uv;
-          vColorUV = colorUV;
+          // wrap offsets with a fade
+          float scale = 4.0;
+          // if(mapPosition.x > 0.8) scale = min(scale, map(mapPosition.x, 0.8, 1., scale, 0.));
+          // if(mapPosition.x < 0.2) scale = min(scale, map(mapPosition.x, 0.2, 0., scale, 0.));
+          // if(mapPosition.y > 0.8) scale = min(scale, map(mapPosition.y, 0.8, 1., scale, 0.));
+          // if(mapPosition.y < 0.2) scale = min(scale, map(mapPosition.y, 0.2, 0., scale, 0.));
+          if(mapPosition.z > 0.8) scale = min(scale, map(mapPosition.z, 0.8, 1., scale, 0.));
+          if(mapPosition.z < 0.2) scale = min(scale, map(mapPosition.z, 0.2, 0., scale, 0.));
 
           // set final vert position
           mvPosition.xyz += (position + posOffset) * scale;
           gl_Position = projectionMatrix * mvPosition;
+
+          // pass values to frag
+          vUv = uv;
+          vColorUV = colorUV;
+          vScale = scale;
         }
       `,
       fragmentShader: `
@@ -308,6 +350,7 @@ class ThreeSceneDemo extends DemoBase {
         
 
         void main() {
+          // tint the particle texture but keep the particle texture alpha
           vec4 diffuseColor = texture2D( map, vUv );
           // vec4 diffuseColor2 = texture2D( colorMap, vUv );
           vec4 diffuseColor2 = texture2D( colorMap, vColorUV );

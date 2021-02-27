@@ -102,11 +102,16 @@ class ThreeDoubleBuffer {
     return this.bufferA.texture;
   }
 
-  render(renderer) {
+  render(renderer, debugRenderer=null) {
     // render!
     renderer.setRenderTarget(this.bufferB);
     renderer.render(this.bufferScene, this.bufferCamera);
     renderer.setRenderTarget(null);
+
+    // render in time if we pass one in
+    if(debugRenderer) {
+      debugRenderer.render(this.bufferScene, this.bufferCamera);
+    }
 
     // ping pong buffers
     var temp = this.bufferA;
