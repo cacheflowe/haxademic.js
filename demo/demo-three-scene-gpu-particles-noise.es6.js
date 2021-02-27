@@ -149,7 +149,7 @@ class ThreeSceneDemo extends DemoBase {
         finalColor = lastFrameZoomed; // override mix with test pattern
         
         // add color & loop
-        float noiseVal = snoise(vUvOrig);
+        float noiseVal = snoise(vUvOrig * (1. + 0.1 * sin(time * 2.)));
         finalColor.r += 0.001 + noiseVal * 0.012;
         finalColor.g += 0.001 + noiseVal * 0.008;
         finalColor.b += 0.001 + noiseVal * 0.0016;

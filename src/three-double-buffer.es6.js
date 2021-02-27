@@ -43,8 +43,7 @@ class ThreeDoubleBuffer {
   buildBuffers(isData) {
     // FBO scene & camera
     this.bufferScene = new THREE.Scene();
-		this.bufferCamera = new THREE.OrthographicCamera( this.width / - 2, this.width / 2, this.height / 2, this.height / - 2, 1, 1000 );
-		this.bufferCamera.position.z = 1;
+    this.bufferCamera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 1);
 
     // build render targets
     let options = (isData) ? this.getOptionsDataTexture() : this.getOptions();
@@ -67,11 +66,11 @@ class ThreeDoubleBuffer {
   }
 
   setUniform(key, val) {
-		this.bufferMaterial.uniforms[key].value = val;
+    this.bufferMaterial.uniforms[key].value = val;
   }
 
   getUniform(key) {
-		return this.bufferMaterial.uniforms[key].value;
+    return this.bufferMaterial.uniforms[key].value;
   }
 
   getWidth() {
@@ -109,6 +108,7 @@ class ThreeDoubleBuffer {
     renderer.setRenderTarget(null);
 
     // render in time if we pass one in
+    // this isn't working...
     if(debugRenderer) {
       debugRenderer.render(this.bufferScene, this.bufferCamera);
     }
