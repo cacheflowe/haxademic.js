@@ -15,7 +15,7 @@ class FrameLoop {
     this.animate();
   }
 
-  // listeners
+  // listeners - must have a public `frameLoop()` callback method
 
   addListener(obj) {
     this.listeners.push(obj);
@@ -46,6 +46,7 @@ class FrameLoop {
   }
 
   updateObjects() {
+    // update listener objects
     this.listeners.forEach((el) => {
       if(el.frameLoop) el.frameLoop(this.frame);
       else throw new Error('FrameLoop listener has no frameLoop()');
