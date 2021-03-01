@@ -47,8 +47,8 @@ class ThreeDoubleBuffer {
 
     // build render targets
     let options = (isData) ? this.getOptionsDataTexture() : this.getOptions();
-    this.bufferA = new THREE.WebGLRenderTarget(this.width, this.height, options);
-    this.bufferB = new THREE.WebGLRenderTarget(this.width, this.height, options);
+    this.textureOld = new THREE.WebGLRenderTarget(this.width, this.height, options);
+    this.textureCur = new THREE.WebGLRenderTarget(this.width, this.height, options);
 
     // camera-filling plane
     this.planeGeom = new THREE.PlaneBufferGeometry(this.width, this.height, 1);
@@ -61,7 +61,7 @@ class ThreeDoubleBuffer {
 
     // add mesh to show on screen if we'd like.
     // this would get attached outside of this object
-    let finalMaterial = new THREE.MeshBasicMaterial({map: this.bufferB})
+    let finalMaterial = new THREE.MeshBasicMaterial({map: this.textureCur})
     this.displayMesh = new THREE.Mesh( this.planeGeom, finalMaterial );
   }
 
@@ -94,16 +94,16 @@ class ThreeDoubleBuffer {
   }
 
   getTexture() {
-    return this.bufferB.texture;
+    return this.textureCur.texture;
   }
 
   getTextureOld() {
-    return this.bufferA.texture;
+    return this.textureOld.texture;
   }
 
   render(renderer, debugRenderer=null) {
     // render!
-    renderer.setRenderTarget(this.bufferB);
+    renderer.setRenderTarget(this.textureCur);
     renderer.render(this.bufferScene, this.bufferCamera);
     renderer.setRenderTarget(null);
 
@@ -114,13 +114,13 @@ class ThreeDoubleBuffer {
     }
 
     // ping pong buffers
-    var temp = this.bufferA;
-    this.bufferA = this.bufferB;
-    this.bufferB = temp;
+    var temp = this.textureOld;
+    this.textureOld = this.textureCur;
+    this.textureCur = temp;
 
     // swap materials in simulation scene and in display mesh
-    this.bufferMaterial.uniforms.lastFrame.value = this.bufferA.texture;
-    this.displayMesh.material.map = this.bufferB.texture;
+    this.bufferMaterial.uniforms.lastFrame.value = this.textureOld.texture;
+    this.displayMesh.material.map = this.textureCur.texture;
   }
 
 }
