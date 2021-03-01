@@ -16,6 +16,10 @@ class ErrorUtil {
   }
 
   static showError(message) {
+    // limit error messages
+    if(ErrorUtil.ERROR_COUNT > ErrorUtil.ERROR_LIMIT) return;
+    ErrorUtil.ERROR_COUNT++;
+
     // lazy-init error element
     var errorContainer = document.querySelector('#inline-error');
     if(!errorContainer) {
@@ -49,5 +53,7 @@ class ErrorUtil {
 ErrorUtil.INITIALIZED = false;
 ErrorUtil.TIMEOUT = null;
 ErrorUtil.TIMEOUT_DURATION = 60000;
+ErrorUtil.ERROR_COUNT = 0;
+ErrorUtil.ERROR_LIMIT = 100;
 
 export default ErrorUtil;
