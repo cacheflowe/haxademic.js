@@ -98,6 +98,10 @@ class ThreeSceneDemo extends DemoBase {
       uniform float mixOriginal;
       uniform vec2 offset;
 
+      #define PI 3.14159265359
+      #define HALF_PI 1.57079632675
+      #define TWO_PI 6.283185307
+
       // Simplex 2D noise
       //
       vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
@@ -149,16 +153,18 @@ class ThreeSceneDemo extends DemoBase {
         finalColor = lastFrameZoomed; // override mix with test pattern
         
         // add color & loop
-        float noiseVal = snoise(vUvOrig * (1. + 0.1 * sin(time * 2.)));
-        finalColor.r += 0.001 + noiseVal * 0.012;
-        finalColor.g += 0.001 + noiseVal * 0.008;
-        finalColor.b += 0.001 + noiseVal * 0.0016;
-        if(finalColor.r > 1.) finalColor.r = 0.;
-        if(finalColor.g > 1.) finalColor.g = 0.;
-        if(finalColor.b > 1.) finalColor.b = 0.;
-        if(finalColor.r < 0.) finalColor.r = 1.;
-        if(finalColor.g < 0.) finalColor.g = 1.;
-        if(finalColor.b < 0.) finalColor.b = 1.;
+        float noiseZoom = 1.85;
+        float posX = finalColor.r;
+        float posY = finalColor.g;
+        float noiseOffset = snoise(vec2(time/10. + vUvOrig.x * 0.1, time/10. + vUvOrig.y * 0.1));
+        float noiseVal = snoise(vec2(noiseOffset + vUvOrig.x * 0.85 + posX * noiseZoom, noiseOffset + vUvOrig.y * 0.85 + posY * noiseZoom));
+        float heading = noiseVal * TWO_PI * 5.;
+        float speed = 0.001 + 0.001 * (vUvOrig.x + vUvOrig.y);
+        finalColor.r += speed * cos(heading); // 0.001 + noiseVal * 0.012;
+        finalColor.g += speed * sin(heading); // 0.001 + noiseVal * 0.008;
+        finalColor.b += sin(noiseVal * 40.) * 0.003;
+        if(finalColor.r > 1. || finalColor.g > 1. || finalColor.b > 1.) finalColor = vec4(vec3(0.5), 1.);
+        if(finalColor.r < 0. || finalColor.g < 0. || finalColor.b < 0.) finalColor = vec4(vec3(0.5), 1.);
 
         // set final color
         gl_FragColor = finalColor;
@@ -303,25 +309,23 @@ class ThreeSceneDemo extends DemoBase {
         }
 
         void main() {
-          // get color map
-          vec4 diffuseColor = texture2D( colorMap, vUv );
-
           // get map position from double buffer
           vec4 mapPosition = texture2D(positionsMap, colorUV);
-          vec3 offsetAmp = vec3(0.0, 0.0, 0.5);
+          vec3 meshScale = vec3(2.0, 2.0, 1.0);
           vec3 posOffset = vec3(
-            (-0.5 + mapPosition.x) * offsetAmp.x, 
-            (-0.5 + mapPosition.y) * offsetAmp.y, 
-            (-0.5 + mapPosition.z) * offsetAmp.z
+            (-0.5 + mapPosition.x) * meshScale.x, 
+            (-0.5 + mapPosition.y) * meshScale.y, 
+            (-0.5 + mapPosition.z) * meshScale.z
           );
 
           // apply offset within modelViewMatrix multiplication
           // for correct inheritance of mesh position/rotation. 
           // doing this afterwards was losing coordinate system rotation
-          vec4 mvPosition = modelViewMatrix * vec4( translate + posOffset, 1.0 );
+          // vec4 mvPosition = modelViewMatrix * vec4( translate + posOffset, 1.0 );
+          vec4 mvPosition = modelViewMatrix * vec4( translate*0.01 + posOffset, 1.0 );
 
           // wrap offsets with a fade
-          float scale = 4.0;
+          float scale = 2.0;
           if(mapPosition.x > 0.8) scale = min(scale, map(mapPosition.x, 0.8, 1., scale, 0.));
           if(mapPosition.x < 0.2) scale = min(scale, map(mapPosition.x, 0.2, 0., scale, 0.));
           if(mapPosition.y > 0.8) scale = min(scale, map(mapPosition.y, 0.8, 1., scale, 0.));
