@@ -65,6 +65,10 @@ class ThreeScene {
     return this.renderer;
   }
 
+  getAspectRatio() {
+    return this.ASPECT;
+  }
+
   render() {
     this.renderer.render(this.scene, this.camera);
   }
