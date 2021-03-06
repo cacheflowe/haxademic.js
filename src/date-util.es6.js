@@ -4,6 +4,10 @@ class DateUtil {
     return (new Date()).getTime();
   }
 
+  static getMillisFine() {
+    return performance.now();
+  }
+
   static getDateTimeStamp() {
     const date = new Date();
     // return (date.getYear() + 1900) + '-' + (date.getMonth() + 1) + '-' + date.getDate();
