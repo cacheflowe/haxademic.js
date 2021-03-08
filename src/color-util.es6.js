@@ -34,9 +34,9 @@ class ColorUtil {
   /**
    *  Converts r, g, b, a values to a css-friendly hexadecimel string.
    *  @return An rgb color string.
-   *  @use    {@code ColorUtil.rgb2hex(0, 255, 0);}
+   *  @use    {@code ColorUtil.rgbToHexString(0, 255, 0);}
    */
-  static rgb2hex(r,g,b) {
+  static rgbToHexString(r,g,b) {
     return "#" + Number(0x1000000 + r*0x10000 + g*0x100 + b).toString(16).substring(1);
   }
 
@@ -57,19 +57,26 @@ class ColorUtil {
   /**
    *  Converts r, g, b, a values to a THREE/PIXI-friendly hexadecimel number.
    *  @return An rgb color string.
-   *  @use    {@code ColorUtil.rgb2hexNum(0, 255, 0);}
+   *  @use    {@code ColorUtil.rgbToColorInt(0, 255, 0);}
    */
-  static rgb2hexNum(r,g,b) {
+  static rgbToColorInt(r,g,b) {
     return Number("0x"+ Number(0x1000000 + r*0x10000 + g*0x100 + b).toString(16).substring(1));
+  }
+  static rgbaToColorInt(r,g,b,a) {
+    return Number("0x"+ Number(a*0x1000000 + r*0x10000 + g*0x100 + b).toString(16).substring(1));
   }
 
   /**
    *  Converts a hex string to a THREE/PIXI-friendly hex number.
    *  @return A hex color string.
-   *  @use    {@code ColorUtil.hexStr2HexNum('#ff0000);}
+   *  @use    {@code ColorUtil.hexStrToColorInt('#ff0000);}
    */
-  static hexStr2HexNum(str) {
+  static hexStrToColorInt(str) {
     return parseInt(str.replace(/^#/, ''), 16);
+  }
+
+  static colorIntToHexString(colorInt) {
+    return "#"+((colorInt)>>>0).toString(16).slice(-6);
   }
 
   /**
