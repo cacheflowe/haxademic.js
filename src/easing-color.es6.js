@@ -1,4 +1,3 @@
-import ColorUtil from './color-util.es6.js'
 import EasingFloat from './easing-float.es6.js'
 
 class EasingColor {
