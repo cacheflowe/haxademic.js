@@ -18,6 +18,8 @@ A personal front-end JavaScript toolkit
   * Add new page.js & demo
     * https://github.com/visionmedia/page.js/blob/master/page.mjs
   * Zora
+* Look at updating ThreeDoubleBuffer for data/simulations:
+  * https://github.com/spite/polygon-shredder
 * Convert more old haxademic.js demos
 * Begin integrating html-experiments repo?
 * Add utility methods: https://1loc.dev/
@@ -41,6 +43,7 @@ A personal front-end JavaScript toolkit
   * https://v8.dev/features/modules
   * https://ccoenraets.github.io/es6-tutorial/classes/
 * THREE.js
+  * SVG parser: https://observablehq.com/@antonlecock/displaying-svg-groups-as-layered-3d-shapes-using-three-js
   * RenderTargets
     * https://tympanus.net/codrops/2020/06/02/kinetic-typography-with-three-js/
     * https://leclub.github.io/2016/06/ThreeJS-Gray-Scott-Reaction-Diffusion/
