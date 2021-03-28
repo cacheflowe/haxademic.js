@@ -89,7 +89,8 @@ class SolidSocket {
     if(this.isConnected()) {
       this.socket.send(message);
     } else {
-      console.warn('SolidSocket.sendMessage() failed - not connected!');
+      this.errorCallback({message:'SolidSocket.sendMessage() failed - not connected'});
+      console.warn('SolidSocket.sendMessage() failed - not connected');
     }
   }
 

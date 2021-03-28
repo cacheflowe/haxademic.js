@@ -3,16 +3,12 @@ import EventLog from '../src/event-log.es6.js';
 import MobileUtil from '../src/mobile-util.es6.js';
 import PointerPos from '../src/pointer-pos.es6.js';
 import SolidSocket from '../src/solid-socket.es6.js';
+import URLUtil from '../src/url-util.es6.js';
 
 class SolidSocketDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/event-log.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/solid-socket.es6.js",
-    ], `
+    super(parentEl, [], `
     <div class="container">
       <style>
         html, body {
@@ -29,15 +25,15 @@ class SolidSocketDemo extends DemoBase {
         <button id="button2">Button 2</button>
       </div>
       <div id="results"></div>
-    </div>`);
+    </div>`, null, 'Add your socket server address to the URL as a hash: #server=ws://192.168.1.171:3001');
   }
 
   init() {
+    this.log = new EventLog(document.getElementById('results'));
+    this.pointerPos = new PointerPos(this.pointerMoved.bind(this));
     this.initSocket();
     this.addClicks();
-    this.pointerPos = new PointerPos(this.pointerMoved.bind(this));
-    this.log = new EventLog(document.getElementById('results'));
-    MobileUtil.lockTouchScreen(true);
+    // MobileUtil.lockTouchScreen(true);
   }
 
   addClicks() {
@@ -67,21 +63,35 @@ class SolidSocketDemo extends DemoBase {
   // SOCKET
 
   initSocket() {
-    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001?roomId=987654321');
-    this.solidSocket.setOpenCallback(this.socketOpen.bind(this));
+    // get address from querystring
+    let serverAddr = URLUtil.getHashQueryVariable('server') || 'ws://192.168.1.171:3001';
+    this.log.log(`attempting to connect to ${serverAddr}`);
+
+    this.solidSocket = new SolidSocket(`${serverAddr}?roomId=987654321`);
+    this.solidSocket.setOpenCallback(this.onOpen.bind(this));
     this.solidSocket.setMessageCallback(this.onMessage.bind(this));
-    this.solidSocket.setErrorCallback(() => console.log('Socket [ERROR]'));
-    this.solidSocket.setCloseCallback(() => console.log('Socket [CLOSE]'));
+    this.solidSocket.setErrorCallback(this.onError.bind(this));
+    this.solidSocket.setCloseCallback(this.onClose.bind(this));
   }
 
-  socketOpen(e) {
-    this.log.log('socketOpen!');
+  onOpen(e) {
+    this.log.log('SolidSocket.onOpen()', '#55ff55');
     this.solidSocket.sendJSON({'hello':'connect!'});
   }
-
+  
   onMessage(msg) {
     // console.log(msg.data);
     this.log.log(JSON.stringify(msg.data));
+  }
+
+  onError(e) {
+    this.log.log(`SolidSocket.onError() ${(e.message) ? ': '+e.message : ''}`, '#ff5555');
+    console.log('onError', e);
+  }
+  
+  onClose(e) {
+    this.log.log('SolidSocket.onClose()', '#ff5555');
+    console.log('onClose', e);
   }
 
 }
