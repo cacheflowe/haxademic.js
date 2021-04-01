@@ -7,7 +7,7 @@ import ThreeScene from '../src/three-scene-.es6.js';
 class ThreeSceneDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeScene', 'three-scene', 'A basic THREE.js scene wrapper with a resize listener', true);
+    super(parentEl, [], 'ThreeScene', 'three-scene', 'A basic THREE.js scene wrapper with a resize listener. Press J to export a jpeg, and P to export a png.', true);
   }
 
   init() {
@@ -132,6 +132,21 @@ class ThreeSceneDemo extends DemoBase {
   resize() {
     this.threeScene.resize();
   }
+
+  keyDown(key) {
+    // asynchronous save post-render(). callback brings the encoded image back from the render loop
+    if(key == 74) {
+      this.threeScene.saveJpg((imageBase64) => {
+        this.debugEl.innerHTML += `<img src="${imageBase64}" style="width: 250px; box-shadow: 0 0 5px #000000;">`;
+      }, 0.5);
+    }
+    if(key == 80) {
+      this.threeScene.savePng((imageBase64) => {
+        this.debugEl.innerHTML += `<img src="${imageBase64}" style="width: 250px; box-shadow: 0 0 5px #000000;">`;
+      });
+    }
+  }
+
 
 }
 

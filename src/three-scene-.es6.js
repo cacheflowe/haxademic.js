@@ -27,7 +27,9 @@ class ThreeScene {
   }
 
   buildRenderer() {
-    let options = {antialias: true};
+    let options = {
+      antialias: true,
+    };
     if(this.transparent) options.alpha = true;
     this.renderer = new THREE.WebGLRenderer(options);
     this.renderer.setClearColor(this.bgColor, (this.transparent) ? 0 : 1);
@@ -71,6 +73,28 @@ class ThreeScene {
 
   render() {
     this.renderer.render(this.scene, this.camera);
+    this.checkRenderFrame();
+  }
+
+  checkRenderFrame() {
+    if(!!this.saveFrameCallback) {
+      this.saveFrameCallback();
+      this.saveFrameCallback = null;
+    }
+  }
+
+  saveJpg(callback, quality=1.0) {
+    this.saveFrameCallback = () => {
+      const imgBase64 = this.canvasEl().toDataURL('image/jpeg', quality);
+      callback(imgBase64);
+    };
+  }
+
+  savePng(callback) {
+    this.saveFrameCallback = () => {
+      const imgBase64 = this.canvasEl().toDataURL();
+      callback(imgBase64);
+    };
   }
 
   getContainerSize() {
