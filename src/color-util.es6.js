@@ -1,11 +1,10 @@
 class ColorUtil {
   /**
-   *  Converts a hex color value to canvas-friendly rgba. Original code from Robin W. Spencer (http://scaledinnovation.com).
+   *  Converts a hex color value to canvas-friendly rgba.
    *  @return An rgba color string.
    *  @use    {@code ColorUtil.hexToCanvasColor('#00ff00', 0.5);}
    */
-  static hexToCanvasColor( hexColor, opacity ) {
-    opacity = ( opacity != null ) ? opacity : "1.0";
+  static hexToCanvasColor( hexColor, opacity='1.0' ) {
     hexColor = hexColor.replace( "#", "" );
     var r = parseInt( hexColor.substring( 0, 2 ), 16 );
     var g = parseInt( hexColor.substring( 2, 4 ), 16 );
