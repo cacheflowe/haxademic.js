@@ -1,27 +1,33 @@
 class JsonPoller {
 
-  constructor(url, callback, errorCallback) {
+  constructor(url, callback, errorCallback, interval=0, requestData={}) {
     this.url = url;
     this.callback = callback;
     this.errorCallback = errorCallback;
+    this.interval = interval;
+    this.requestData = requestData;
     this.requestCount = 0;
     this.fetchData();
+  }
+
+  setRequestData(requestData) {
+    this.requestData = requestData;
   }
 
   fetchData() {
     this.requestCount++;
     //  + "&rand="+Math.round(Math.random() * 999999)
-    fetch(this.url)
+    fetch(this.url, this.requestData)
       .then((response) => {
         return response.json();
       }).then((jsonData) => {
         requestAnimationFrame(() => {  // detach from fetch Promise to prevent Error-throwing
           this.callback(jsonData);
-          this.fetchData();
+          setTimeout(() => this.fetchData(), this.interval);
         });
       }).catch((error) => {
         this.errorCallback(error);
-        this.fetchData();
+        setTimeout(() => this.fetchData(), this.interval);
       });
   }
 
