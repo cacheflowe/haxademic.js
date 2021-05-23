@@ -59,21 +59,31 @@ class WebcamToCanvasDemo extends DemoBase {
 
     // crop copy video to canvas
     if(this.cropData) {
-      this.ctx.save();
-      // flip x
-      this.ctx.translate(this.canvasEl.width, 0);
-      this.ctx.scale(-1, 1);
-      // crop to fill
-      this.ctx.drawImage(this.videoEl, this.cropData[0], this.cropData[1], this.cropData[2], this.cropData[3]);
-      this.ctx.restore();
-
-      // canvas filters just for fun
-      CanvasFilters.desaturate(this.canvasEl);
-      CanvasFilters.contrastImage(this.canvasEl, 100);
+      this.drawWebcamToCanvas();
+      this.applyCanvasFilters();
     }
-    
   }
 
+  drawWebcamToCanvas() {
+    let x = this.cropData[0];
+    let y = this.cropData[1];
+    let w = this.cropData[2];
+    let h = this.cropData[3];
+    this.ctx.save();                              // push
+    this.ctx.translate(this.canvasEl.width, 0);   // flip x
+    this.ctx.scale(-1, 1);
+    this.ctx.drawImage(this.videoEl, x, y, w, h); // crop to fill
+    this.ctx.restore();                           // pop
+  }
+
+  applyCanvasFilters() {
+    // just for funsies. could be optimized 
+    // by only getting pixel data once, 
+    // and sharing across filters. But should really
+    // just be done w/shaders in WebGL
+    CanvasFilters.desaturate(this.canvasEl);
+    CanvasFilters.contrastImage(this.canvasEl, 100);
+  }
 }
 
 if(window.autoInitDemo) window.demo = new WebcamToCanvasDemo(document.body);
