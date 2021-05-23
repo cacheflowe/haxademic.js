@@ -50,7 +50,8 @@ class WebcamToCanvasDemo extends DemoBase {
   animate() {
     requestAnimationFrame(() => this.animate());
 
-    // calculate cropping offset & size (only once)
+    // calculate cropping offset & size. 
+    // only do this once when video has valid dimensions
     if(!this.cropData && this.videoEl.videoWidth > 0) {
       this.cropData = ImageUtil.getOffsetAndSizeToCrop(this.canvasEl.width, this.canvasEl.height, this.videoEl.videoWidth, this.videoEl.videoHeight, true);
       console.log(this.cropData);
