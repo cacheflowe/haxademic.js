@@ -59,8 +59,10 @@ class WebcamToCanvasDemo extends DemoBase {
     // crop copy video to canvas
     if(this.cropData) {
       this.ctx.save();
+      // flip x
       this.ctx.translate(this.canvasEl.width, 0);
       this.ctx.scale(-1, 1);
+      // crop to fill
       this.ctx.drawImage(this.videoEl, this.cropData[0], this.cropData[1], this.cropData[2], this.cropData[3]);
       this.ctx.restore();
     }
