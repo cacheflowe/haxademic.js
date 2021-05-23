@@ -1,7 +1,8 @@
 import DemoBase from './demo--base.es6.js';
-import Webcam from '../src/webcam.es6.js';
-import ImageUtil from '../src/image-util.es6.js';
+import CanvasFilters from '../src/canvas-filters.es6.js';
 import DOMUtil from '../src/dom-util.es6.js';
+import ImageUtil from '../src/image-util.es6.js';
+import Webcam from '../src/webcam.es6.js';
 
 class WebcamToCanvasDemo extends DemoBase {
 
@@ -65,6 +66,10 @@ class WebcamToCanvasDemo extends DemoBase {
       // crop to fill
       this.ctx.drawImage(this.videoEl, this.cropData[0], this.cropData[1], this.cropData[2], this.cropData[3]);
       this.ctx.restore();
+
+      // canvas filters just for fun
+      CanvasFilters.desaturate(this.canvasEl);
+      CanvasFilters.contrastImage(this.canvasEl, 100);
     }
     
   }
