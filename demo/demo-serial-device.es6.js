@@ -31,8 +31,16 @@ class SerialDeviceDemo extends DemoBase {
 
   serialRead(data) {
     let val = data;
-    if(data.length && data.length > 0 && data[0] == 'a') {
-      this.el.innerHTML = `<p>Distance: ${data.substring(1)}mm</p>`;
+    if(data.length && data.length > 0) {
+      if(data[0] == 'a') {
+        this.el.innerHTML = `<p>Distance: ${data.substring(1)}mm</p>`;
+      } else if(parseInt(data) > 40) {
+        this.el.innerHTML = `<p>Distance: ${data}mm</p>`;
+      } else {
+        this.debugEl.innerHTML = `<p>Error: ${data}</p>`;
+      }
+    } else {
+      this.debugEl.innerHTML = `<p>Error: ${data}</p>`;
     }
   }
 

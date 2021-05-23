@@ -51,7 +51,7 @@ class MobileUtilDemo extends DemoBase {
     MobileUtil.setDeviceInputClass();
     MobileUtil.enablePseudoStyles();
     MobileUtil.addFullscreenListener();
-    MobileUtil.addFullscreenEl(document.getElementById('fullscreen'));
+    MobileUtil.addFullscreenEl(document.getElementById('fullscreen'), true);
   }
 
   initButtons() {

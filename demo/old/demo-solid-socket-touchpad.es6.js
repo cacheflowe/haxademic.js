@@ -98,7 +98,7 @@ class SolidSocketTouchpadDemo extends DemoBase {
     MobileUtil.setDeviceInputClass();
     MobileUtil.enablePseudoStyles();
     MobileUtil.addFullscreenListener();
-    MobileUtil.addFullscreenEl(this.el);
+    MobileUtil.addFullscreenEl(this.el, true);
     MobileUtil.disableTextSelect(document.body, true);
 
     this.addSessionCloseMessage();

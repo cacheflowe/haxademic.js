@@ -44,7 +44,7 @@ class DemoBase {
       if(fullscreen) {
         this.el.classList.add('fullscreen-bg');
         MobileUtil.addFullscreenListener();
-        MobileUtil.addFullscreenEl(this.el);
+        MobileUtil.addFullscreenEl(this.el, true);
       }
       this.debugEl = document.getElementById('debug');
     }

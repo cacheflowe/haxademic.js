@@ -68,10 +68,11 @@ class MobileUtil {
     });
   }
 
-  static addFullscreenEl(el, isBackground=false) {
+  static addFullscreenEl(el, usesVH = true, isBackground=false) {
     // use in conjunction with addFullscreenListener()
     // helps stick an element to fullscreen, no matter where mobile Safari's browser bars are
-    el.style.setProperty('height', 'calc(var(--vh, 1vh) * 100)');
+    if(usesVH) el.style.setProperty('height', 'calc(var(--vh, 1vh) * 100)');
+    else       el.style.setProperty('height', '100%');
     el.style.setProperty('width', '100%');
     el.style.setProperty('position', 'fixed');
     el.style.setProperty('top', '0');
@@ -79,7 +80,7 @@ class MobileUtil {
     if(isBackground) el.style.setProperty('z-index', '-9999');
   }
 
-  static addFullscreenListener() {
+  static addFullscreenListener(extraUpdateTimeout=100) {
     if(MobileUtil.FULLSCREEN_LISTENING) return;
     MobileUtil.FULLSCREEN_LISTENING = true;
     // from: https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
@@ -88,7 +89,7 @@ class MobileUtil {
       MobileUtil.updateFullscreenHeight();
       // debounce it too, as iOS Firefox gets stuck
       // requestAnimationFrame didn't fix it on FF iOS, but setTimeout() did
-      setTimeout(() => MobileUtil.updateFullscreenHeight(), 20);
+      setTimeout(() => MobileUtil.updateFullscreenHeight(), extraUpdateTimeout);
     });
     window.dispatchEvent(new Event('resize'));
   }
