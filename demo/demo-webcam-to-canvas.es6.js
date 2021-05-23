@@ -6,7 +6,7 @@ import DOMUtil from '../src/dom-util.es6.js';
 class WebcamToCanvasDemo extends DemoBase {
 
   constructor(parentEl) {
-    super(parentEl, [], 'Webcam', 'webcam-to-canvas-container');
+    super(parentEl, [], 'Webcam To Canvas', 'webcam-to-canvas-container');
   }
 
   init() {
