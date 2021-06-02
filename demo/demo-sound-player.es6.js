@@ -1,6 +1,8 @@
 import DemoBase from './demo--base.es6.js';
-import SoundPlayer from '../src/sound-player.es6.js';
 import DOMUtil from '../src/dom-util.es6.js';
+import FrameLoop from '../src/frame-loop.es6.js';
+import SoundFFT from '../src/sound-fft.es6.js';
+import SoundPlayer from '../src/sound-player.es6.js';
 
 class SoundPlayerDemo extends DemoBase {
 
@@ -15,7 +17,9 @@ class SoundPlayerDemo extends DemoBase {
     this.samples = {};
     this.loops = {};
     this.loopVolumes = {};
+    this.loopTime = 4.2;
     this.buildSounds();
+    this.startTickUpdate();
   }
 
   buildPlayButton(soundId) {
@@ -32,7 +36,6 @@ class SoundPlayerDemo extends DemoBase {
       let soundPlayer = this.samples[soundId];
       soundPlayer.play();
     });
-
   }
 
   loadedSample(id) {
@@ -49,7 +52,17 @@ class SoundPlayerDemo extends DemoBase {
 
   playLoops() {
     this.loopIds.forEach(id => this.loops[id].stop());
-    this.loopIds.forEach(id => this.loops[id].play(1, 3.87097916));
+    setTimeout(() => {
+      // this.loopIds.forEach(id => this.loops[id].play(1, 3.87097916));
+      this.loopIds.forEach(id => this.loops[id].play(1, this.loopTime));
+      this.attachPlayerToFFT();
+    }, 20);
+  }
+
+  attachPlayerToFFT() {
+    // attach specific sound player to FFT
+    let soundPlayer = this.loops[this.loopIds[3]];
+    this.soundFFT.setNewSourceAudioNode(soundPlayer.getVolumeNode());
   }
 
   loadSamples() {
@@ -67,9 +80,19 @@ class SoundPlayerDemo extends DemoBase {
       this.loops[id] = new SoundPlayer('../data/audio/'+id, () => {this.loadedSample()}, this.audioCtx);
       this.loops[id].setLoops(true);
     });
-    // this.loops[this.loopIds[0]].setEndedCallback(() => {
-    //   console.log('sample ended!');
-    // });
+
+    // add sound complete callback
+    let firstPlayer = this.loops[this.loopIds[0]];
+    firstPlayer.setEndedCallback(() => {
+      // this.playLoops();
+      this.loopIds.forEach((id, i) => {
+        if(i != 0) {
+          this.loops[id].stop();
+          this.loops[id].play(1, this.loopTime);
+        }
+      });
+      this.attachPlayerToFFT();
+    });
 
     // build buttons to start & stop loops
     var button = document.createElement('button');
@@ -87,6 +110,7 @@ class SoundPlayerDemo extends DemoBase {
     });
 
     // build buttons to toggle (fade) mute per channel
+    this.el.appendChild(DOMUtil.stringToElement('<p>Toggle the 4 loop channels with a fade.</p>'));
     this.loopIds.forEach((id, i) => {
       let fadeButton = document.createElement('button');
       this.el.appendChild(fadeButton);
@@ -97,12 +121,47 @@ class SoundPlayerDemo extends DemoBase {
         else loop.fadeVolume(0, 1.5);
       });
     });
+
+    // show tick in text
+    this.el.appendChild(DOMUtil.stringToElement('<p>Tick: <span id="tick">-1</span></p>'));
+    
+    // add soundFFT
+    this.el.appendChild(DOMUtil.stringToElement('<p id="fft"></p>'));
+    this.soundFFT = new SoundFFT(this.audioCtx, null);
   }
 
   buildSounds() {
     // build one-shot sample players
     this.loadSamples();
     this.loadLoops();
+  }
+
+  startTickUpdate() {
+    window._frameLoop = new FrameLoop(180, 4);
+    _frameLoop.addListener(this);
+  }
+
+  frameLoop(frameCount) {
+    // check current tick for first loop
+    let soundPlayer = this.loops[this.loopIds[3]];
+    soundPlayer.updateTicks();
+    document.getElementById('tick').innerHTML = soundPlayer.curTick + 1;
+
+    // update FFT
+    this.animateFFT();
+  }
+
+  animateFFT() {
+    if(!this.soundFFT) return;
+    this.soundFFT.update();
+    this.soundFFT.drawDebug();
+    this.attachDebugCanvas();
+  }
+
+  attachDebugCanvas() {
+    if(this.fftAttached) return;
+    this.fftAttached = true;
+    document.getElementById('fft').appendChild(this.soundFFT.getDebugCanvas());
   }
 
 }

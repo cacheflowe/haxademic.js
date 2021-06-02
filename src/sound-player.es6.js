@@ -12,11 +12,39 @@ class SoundPlayer {
     this.volume = 1;
     this.loops = false;
     this.loadAudio();
-    this.playOnLoad = false;
+    this.playing = false;
     this.loadedCallback = loadedCallback;
     this.endedCallback = null;
 
+    this.initTicks();
     if(analysisAverages > 0) this.createAnalyzer(analysisAverages);
+  }
+
+  initTicks() {
+    this.startTime = 0;
+    this.audioTimeOffset = 0.; // helps with the visual timing
+    this.tickTime = 0;
+    this.numTicks = 16;
+    this.curTick = 0;
+    this.lastTick = 0;
+    this.tickChanged = false;
+  }
+
+  setNumTicks(numTicks) {
+    this.numTicks = numTicks;
+  }
+
+  loadAudio() {
+    const request = new XMLHttpRequest();
+    request.open("GET", this.audioFile, true);
+    request.responseType = "arraybuffer";
+    request.onload = () => {
+      this.audioContext.decodeAudioData(request.response, (buffer) => { 
+          this.buffer = buffer;
+          if(this.loadedCallback) this.loadedCallback(this.audioFile);
+      });
+    }
+    request.send();
   }
 
   setEndedCallback(callback) {
@@ -36,48 +64,64 @@ class SoundPlayer {
     this.play();
   }
 
-  play(rate=1, newDuration=-1) {
-    if(!this.buffer) {
-      this.playOnLoad = true;
+  play(rate=1, targetDuration=-1) {
+    this.targetDuration = targetDuration;
+
+    this.sourceNode = this.audioContext.createBufferSource();
+    this.sourceNode.buffer = this.buffer;
+    this.sourceNode.loop = (!!this.endedCallback) ? false : this.loops;
+    // this.sourceNode.loop = false;
+
+    this.panner = this.audioContext.createPanner();
+    this.panner.setPosition(this.pan, 0, 0);
+    this.sourceNode.connect(this.panner);
+
+    this.volumeNode = this.audioContext.createGain();
+    this.volumeNode.gain.value = this.volume;
+    this.panner.connect(this.volumeNode);
+
+    // add pan node
+    if(this.analyser) {
+      this.volumeNode.connect( this.analyser );
+      this.analyser.connect( this.audioContext.destination );
     } else {
-      this.sourceNode = this.audioContext.createBufferSource();
-      this.sourceNode.buffer = this.buffer;
-      this.sourceNode.loop = (!!this.endedCallback) ? false : this.loops;
-      // this.sourceNode.loop = false;
-
-      this.panner = this.audioContext.createPanner();
-      this.panner.setPosition(this.pan, 0, 0);
-      this.sourceNode.connect(this.panner);
-
-      this.volumeNode = this.audioContext.createGain();
-      this.volumeNode.gain.value = this.volume;
-
-      this.panner.connect(this.volumeNode);
-      if(this.analyser) {
-        this.volumeNode.connect( this.analyser );
-        this.analyser.connect( this.audioContext.destination );
-      } else {
-        this.volumeNode.connect( this.audioContext.destination );
-      }
-      
-      // set pitch
-      if(newDuration > 0) {
-        this.sourceNode.playbackRate.value = this.duration() / newDuration;
-      } else {
-        this.sourceNode.playbackRate.value = rate;
-      }
-
-      // play!
-      this.sourceNode.start(0);
-      this.sourceNode.onended = () => {
-        if(this.endedCallback) this.endedCallback();
-        if(this.loops) this.play(rate, newDuration);
-      };
+      this.volumeNode.connect( this.audioContext.destination );
     }
+    
+    // set pitch
+    if(this.targetDuration > 0) {
+      this.sourceNode.playbackRate.value = this.durationOrig() / this.targetDuration;
+    } else {
+      this.sourceNode.playbackRate.value = rate;
+    }
+
+    // play!
+    this.playing = true;
+    this.sourceNode.start(0);
+    this.startTime = this.audioContext.currentTime; // for ticks (and pausing if implemented later)
+    this.sourceNode.onended = () => {
+      if(this.endedCallback) this.endedCallback();
+      if(this.loops && this.playing) this.play(rate, this.targetDuration);
+    };
+
+    // return node
+    return this.sourceNode;
+  }
+
+  getNode() {
+    return this.sourceNode;
+  }
+  
+  getVolumeNode() {
+    return this.volumeNode;
   }
 
   stop() {
-    if (this.sourceNode) this.sourceNode.stop(0);
+    this.playing = false;
+    if(this.sourceNode) {
+      this.sourceNode.onended = null;
+      this.sourceNode.stop(0);
+    }
   }
 
   getVolume() {
@@ -103,23 +147,36 @@ class SoundPlayer {
     this.loops = loops;
   }
 
-  duration() {
+  isPlaying() {
+    return this.playing;
+  }
+
+  durationOrig() {
     return this.sourceNode.buffer.duration;
   }
 
-  loadAudio() {
-    var request = new XMLHttpRequest();
-    request.open("GET", this.audioFile, true);
-    request.responseType = "arraybuffer";
-    request.onload = () => {
-      this.audioContext.decodeAudioData(request.response, (buffer) => { 
-          this.buffer = buffer;
-          if( this.playOnLoad ) this.playSound();
-          if( this.loadedCallback ) this.loadedCallback(this.audioFile);
-      });
-    }
-    request.send();
+  curDuration() {
+    return (this.targetDuration > 0) ? this.targetDuration : this.durationOrig();
   }
+  
+  // Ticks
+
+  updateTicks() {
+    // don't calculate ticks if sound isn't loaded or playing
+    if(!this.sourceNode) return;
+    if(!this.playing) {
+      this.lastTick = this.curTick = 0; 
+      return;
+    }
+    // calculate ticks based on current time and target duration
+    this.tickTime = (this.curDuration() / this.durationOrig()) * this.durationOrig() / this.numTicks;
+    this.playbackTime = (this.audioContext.currentTime - this.startTime) % this.curDuration() + this.audioTimeOffset;
+    this.curTick = Math.floor(this.playbackTime / this.tickTime) % this.numTicks;
+    this.tickChanged = (this.curTick != this.lastTick);
+    this.lastTick = this.curTick;
+  }
+
+  // FFT
 
   getSpectrum() {
     var freqByteData = new Uint8Array(this.analyser.frequencyBinCount);
