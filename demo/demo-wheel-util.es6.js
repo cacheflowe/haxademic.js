@@ -1,4 +1,5 @@
 import DemoBase from './demo--base.es6.js';
+import FloatBuffer from '../src/float-buffer.es6.js';
 import WheelUtil from '../src/wheel-util.es6.js';
 
 class WheelUtilDemo extends DemoBase {
@@ -12,6 +13,8 @@ class WheelUtilDemo extends DemoBase {
   init() {
     this.listenOnDocument();
     this.listenOnElement();
+    this.initMovement();
+    this.animate();
   }
 
   listenOnDocument() {
@@ -28,6 +31,10 @@ class WheelUtilDemo extends DemoBase {
       this.bgCol = Math.min(Math.max(0, this.bgCol), 255);  // clamp 0-255
       document.body.style.setProperty('background-color', `rgba(${this.bgCol}, ${this.bgCol}, ${this.bgCol}, 1)`);
       this.updateDebug();
+      // update movement controls
+      this.speedX.update(-this.deltaX);
+      this.speedY.update(-this.deltaY);
+      this.lastWheelTime = Date.now();
     });
   }
 
@@ -45,9 +52,8 @@ class WheelUtilDemo extends DemoBase {
     WheelUtil.addWheelListener((deltaX, deltaY, e) => {
       this.scale += deltaY / 10;
       this.scale = Math.min(Math.max(0.5, this.scale), 1.5);  // clamp 0.5-1.5
-      this.scrollBox.style.setProperty('transform', `scale(${this.scale})`);
       this.updateDebug();
-    }, this.scrollBox, false);
+    }, this.scrollBox, true);
   }
 
   updateDebug() {
@@ -59,6 +65,29 @@ class WheelUtilDemo extends DemoBase {
       Div scale: ${this.scale.toFixed(2)}
       </pre>
     `
+  }
+
+  initMovement() {
+    this.speedX = new FloatBuffer(20);
+    this.speedY = new FloatBuffer(20);
+    this.lastWheelTime = Date.now();
+    this.curX = 0;
+    this.curY = 0;
+  }
+
+  animate() {
+    requestAnimationFrame(() => this.animate());
+
+    // update offset position
+    this.curX += this.speedX.average();
+    this.curY += this.speedY.average();
+    this.scrollBox.style.setProperty('transform', `translate3d(${this.curX}px, ${this.curY}px, 0px) scale(${this.scale})`);
+
+    // settle back down after a slight delay from user interaction
+    if(Date.now() > this.lastWheelTime + 100) {
+      this.speedX.update(0);
+      this.speedY.update(0);
+    }
   }
 }
 
