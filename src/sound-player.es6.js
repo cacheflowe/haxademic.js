@@ -129,14 +129,18 @@ class SoundPlayer {
   }
 
   setVolume(volume) {
+    if(volume < 0.0001) volume = 0.0001;
     this.volume = volume;
     this.volumeNode.gain.value = this.volume;
   }
 
   fadeVolume(volume, fadeSeconds) {
     if(volume < 0.0001) volume = 0.0001;
-    this.volume = volume;
-    this.volumeNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + fadeSeconds);
+    if(volume != this.volume) {
+      this.volume = volume;
+      this.volumeNode.gain.setValueAtTime(this.volumeNode.gain.value, this.audioContext.currentTime);   // added because audible clicks: http://alemangui.github.io/ramp-to-value
+      this.volumeNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + fadeSeconds);
+    }
   }
 
   setPan(pan) {
