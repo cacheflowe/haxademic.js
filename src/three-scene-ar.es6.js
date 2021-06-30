@@ -226,7 +226,7 @@ class ThreeSceneAr extends ThreeScene {
   addTestCube() {
     // add a transparent unit cube so we can tell if things are working
     let cubeMesh = new THREE.Mesh(
-      new THREE.CubeGeometry(1, 1, 1),
+      new THREE.BoxBufferGeometry(1, 1, 1),
       new THREE.MeshNormalMaterial({ transparent: true, opacity: 0.5, side: THREE.DoubleSide })
     );
     cubeMesh.position.y = 0.5;
