@@ -47,16 +47,20 @@ window.p5Recorder = p5Recorder;
 // loop-tracking & video recording function 
 ////////////////////////////////////////////////
 
-var recorder = null;
+window.recorder = null;
+window.loopFrames = 240; // 4-second loop (60fps * 4)
+window.frameCountLooped = 1;
+window.loopProgress = 0;
+window.loopProgressRadians = 0;
 
-function updateLoopRecording() {
-  if(!recorder) recorder = new p5Recorder(loopFrames);
+window.updateLoopRecording = function(frameCount) {
+  if(!window.recorder) window.recorder = new p5Recorder(window.loopFrames);
   // create a looped framecount & normalized progress
-  frameCountLooped = frameCount % loopFrames;
-  loopProgress = frameCountLooped / loopFrames;
-  loopProgressRadians = loopProgress * TWO_PI;
+  window.frameCountLooped = frameCount % window.loopFrames;
+  window.loopProgress = window.frameCountLooped / window.loopFrames;
+  window.loopProgressRadians = window.loopProgress * (Math.PI * 2);
   // start/stop recording, and progress
-  if(!!recorder) {
-    recorder.renderVideo();
+  if(!!window.recorder) {
+    window.recorder.renderVideo();
   }
 }
