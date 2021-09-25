@@ -48,10 +48,6 @@ window.p5Recorder = p5Recorder;
 ////////////////////////////////////////////////
 
 var recorder = null;
-var loopFrames = 240; // 4-second loop (60fps * 4)
-let frameCountLooped = 1;
-let loopProgress = 0;
-let loopProgressRadians = 0;
 
 function updateLoopRecording() {
   if(!recorder) recorder = new p5Recorder(loopFrames);
