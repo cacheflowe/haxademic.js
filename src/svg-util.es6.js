@@ -50,6 +50,22 @@ class SVGUtil {
     return SVGUtil.svgStrToBase64(el.outerHTML);
   }
 
+  static polygonsToPaths(el) {
+    var polys = el.querySelectorAll('polygon,polyline');
+    [].forEach.call(polys,convertPolyToPath);
+
+    function convertPolyToPath(poly){
+      var svgNS = poly.ownerSVGElement.namespaceURI;
+      var path = document.createElementNS(svgNS,'path');
+      var pathdata = 'M '+poly.getAttribute('points');
+      if (poly.tagName=='polygon') pathdata+='z';
+      if(poly.getAttribute('id')) path.setAttribute('id', poly.getAttribute('id'));
+      if(poly.getAttribute('fill')) path.setAttribute('fill', poly.getAttribute('fill'));
+      if(poly.getAttribute('stroke')) path.setAttribute('stroke', poly.getAttribute('stroke'));
+      path.setAttribute('d',pathdata);
+      poly.parentNode.replaceChild(path,poly);
+    }
+  }
 }
 
 SVGUtil.clearColor = 'rgba(0,0,0,0)';
