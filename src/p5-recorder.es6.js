@@ -42,25 +42,3 @@ class p5Recorder {
 
 // set class on window since this gets imported into editor.p5js.org, not as a module
 window.p5Recorder = p5Recorder;
-
-////////////////////////////////////////////////
-// loop-tracking & video recording function 
-////////////////////////////////////////////////
-
-window.recorder = null;
-window.loopFrames = 240; // 4-second loop (60fps * 4)
-window.frameCountLooped = 1;
-window.loopProgress = 0;
-window.loopProgressRadians = 0;
-
-window.updateLoopRecording = function(frameCount) {
-  if(!window.recorder) window.recorder = new p5Recorder(window.loopFrames);
-  // create a looped framecount & normalized progress
-  window.frameCountLooped = frameCount % window.loopFrames;
-  window.loopProgress = window.frameCountLooped / window.loopFrames;
-  window.loopProgressRadians = window.loopProgress * (Math.PI * 2);
-  // start/stop recording, and progress
-  if(!!window.recorder) {
-    window.recorder.renderVideo();
-  }
-}
