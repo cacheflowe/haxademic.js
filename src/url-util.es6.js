@@ -12,6 +12,10 @@ class URLUtil {
     return null;
   }
 
+  static curAbsolutePath() {
+    return window.location.protocol + window.location.hostname + window.location.pathname;
+  }
+
   static removeHash() {
     history.pushState("", document.title, window.location.pathname + window.location.search);
   }
