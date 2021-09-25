@@ -66,7 +66,8 @@ class VideoRecorder {
 
   addFrame() {
     if(this.isRecording) {
-      this.stream.getVideoTracks()[0].requestFrame();
+      // this.stream.getVideoTracks()[0].requestFrame();  // old method - browser implementatoin changed
+      this.stream.requestFrame();
     }
   }
 
