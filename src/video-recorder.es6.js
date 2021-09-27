@@ -54,7 +54,7 @@ class VideoRecorder {
   }
 
   start() {
-    console.log('- VideoRecorder started (Chrome Only) ---');
+    console.log('- VideoRecorder started ---');
     console.log('- fileType:', this.fileType);
     console.log('- fps:', this.frameRate);
     console.log('- audioBitsPerSecond:', this.audioBitsPerSecond);
@@ -67,9 +67,9 @@ class VideoRecorder {
   addFrame() {
     if(this.isRecording) {
       if(this.stream.requestFrame) {
-        this.stream.requestFrame();
+        this.stream.requestFrame();                      // Firefox
       } else {
-        this.stream.getVideoTracks()[0].requestFrame();  // old method - browser implementation changed to above, but some browsers might still use the old one
+        this.stream.getVideoTracks()[0].requestFrame();  // Chrome
       }
     }
   }
