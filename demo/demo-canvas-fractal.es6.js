@@ -77,6 +77,7 @@ class Fractal {
     this.polygonVertices = Math.round(this.remap(this.hexToNum(this.getHashValAt(6)), 0, 255, 3, 8));
     this.drawsInnerLines = this.booleanFromHex(this.getHashValAt(0));
     this.inwardIsOkay = this.booleanFromHex(this.getHashValAt(25));
+    if(this.inwardIsOkay) this.maxLevels--;
     this.backgroundR = this.hexToNum(this.getHashValAt(19));
     this.backgroundG = this.hexToNum(this.getHashValAt(20));
     this.backgroundB = this.hexToNum(this.getHashValAt(21));
