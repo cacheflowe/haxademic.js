@@ -17,6 +17,12 @@ class ObjectUtil {
     });
   }
 
+  static overrideOptionsObject(defaultOptions, customOptions) {
+    for(let key in customOptions) {
+      if(defaultOptions[key]) defaultOptions[key] = customOptions[key]
+    }
+  }
+
 }
 
 export default ObjectUtil;

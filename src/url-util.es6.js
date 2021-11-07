@@ -12,6 +12,16 @@ class URLUtil {
     return null;
   }
 
+  static getQueryParam(variable, paramsStartChar='#') {
+    let url = document.location.hash;
+    let paramsString = url.split(paramsStartChar)[1];
+    let searchParams = new URLSearchParams(paramsString);
+    for (let [key, value] of searchParams) {
+      if(key == variable) return value;
+    }
+    return null;
+  }
+
   static curAbsolutePath() {
     return window.location.protocol + window.location.hostname + window.location.pathname;
   }

@@ -202,6 +202,11 @@ class MathUtil {
     return MathUtil.interp(lower2,upper2, MathUtil.getPercentWithinRange(lower1,upper1,value));
   }
 
+  // better version of above
+  static remapRange(value, low1, high1, low2, high2) {
+    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+  }
+
   /**
    *  Get distance between 2 points with the pythagorean theorem.
    *  @param  x1  first point's x position
