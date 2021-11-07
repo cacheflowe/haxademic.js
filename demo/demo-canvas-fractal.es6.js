@@ -52,6 +52,7 @@ class Fractal {
     this.height = window.innerHeight;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+    this.needsRedraw = true;
   }
 
   saveImage() {
@@ -75,6 +76,7 @@ class Fractal {
     // shape properties (configurable)
     this.polygonVertices = Math.round(this.remap(this.hexToNum(this.getHashValAt(6)), 0, 255, 3, 8));
     this.drawsInnerLines = this.booleanFromHex(this.getHashValAt(0));
+    this.inwardIsOkay = this.booleanFromHex(this.getHashValAt(25));
     this.backgroundR = this.hexToNum(this.getHashValAt(19));
     this.backgroundG = this.hexToNum(this.getHashValAt(20));
     this.backgroundB = this.hexToNum(this.getHashValAt(21));
@@ -175,9 +177,11 @@ class Fractal {
   animate() {
     if(this.needsRedraw) {  // removed animation for now
       this.needsRedraw = false;
+      this.context.globalCompositeOperation = "source-over";  // default blend mode
       this.drawBackground();
+      this.context.globalCompositeOperation = "overlay";
       this.updateBaseShapeProps();
-      this.drawPolygonParent(0, this.width/2, this.height/2, -this.rootRot, this.startRadius);
+      this.drawPolygonParent(0, this.width/2, this.height/2, this.rootRot, this.startRadius);
     }
     requestAnimationFrame(() => this.animate());
   }
@@ -190,12 +194,19 @@ class Fractal {
     this.frameCount += 1;
     this.curCircleSegment = ((Math.PI*2) / this.polygonVertices);
     this.startRadius = this.baseRadius; // + this.baseRadius/9 * Math.sin(this.frameCount * 0.001);
-    this.rootRot = this.curCircleSegment * 3;
-    // this.rootRot = this.frameCount * 0.001;
+    this.rootRot = this.curCircleSegment / 2;
   }
 
   drawBackground() {
+    // static color
     this.context.fillStyle = this.backgroundColor;
+    this.context.fillRect(0, 0, this.width, this.height);
+
+    // radial gradient
+    var gradient = this.context.createRadialGradient(this.width/2, this.height/2, 0, this.width/2, this.height/2, this.width);
+    gradient.addColorStop(0.0, this.backgroundColor);
+    gradient.addColorStop(1.0, 'rgba(0,0,0,1)');
+    this.context.fillStyle = gradient;
     this.context.fillRect(0, 0, this.width, this.height);
   }
 
@@ -215,7 +226,7 @@ class Fractal {
     var polyCenterDistToSceneCenter = this.getDistance( parentX, parentY, this.width/2, this.height/2 );
     var polyArmDist = this.getDistance( x, y, this.width/2, this.height/2 );
     var isOutward = (polyCenterDistToSceneCenter < polyArmDist)
-    if(isOutward) {
+    if(isOutward || this.inwardIsOkay) {
       // draw next child
       this.drawPolygonParent(level, childCenterX, childCenterY, this.curCircleSegment + startCircleInc, radius );
     }
@@ -254,7 +265,7 @@ class Fractal {
     this.context.lineJoin = 'round';
     
     // draw lines between parent & child
-    if( this.drawsInnerLines && level < this.maxLevels - 1) {
+    if( this.drawsInnerLines && level < this.maxLevels) {
       for( var i=0; i < this.polygonVertices; i++ ) {
         if(vertices[i].isOutward) {
           this.context.beginPath();
@@ -267,7 +278,7 @@ class Fractal {
       }
     }
     
-    // draw actual shape
+    // draw actual polygon shape
     this.context.beginPath();
     this.context.moveTo( vertices[0].x, vertices[0].y );
     for( var i=0; i < this.polygonVertices; i++ ) {
