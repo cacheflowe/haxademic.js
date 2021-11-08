@@ -68,15 +68,17 @@ class Fractal {
     this.needsRedraw = true;
     this.maxLevels = 5;
     this.frameCount = 0;
-    this.baseRadius = this.height/4;
+    this.baseRadius = this.height / 4; //  Math.max(this.width, this.height) / 4;
     this.curCircleSegment = 0;
     this.recursiveDivisor = this.remap(this.hexToNum(this.getHashValAt(4)), 0, 255, 0.5, 1);
+    this.baseRadius -= this.baseRadius * this.recursiveDivisor * 0.2; // shrink base size when divisor is high
     this.rootRot = 0;
     
     // shape properties (configurable)
     this.polygonVertices = Math.round(this.remap(this.hexToNum(this.getHashValAt(6)), 0, 255, 3, 8));
     this.drawsInnerLines = this.booleanFromHex(this.getHashValAt(0));
     this.inwardIsOkay = this.booleanFromHex(this.getHashValAt(25));
+    this.rotatesChildren = this.booleanFromHex(this.getHashValAt(26));
     if(this.inwardIsOkay) this.maxLevels--;
     this.backgroundR = this.hexToNum(this.getHashValAt(19));
     this.backgroundG = this.hexToNum(this.getHashValAt(20));
@@ -180,7 +182,7 @@ class Fractal {
       this.needsRedraw = false;
       this.context.globalCompositeOperation = "source-over";  // default blend mode
       this.drawBackground();
-      this.context.globalCompositeOperation = "overlay";
+      // this.context.globalCompositeOperation = "color"; // "luminosity"; // normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity
       this.updateBaseShapeProps();
       this.drawPolygonParent(0, this.width/2, this.height/2, this.rootRot, this.startRadius);
     }
@@ -214,6 +216,9 @@ class Fractal {
   drawPolygonChildAtVertex(level, parentX, parentY, startCircleInc, radius ) {
     // children are smaller than parent
     radius *= this.recursiveDivisor;
+
+    // rotate children to keep it interesting
+    if(this.rotatesChildren) startCircleInc += this.rootRot;
 
     // find center point of child
     let x = parentX + Math.sin( startCircleInc ) * radius;
