@@ -38,6 +38,7 @@ class Fractal {
     this.context = this.canvas.getContext("2d");
     document.body.appendChild(this.canvas);
     window.addEventListener('resize', () => this.resize());
+    this.canvas.addEventListener('click', () => this.setRandomHash());
   }
 
   addKeyCommands() {
