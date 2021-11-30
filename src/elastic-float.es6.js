@@ -27,18 +27,22 @@ class ElasticFloat {
 
   setCurrent(value) {
     this.val = value;
+    return this;
   }
-
+  
   setTarget(target) {
     this.targetVal = target;
+    return this;
   }
-
+  
   setFriction(fric) {
     this.fric = fric;
+    return this;
   }
-
+  
   setAccel(accel) {
     this.accel = accel;
+    return this;
   }
 
   update() {

@@ -26,9 +26,11 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0xffffff);
+    this.threeScene = new ThreeScene(this.el, 0xffffff, false);
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
+    this.threeScene.buildRaycaster(this.pointerPos, MobileUtil.isMobileBrowser(), (mesh) => this.raycastHoverChanged(mesh))
+    document.addEventListener((MobileUtil.isMobileBrowser()) ? 'touchend' : 'click', (e) => this.onDocumentMouseClick(e));
   }
 
   startAnimation() {
@@ -133,6 +135,16 @@ class ThreeSceneDemo extends DemoBase {
     this.threeScene.resize();
   }
 
+  raycastHoverChanged(mesh) {
+    this.materialCube.color.set((mesh == this.cubeMesh) ? 0xffffbb : 0x00ffbb);
+  }
+
+  onDocumentMouseClick(e) {
+    if(this.threeScene.getHoveredMesh() == this.cubeMesh) {
+      console.log('clicked box!');
+    }
+  }
+
   keyDown(key) {
     // asynchronous save post-render(). callback brings the encoded image back from the render loop
     if(key == 74) {
@@ -146,7 +158,6 @@ class ThreeSceneDemo extends DemoBase {
       });
     }
   }
-
 
 }
 

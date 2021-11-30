@@ -1,6 +1,6 @@
 import DemoBase from './demo--base.es6.js';
 import * as THREE from '../vendor/three/three.module.js';
-import GLTFLoader from '../vendor/three/GLTFLoader.js';
+import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
 import PointerPos from '../src/pointer-pos.es6.js';
 import ThreeScene from '../src/three-scene-.es6.js';
 
