@@ -46,7 +46,7 @@ class CustomSketch extends P5App {
     // this.createCanvas(this.windowWidth, this.windowHeight); // , this.WEBGL
     let clientBounds = this.containerEl().getBoundingClientRect();
     this.createCanvas(clientBounds.width, clientBounds.width);
-    this.background(0);
+    this.pixelDensity(2);
     this.chartSize = this.min(this.width, this.height);
     this.animated = true;
     if(!this.animated) this.noLoop();
@@ -54,7 +54,11 @@ class CustomSketch extends P5App {
   
   draw() {
     this.setupContext();
+
+    this.setShadow(2, 'rgba(0,0,0,1)', 2, 4);
     this.drawRings();
+    this.setShadow(0);
+
     this.setBlurFilter(2);
     this.drawHex();
     this.setBlurFilter(0);
@@ -72,30 +76,9 @@ class CustomSketch extends P5App {
   
   setupContext() {
     this.background(0);
-    this.drawGradientBg();
     this.noFill();
+    this.drawLinearGradientRect([{stop: 0, color: '#444'}, {stop: 1, color: '#000'}]);
     this.translate(this.width/2, this.height/2);
-  }
-
-  drawGradientBg() {
-    var gradient = this.ctx().createLinearGradient(20,0,220,0);
-
-    // Add three color stops
-    gradient.addColorStop(0, 'green');
-    gradient.addColorStop(.5, 'cyan');
-    gradient.addColorStop(1, 'black');
-
-    // Set the fill style and draw a rectangle
-    this.ctx().fillStyle = gradient;
-    this.ctx().fillRect(20, 20, 200, 100);
-  }
-
-  setBlurFilter(blurAmp=2) {
-    if(blurAmp === 0) {
-      this.ctx().filter = 'none';
-    } else {
-      this.ctx().filter = `blur(${blurAmp * this.pixelDensity()}px)`
-    }
   }
   
   numRings() {
