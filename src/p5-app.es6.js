@@ -34,6 +34,54 @@ class P5App extends p5 {
   containerEl() {
     return this._userNode;
   }
+    return this.color(
+      img.pixels[offset],
+      img.pixels[offset + 1],
+      img.pixels[offset + 2],
+      img.pixels[offset + 3]
+    );
+  }
+
+  // context helpers
+
+  setBlurFilter(blurAmp=0) {
+    if(blurAmp === 0) {
+      this.ctx().filter = 'none';
+    } else {
+      this.ctx().filter = `blur(${blurAmp * this.pixelDensity()}px)`
+    }
+  }
+
+  setShadow(blurAmp=0, color='black', offsetX=0, offsetY=5) {
+    if(blurAmp === 0) {
+      this.ctx().shadowBlur = blurAmp;
+      this.ctx().shadowOffsetX = 0;
+      this.ctx().shadowOffsetY = 0;
+    } else {
+      this.ctx().shadowBlur = blurAmp;
+      this.ctx().shadowColor = color;
+      this.ctx().shadowOffsetX = offsetX;
+      this.ctx().shadowOffsetY = offsetY;
+    }
+  }
+
+  setGlobalAlpha(alpha=1) {
+    this.ctx().globalAlpha = alpha;
+  }
+
+  // gradients
+
+  drawLinearGradientRect(stops=[{stop: 0, color: '#fff'}, {stop: 1, color: '#000'}], gradX=0, gradY=0, gradW=0, gradH=this.height, drawX=0, drawY=0, drawW=this.width, drawH=this.height) {
+    var gradient = this.ctx().createLinearGradient(gradX, gradY, gradW, gradH);
+
+    // Add three color stops
+    stops.forEach(stop => gradient.addColorStop(stop.stop, stop.color));
+
+    // Set the fill style and draw a rectangle
+    this.ctx().fillStyle = gradient;
+    this.ctx().fillRect(drawX, drawY, drawW, drawH);
+  }
+
 }
 
 P5App.defaultVertShader = `
