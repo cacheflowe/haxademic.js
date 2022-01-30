@@ -27,6 +27,12 @@ class P5App extends p5 {
     });
   }
 
+  ///////////////////
+  // Drawing helpers
+  ///////////////////
+
+  // canvas attributes
+
   ctx() {
     return this.drawingContext;
   }
@@ -34,6 +40,12 @@ class P5App extends p5 {
   containerEl() {
     return this._userNode;
   }
+
+  // fast image pixel color access - requires img.loadPixels() befre calling
+
+  fget(img, x, y) {
+    let d = 1; // pixel density
+    let offset = (y * img.width + x) * d * 4;
     return this.color(
       img.pixels[offset],
       img.pixels[offset + 1],
