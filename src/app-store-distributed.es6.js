@@ -1,3 +1,6 @@
+import AppStore from '../src/app-store-.es6.js';
+import SolidSocket from '../src/solid-socket.es6.js';
+
 class AppStoreDistributed extends AppStore {
 
   constructor(socketServerUrl) {
@@ -25,7 +28,6 @@ class AppStoreDistributed extends AppStore {
   };
 
   set(key, value, broadcast) {
-    super.set(key, value);
     if(broadcast) {
       // get data type for java AppStore
       var type = "number";
@@ -39,6 +41,8 @@ class AppStoreDistributed extends AppStore {
         type: type
       };
       this.solidSocket.sendMessage(JSON.stringify(data));
+    } else {
+      super.set(key, value);
     }
   }
 
