@@ -1,5 +1,4 @@
 class PointerPos {
-
   constructor(callbackMove, callbackStart, callbackEnd) {
     // store options
     this.callbackMove = callbackMove;
@@ -48,9 +47,9 @@ class PointerPos {
   }
 
   checkInputType(e) {
-    if(this.hasCheckedTouchEvents) return;
-    this.isTouchEvents = (e.type == "touchstart");
-    if(this.isTouchEvents) {
+    if (this.hasCheckedTouchEvents) return;
+    this.isTouchEvents = e.type == 'touchstart';
+    if (this.isTouchEvents) {
       this.removeMouseListeners();
     } else {
       this.removeTouchListeners();
@@ -69,7 +68,7 @@ class PointerPos {
     this.totalDeltaX = 0;
     this.totalDeltaY = 0;
     this.pointerActive = true;
-    if(this.callbackStart) this.callbackStart();
+    if (this.callbackStart) this.callbackStart(e, this.curX, this.curY);
   }
 
   pointerMove(e) {
@@ -83,73 +82,73 @@ class PointerPos {
     this.curY = y;
     let deltaX = this.curX - this.lastX;
     let deltaY = this.curY - this.lastY;
-    if(this.pointerActive) {
+    if (this.pointerActive) {
       this.totalDeltaX += Math.abs(deltaX);
       this.totalDeltaY += Math.abs(deltaY);
     }
-    if(this.callbackMove && this.pointerActive) this.callbackMove(this.curX, this.curY, deltaX, deltaY);
+    if (this.callbackMove) this.callbackMove(e, this.curX, this.curY, deltaX, deltaY, this.pointerActive);
   }
 
   pointerEnd(e) {
-    this.pointerCount = (this.isTouchEvents) ? e.touches.length : 0;
-    if(this.pointerCount == 0) {
+    this.pointerCount = this.isTouchEvents ? e.touches.length : 0;
+    if (this.pointerCount == 0) {
       this.pointerActive = false;
       this.touches = null;
-      if(this.callbackEnd) this.callbackEnd();
+      if (this.callbackEnd) this.callbackEnd(e, this.curX, this.curY);
     }
   }
 
   // position
 
-  x(el=null) {
-    if(el) {
+  x(el = null) {
+    if (el) {
       var offset = el.getBoundingClientRect();
       return this.curX - offset.left;
     }
     return this.curX;
-  };
+  }
 
-  y(el=null) {
-    if(el) {
+  y(el = null) {
+    if (el) {
       var offset = el.getBoundingClientRect();
       return this.curY - offset.top;
     }
     return this.curY;
-  };
+  }
 
   xNorm(el) {
-    if(el) {
+    if (el) {
       var offset = el.getBoundingClientRect();
       var relativeX = this.curX - offset.left;
       return relativeX / offset.width;
     }
     return this.curX / window.innerWidth;
-  };
+  }
 
   yNorm(el) {
-    if(el) {
+    if (el) {
       var offset = el.getBoundingClientRect();
       var relativeY = this.curY - offset.top;
       return relativeY / offset.height;
     }
     return this.curY / window.innerHeight;
-  };
+  }
 
   xDelta() {
     return this.curX - this.lastX;
-  };
+  }
 
   yDelta() {
     return this.curY - this.lastY;
-  };
+  }
 
   xDeltaTotal() {
     return this.totalDeltaX;
-  };
+  }
 
   yDeltaTotal() {
     return this.totalDeltaY;
-  };
+  }
 
   // state
 
@@ -176,7 +175,7 @@ class PointerPos {
   insideEl(el) {
     let x = this.xNorm(el);
     let y = this.yNorm(el);
-    return (x >= 0 && x <= 1 && y >= 0 && y <= 1);
+    return x >= 0 && x <= 1 && y >= 0 && y <= 1;
   }
 
   dispose() {
@@ -191,7 +190,6 @@ class PointerPos {
     this.totalDeltaX = 0;
     this.totalDeltaY = 0;
   }
-
 }
 
 export default PointerPos;
