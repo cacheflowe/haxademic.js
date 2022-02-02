@@ -33,6 +33,16 @@ class DemoBase {
     return `./demo-${DemoBase.getDemoId()}.es6.js?v=${Math.round(Math.random() * 9999999)}`;
   }
 
+  static injectScript(src) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.addEventListener('load', resolve);
+        script.addEventListener('error', e => reject(e.error));
+        document.head.appendChild(script);
+    });
+  }
+
   constructor(parentEl, jsFiles, layoutHtmlOrTitle=null, elId=null, desc=null, fullscreen=false) {
     this.parentEl = parentEl;
     if(layoutHtmlOrTitle != null && elId == null) {
