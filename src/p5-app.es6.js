@@ -6,7 +6,6 @@ class P5App extends p5 {
   }
 
   bindAllMethods(p) {
-    console.log(p);
     // get all function names of this class
     // from: https://stackoverflow.com/a/40577337
     let methods = new Set();
