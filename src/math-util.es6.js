@@ -176,6 +176,20 @@ class MathUtil {
     return MathUtil.sums( nums ) / nums.length;
   }
 
+  static minValue(arr) {
+    const min = arr.reduce((acc, val) => {
+        return acc < val ? acc : val;
+    });
+    return min;
+  }
+
+  static maxValue(arr) {
+      const max= arr.reduce((acc, val) => {
+          return acc > val ? acc : val;
+      });
+      return max;
+  }
+
   /**
    *  Linear interpolate between two values.
    *  @param  lower first value (-1.0, 43.6)
