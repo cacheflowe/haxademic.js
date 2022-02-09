@@ -5,6 +5,15 @@ class ObjectUtil {
     return newObj;
   }
 
+  /*
+  Helpful for lazy loading .js libraries and being notified when they're available.
+  example:
+  ```
+    this.addPropertyChangedCallback(window, 'THREE', () => {
+      this.initThreeScene();
+    });
+  ```
+  */
   static addPropertyChangedCallback(obj, prop, callback) {
     if (obj[prop]) callback(obj[prop]);   // if value already exists, do callback immediately
     let val = obj[prop];                  // cache value & create listener for changes
