@@ -11,9 +11,16 @@ class KeyboardUtil {
       }
     });
   }
-
-  static addKeyListener(key, callback) {
+  
+  static addKeyListener(callback) {
     window.addEventListener('keydown', (e) => {
+      callback(e);
+    });
+  }
+
+  static addSingleKeyListener(key, callback) {
+    window.addEventListener('keydown', (e) => {
+      console.log(e);
       if (e.key == key) {
         callback(e);
       }
@@ -33,6 +40,7 @@ class KeyboardUtil {
 
 }
 
+// MDN docs with key coes & values: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
 // Special non-character `e.key` values: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
 
 KeyboardUtil.KEYS = {

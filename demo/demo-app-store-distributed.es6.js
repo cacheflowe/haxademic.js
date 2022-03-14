@@ -16,7 +16,7 @@ class AppStoreDistributedDemo extends DemoBase {
     this.log = new EventLog(document.getElementById('debug'));
     
     // get address from querystring
-    let serverAddr = URLUtil.getHashQueryVariable('server') || 'ws://192.168.1.171:3001';
+    let serverAddr = URLUtil.getHashQueryVariable('server') || 'ws://localhost:3001';
     this.log.log(`attempting to connect to ${serverAddr}`);
     
     // init AppStore
