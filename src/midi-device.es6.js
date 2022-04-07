@@ -34,10 +34,12 @@ class MidiDevice {
       this.midiInputs.addEventListener('midimessage', (msg) => {
         // return data from MIDI message
         if(this.inputCallback) {
+          let vel = (msg.data.length > 2) ? msg.data[2] : 0;
           this.inputCallback({
             cmd: msg.data[0] >> 4,
             pitch: msg.data[1],
-            velocity: (msg.data.length > 2) ? msg.data[2] : 0,
+            velocity: vel,
+            velocityNorm: vel / 127,
           });
         }
       });
@@ -45,7 +47,8 @@ class MidiDevice {
   }
 }
 
-MidiDevice.NOTE_ON = 9;
-MidiDevice.NOTE_OFF = 8;
+MidiDevice.CMD_NOTE_ON = 9;
+MidiDevice.CMD_NOTE_OFF = 8;
+MidiDevice.CMD_CC = 11;
 
 export default MidiDevice;

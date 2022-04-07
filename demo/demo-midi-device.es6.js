@@ -11,6 +11,7 @@ class MidiDeviceDemo extends DemoBase {
     // setup
     this.midiContainer = document.getElementById('midi-container');
     this.startWithButton();
+    this.initMidi();
   }
 
   startWithButton() {
@@ -23,19 +24,45 @@ class MidiDeviceDemo extends DemoBase {
     this.startButton.addEventListener('click', (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
       // init serial device on user interaction
-      this.midiDevice = new MidiDevice(
-        (data) => this.midiInputMessage(data),
-        (err) => this.midiError(err)
-      );
+      this.initMidi();
     });
   }
 
+  initMidi() {
+    // build midi hardware interface
+    this.midiDevice = new MidiDevice(
+      (data) => this.midiInputMessage(data),
+      (err) => this.midiError(err)
+    );
+
+    // build knobs
+    this.knobs = {
+      knob13: 0,
+      knob14: 0,
+      knob15: 0,
+      knob16: 0,
+    };
+  }
+
   midiInputMessage(msg) {
+    // update knobs object
+    this.knobs[`knob${msg.pitch}`] = msg.velocityNorm;
+
+    // log all values to screen
+    let logStr = '<h3>Midi Input</h3>';
+    for (let k in this.knobs) {
+      logStr += `${k}: ${this.knobs[k]}<br>`;
+    }
+    this.debugEl.innerHTML = logStr;
+
+    // log output
     this.midiContainer.innerHTML = `
-      <p>cmd: ${msg.cmd == MidiDevice.NOTE_ON ? 'NOTE_ON' : 'NOTE_OFF'}</p>
+      <p>cmd: ${msg.cmd}</p>
       <p>pitch: ${msg.pitch}</p>
       <p>velocity: ${msg.velocity}</p>
+      <p>velocityNorm: ${msg.velocityNorm}</p>
     `;
+
   }
 
   midiError(err) {
