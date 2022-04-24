@@ -40,7 +40,7 @@ class AppStoreDistributed extends AppStore {
         store: true,
         type: type
       };
-      this.solidSocket.sendMessage(JSON.stringify(data));
+      this.solidSocket.sendMessage(JSON.stringify(data)); // local AppStore is updated when message is broadcast back to us
     } else {
       super.set(key, value);
     }
