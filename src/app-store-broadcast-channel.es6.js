@@ -21,6 +21,7 @@ class AppStoreBroadcastChannel extends AppStore {
   };
 
   set(key, value, broadcast) {
+    super.set(key, value); // store in local AppStore
     if(broadcast) {
       // get data type for java AppStore
       var type = "number";
@@ -33,11 +34,8 @@ class AppStoreBroadcastChannel extends AppStore {
         store: true,
         type: type
       };
-      // store in local AppStore *and* broadcast to other tabs/windows
-      super.set(key, value);
+      // finally broadcast to other tabs/windows, packaged up like AppStoreDistributed
       this.bc.postMessage(JSON.stringify(data));
-    } else {
-      super.set(key, value);
     }
   }
 
