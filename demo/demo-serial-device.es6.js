@@ -8,10 +8,11 @@ class SerialDeviceDemo extends DemoBase {
   }
 
   async init() {
-    this.startWithButton();
+    this.initSerialWithButton();
+    this.sendOnClick();
   }
 
-  startWithButton() {
+  initSerialWithButton() {
     // add button to start everything
     this.startButton = document.createElement('button');
     this.startButton.innerText = 'Start';
@@ -26,6 +27,16 @@ class SerialDeviceDemo extends DemoBase {
         (data) => this.serialRead(data),
         (err) => this.serialError(err)
       );
+    });
+  }
+
+  sendOnClick() {
+    document.addEventListener('click', (e) => {
+      if(!!this.serialDevice && this.serialDevice.initialized) {
+        // test 2 write methods
+        this.serialDevice.writeDataArray([Math.round(Math.random() * 100)]);
+        this.serialDevice.writeString("testing");
+      }
     });
   }
 
