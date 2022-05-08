@@ -1,6 +1,7 @@
 class URLUtil {
 
   static getHashQueryVariable(variable) {
+    // should be deprecated - newer style below: getHashQueryParam()
     var query = decodeURIComponent(window.location.hash.substring(1)); // decode in case of it being encoded
     var vars = query.split('&');
     for (var i = 0; i < vars.length; i++) {
@@ -12,10 +13,17 @@ class URLUtil {
     return null;
   }
 
-  static getQueryParam(variable, paramsStartChar='#') {
-    let url = document.location.hash;
-    let paramsString = url.split(paramsStartChar)[1];
-    let searchParams = new URLSearchParams(paramsString);
+  static getQueryParam(variable) {
+    const url = new URL(document.location); 
+    for (let [key, value] of url.searchParams) {
+      if(key == variable) return value;
+    }
+    return null;
+  }
+
+  static getHashQueryParam(variable) {
+    const url = new URL(document.location); 
+    const searchParams = new URLSearchParams(url.hash);
     for (let [key, value] of searchParams) {
       if(key == variable) return value;
     }
