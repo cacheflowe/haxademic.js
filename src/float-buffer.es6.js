@@ -22,13 +22,15 @@ class FloatBuffer {
 
   update(value) {
     this.sampleIndex++;
-    if(this.sampleIndex == this.size) this.sampleIndex = 0;
+    if(this.sampleIndex === this.size) this.sampleIndex = 0;
     this.buffer[this.sampleIndex] = value;
   }
 
-  toString() {
-    return this.buffer.reduce(function(acc, val) {
-      return acc + Math.round(val * 10) / 10 + ', ';
+  toString(separator='| ') {
+    return this.buffer.reduce((acc, val, i) => {
+      let boldOpen = (i === this.sampleIndex) ? '<b><u>' : '';
+      let boldClose = (i === this.sampleIndex) ? '</u></b>' : '';
+      return acc + separator + boldOpen + '<span style="display:inline-block; width:50px;">' + Math.round(val * 10) / 10 + '</span>' + boldClose;
     }, '');
   }
 

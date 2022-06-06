@@ -3,7 +3,7 @@ class EasingFloat {
   constructor(value=0, easeFactor=8, completeRange=0.001) {
     this.val = value;
     this.targetVal = value;
-    this.easeFactor = (easeFactor <= 1) ? 1 / easeFactor : easeFactor;
+    this.setEaseFactor(easeFactor);
     this.completeRange = completeRange;
     this.speed = 0;
     this.delay = 0;
@@ -38,15 +38,15 @@ class EasingFloat {
   }
 
   isComplete() {
-    return this.val == this.targetVal;
+    return this.val === this.targetVal;
   }
 
   update(accelerates=false) {
     // don't do any math if we're already at the destination
-    if(this.val == this.targetVal) return;
+    if(this.val === this.targetVal) return;
     if(this.delay > 0) { this.delay--; return; }
     // interpolate
-    if(accelerates == false) {
+    if(accelerates === false) {
       this.val += (this.targetVal - this.val ) / this.easeFactor;
     } else {
       let increment = (this.targetVal - this.val ) / this.easeFactor;
@@ -66,7 +66,7 @@ class EasingFloat {
   }
 
   updateRadians(accelerates=false) {
-    if(this.val == this.targetVal) return;
+    if(this.val === this.targetVal) return;
     if(this.delay > 0) { this.delay--; return; }
 
     var angleDifference = this.targetVal - this.val;
@@ -76,7 +76,7 @@ class EasingFloat {
     } else if(angleDifference < -Math.PI ) {
       addToLoop = EasingFloat.TWO_PI;
     }
-    if(accelerates == false) {
+    if(accelerates === false) {
       this.val += ((this.targetVal - this.val + addToLoop) / this.easeFactor);
     } else {
       let increment = (this.targetVal - this.val + addToLoop) / this.easeFactor;
