@@ -36,7 +36,6 @@ class DashboardCheckinPoller {
       .then((response) => {
         return response.json();
       }).then((jsonData) => {
-        console.log('Checkin response:', jsonData);
         if(this.callback) this.callback(jsonData);
       }).catch(error => {
         console.warn('Checkin failed:', JSON.stringify(error));
@@ -48,7 +47,5 @@ class DashboardCheckinPoller {
   }
 
 }
-
-DashboardCheckinPoller.CHECKIN_INTERVAL = "CHECKIN_INTERVAL";
 
 export default DashboardCheckinPoller;
