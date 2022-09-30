@@ -147,6 +147,7 @@ class WebRtcTest extends DemoBase {
     console.log("Received data:", data);
     if (!!data && data.cmd == "image") {
       let img = document.createElement("img");
+      img.style.setProperty("width", "100%");
       img.src = data.base64Img;
       this.el.appendChild(img);
     }
