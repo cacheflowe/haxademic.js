@@ -9,8 +9,9 @@ class WebRtcTest extends DemoBase {
         "!https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js",
         "!https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js",
       ],
-      "WebRTC",
-      "webrtc-container"
+      "WebRTC | PeerJS image transfer",
+      "webrtc-container",
+      "Just scan the QR code, and you should be sent an image!"
     );
   }
 
@@ -96,12 +97,11 @@ class WebRtcTest extends DemoBase {
       this.conn = conn;
       console.log("Client connected!", this.conn);
 
-      setTimeout(() => {
-        this.sendJSON({ cmd: "image", base64Img: this.base64Img });
-      }, 1000);
-
       this.conn.on("open", () => {
         console.log("Kiosk: open connection!");
+        setTimeout(() => {
+          this.sendJSON({ cmd: "image", base64Img: this.base64Img });
+        }, 100);
       });
 
       this.conn.on("data", (data) => {
