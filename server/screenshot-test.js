@@ -6,59 +6,84 @@
 // - node screenshot-test.js [--debug]
 
 "use strict";
-process.title = 'node-screenshot';
+process.title = "node-screenshot";
 
 /////////////////////
 // Imports
 /////////////////////
 
-const fs = require('fs');
-const screenshot = require('screenshot-desktop');
-const axios = require('axios');
+const fs = require("fs");
+const screenshot = require("screenshot-desktop");
+const axios = require("axios");
 
 /////////////////////
 // Config
 /////////////////////
 
-function bigLog(msg) {
-  console.log('===================================');
-  console.log('\x1b[42m%s\x1b[0m', msg);
-  console.log('===================================');
-}
+const heartbeatInterval = 60 * 1000 * 5;
+const screenshotInterval = 60 * 1000 * 15;
+const appId = "test-app-web";
+const appTitle = "Test Web App";
+const dashboardURL = "http://localhost/haxademic/www/dashboard-new/";
+
+// globals
+let startTime = Date.now();
+const screenshotFileName = "screenshot.jpg";
 
 /////////////////////
-// Screenshot
+// post to dashboard
 /////////////////////
 
+function postToDashboard(imageScreenshot = null) {
+  // build post data for dashboard
+  let postData = {
+    appId: appId,
+    appTitle: appTitle,
+    // imageExtra: null,
+    uptime: Math.round((Date.now() - startTime) / 1000),
+    // resolution: `${window.innerWidth}x${window.innerHeight}`,
+    frameCount: 1,
+    frameRate: 60,
+  };
+  if (imageScreenshot) {
+    postData.imageScreenshot = imageScreenshot;
+  }
 
-function sendToDashboard(imageScreenshot) {
+  // post it!
   axios
-    .post('http://localhost/haxademic/www/dashboard-new/', {
-      appId: 'test-app-web',
-      appTitle: "Test Web App",
-      imageScreenshot: imageScreenshot,
-      imageExtra: null,
-      // uptime: Math.round((Date.now() - this.startTime) / 1000),
-      // resolution: `${window.innerWidth}x${window.innerHeight}`,
-      // frameCount: 1,
-      // frameRate: 60,
+    .post(dashboardURL, postData)
+    .then((res) => {
+      // console.log(`statusCode: ${res.status}`);
+      // console.log(res);
     })
-    .then(res => {
-      console.log(`statusCode: ${res.status}`)
-      console.log(res)
-    })
-    .catch(error => {
-      console.error(error)
-    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 
-screenshot({format: 'jpg', filename: 'shot.jpg'}).then((img) => {
-  // img: Buffer of the image - not sure what this is
-  fs.readFile('shot.jpg', function(err, data) {
-    let base64Img = Buffer.from(data).toString('base64');
-    // 'data:image/jpeg;base64,' + base64Img
-    sendToDashboard(base64Img);
-  });
-}).catch((err) => {
-  // ...
-})
+/////////////////////
+// screenshot check-in
+/////////////////////
+
+setInterval(() => {
+  screenshot({ format: "jpg", filename: screenshotFileName })
+    .then((img) => {
+      // img: Buffer of the image - not sure what this is
+      fs.readFile(screenshotFileName, function (err, data) {
+        let base64Img = Buffer.from(data).toString("base64");
+        // 'data:image/jpeg;base64,' + base64Img
+        postToDashboard(base64Img);
+      });
+    })
+    .catch((err) => {
+      console.error("Failed to post screenshot", err);
+    });
+}, screenshotInterval);
+
+/////////////////////
+// non-screenshot heartbeat check-in
+/////////////////////
+
+setInterval(() => {
+  postToDashboard();
+}, heartbeatInterval);
