@@ -1,19 +1,22 @@
 class PointerUtil {
-
-  // TODO: finish converting this !
-  static multipleClickHandler(el) {
-    // require quintuple-click
+  static multipleClickHandler(
+    el,
+    callback = null,
+    numClicks = 5,
+    tapEvent = "touchstart"
+  ) {
     var clickStream = [];
-    var numClicks = 5;
-    var timeWindow = 3000;
-    el.addEventListener(window.tapEvent, function(e){
+    var clickWindow = numClicks * 300;
+    el.addEventListener(tapEvent, function (e) {
       clickStream.push(Date.now());
-      while(clickStream.length > numClicks) clickStream.shift();
-      var recentClicks = clickStream.filter(function(clickTime) {
-        return clickTime > Date.now() - timeWindow;
-      });
-      if(recentClicks.length < numClicks) e.preventDefault();
-      else clickStream.splice(0);
+      while (clickStream.length > numClicks) clickStream.shift();
+      let recentClicks = clickStream.filter((time) => {
+        return time > Date.now() - clickWindow;
+      }).length;
+      if (recentClicks >= numClicks) {
+        clickStream.splice(0);
+        if (callback) callback();
+      }
     });
   }
 
