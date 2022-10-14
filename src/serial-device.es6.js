@@ -1,10 +1,9 @@
 class SerialDevice {
-
   // info:
   // - https://web.dev/serial/
   // - https://codelabs.developers.google.com/codelabs/web-serial/#0
 
-  constructor(baudRate=115200, readCallback=null, errorCallback=null) {
+  constructor(baudRate = 115200, readCallback = null, errorCallback = null) {
     this.baudRate = baudRate;
     this.readCallback = readCallback;
     this.errorCallback = errorCallback;
@@ -13,12 +12,15 @@ class SerialDevice {
 
   async initSerial() {
     try {
-      this.port = await navigator.serial.requestPort();   // Request a port and open a connection.
-      await this.port.open({baudrate: this.baudRate, baudRate: this.baudRate});         // Wait for the port to open. Use new & old `baudrate` key for different browsers
+      this.port = await navigator.serial.requestPort(); // Request a port and open a connection.
+      await this.port.open({
+        baudrate: this.baudRate,
+        baudRate: this.baudRate,
+      }); // Wait for the port to open. Use new & old `baudrate` key for different browsers
       console.log(this.port);
       this.initialized = true;
-    } catch(err) {
-      if(this.errorCallback) this.errorCallback(err);
+    } catch (err) {
+      if (this.errorCallback) this.errorCallback(err);
       return;
     }
     // start reading input
@@ -39,44 +41,41 @@ class SerialDevice {
     while (true) {
       const { value, done } = await this.reader.read();
       if (value) {
-        if(this.readCallback) this.readCallback(value);
+        if (this.readCallback) this.readCallback(value);
       }
       if (done) {
-        console.log('[readLoop] DONE', done);
+        console.log("[readLoop] DONE", done);
         this.reader.releaseLock();
         break;
       }
     }
   }
-  
+
   async startWriting() {
     // output to serial device
-    this.writerData = this.port.writable.getWriter();
     this.encoder = new TextEncoderStream();
     this.outputDone = this.encoder.readable.pipeTo(this.port.writable);
     this.writerString = this.encoder.writable.getWriter();
-  }
-  
-  async writeDataArray(data) {
-    if(this.port && this.port.writable) {
-      // const data = [104, 101, 108, 108, 111]); // hello
-      console.log('writing', data);
-      this.writerData.write(new Uint8Array(data));
-      // this.writerData.releaseLock();
-    } else {
-      console.log('[SerialDevice can\'t write data]', data);
-    }
-  }
-  
-  async writeString(data) {
-    if(this.port && this.port.writable) {
-      console.log('writing', data);
-      this.writerString.write(data + '\n');
-    } else {
-      console.log('[SerialDevice can\'t write string]', data);
-    }
+    // attempt to write both data or string... can't use them both yet
+    // this.writerData = this.port.writable.getWriter();
   }
 
+  // async writeDataArray(data) {
+  //   if (this.port && this.port.writable) {
+  //     // const data = [104, 101, 108, 108, 111]); // hello
+  //     this.writerData.write(new Uint8Array(data));
+  //   } else {
+  //     console.log("[SerialDevice can't write data]", data);
+  //   }
+  // }
+
+  async writeString(data) {
+    if (this.port && this.port.writable) {
+      await this.writerString.write(data);
+    } else {
+      console.log("[SerialDevice can't write string]", data);
+    }
+  }
 }
 
 export default SerialDevice;

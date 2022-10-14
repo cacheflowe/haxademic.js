@@ -1,10 +1,9 @@
-import DemoBase from './demo--base.es6.js';
-import SerialDevice from '../src/serial-device.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import SerialDevice from "../src/serial-device.es6.js";
 
 class SerialDeviceDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'SerialDevice', 'serial-container');
+    super(parentEl, [], "SerialDevice", "serial-container");
   }
 
   async init() {
@@ -14,12 +13,12 @@ class SerialDeviceDemo extends DemoBase {
 
   initSerialWithButton() {
     // add button to start everything
-    this.startButton = document.createElement('button');
-    this.startButton.innerText = 'Start';
+    this.startButton = document.createElement("button");
+    this.startButton.innerText = "Start";
     this.el.appendChild(this.startButton);
 
     // click to init serial device selector
-    this.startButton.addEventListener('click', (e) => {
+    this.startButton.addEventListener("click", (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
       // init serial device on user interaction
       this.serialDevice = new SerialDevice(
@@ -31,21 +30,22 @@ class SerialDeviceDemo extends DemoBase {
   }
 
   sendOnClick() {
-    document.addEventListener('click', (e) => {
-      if(!!this.serialDevice && this.serialDevice.initialized) {
-        // test 2 write methods
-        this.serialDevice.writeDataArray([Math.round(Math.random() * 100)]);
-        this.serialDevice.writeString("testing");
+    document.addEventListener("click", (e) => {
+      if (!!this.serialDevice && this.serialDevice.initialized) {
+        // test write method
+        // this.serialDevice.writeDataArray([Math.round(Math.random() * 100)]);
+        this.serialDevice.writeString(
+          "a" + Math.round(100 + Math.random() * 300)
+        );
       }
     });
   }
 
   serialRead(data) {
-    let val = data;
-    if(data.length && data.length > 0) {
-      if(data[0] == 'a') {
+    if (data.length && data.length > 0) {
+      if (data[0] == "a") {
         this.el.innerHTML = `<p>Distance: ${data.substring(1)}mm</p>`;
-      } else if(parseInt(data) > 40) {
+      } else if (parseInt(data) > 40) {
         this.el.innerHTML = `<p>Distance: ${data}mm</p>`;
       } else {
         this.debugEl.innerHTML = `<p>Error: ${data}</p>`;
@@ -58,7 +58,6 @@ class SerialDeviceDemo extends DemoBase {
   serialError(err) {
     this.el.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new SerialDeviceDemo(document.body);
+if (window.autoInitDemo) window.demo = new SerialDeviceDemo(document.body);
