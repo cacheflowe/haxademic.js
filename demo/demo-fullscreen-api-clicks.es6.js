@@ -20,7 +20,7 @@ class FullScreenClicksAPIDemo extends DemoBase {
     );
     this.el.appendChild(secretButton);
 
-    // switch to PointerUtil
+    // add multiple click handler
     this.multipleClickHandler(
       secretButton,
       this.toggleFullScreen,
