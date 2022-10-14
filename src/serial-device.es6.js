@@ -2,6 +2,12 @@ class SerialDevice {
   // info:
   // - https://web.dev/serial/
   // - https://codelabs.developers.google.com/codelabs/web-serial/#0
+  // Arduino code:
+  // inputs:
+  // - https://github.com/cacheflowe/haxademic/blob/master/arduino/VL53L0X/VL53L0X.ino
+  // - https://github.com/cacheflowe/haxademic/blob/master/arduino/VL53L1X/VL53L1X.ino
+  // inputs & outputs:
+  // - https://github.com/cacheflowe/haxademic/blob/master/arduino/PiezoBuzzerSerialRead/PiezoBuzzerSerialRead.ino
 
   constructor(baudRate = 115200, readCallback = null, errorCallback = null) {
     this.baudRate = baudRate;
