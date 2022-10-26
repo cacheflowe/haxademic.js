@@ -28,7 +28,7 @@ class VideoDownloadDemo extends DemoBase {
     this.linkEl = document.createElement("a");
     this.linkEl.innerText = "Download Video";
     this.linkEl.setAttribute("href", "../data/wash-your-hands.mp4");
-    this.linkEl.setAttribute("href", "#");
+    // this.linkEl.setAttribute("href", "#");
     this.el.appendChild(this.linkEl);
 
     // load video to blob
