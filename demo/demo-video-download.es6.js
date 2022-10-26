@@ -1,5 +1,5 @@
 import DemoBase from "./demo--base.es6.js";
-import VideoToBlob from "../src/video-to-blob.es6.js";
+import MobileUtil from "../src/mobile-util.es6.js";
 
 class VideoDownloadDemo extends DemoBase {
   constructor(parentEl) {
@@ -28,6 +28,7 @@ class VideoDownloadDemo extends DemoBase {
     this.linkEl = document.createElement("a");
     this.linkEl.innerText = "Download Video";
     this.linkEl.setAttribute("href", "../data/wash-your-hands.mp4");
+    this.linkEl.setAttribute("download", "wash-your-hands.mp4");
     this.el.appendChild(this.linkEl);
 
     // load video to blob
@@ -43,14 +44,21 @@ class VideoDownloadDemo extends DemoBase {
 
         // click event to launch share api
         this.linkEl.addEventListener("click", (e) => {
-          e.preventDefault();
-          if (navigator.canShare && navigator.canShare({ files: filesArray })) {
-            navigator.share({
-              text: "video_file",
-              files: filesArray,
-              // title: "Your Video",
-              // url: this.videoEl.src,
-            });
+          if (MobileUtil.isIOS()) {
+            // ios solution
+            // otherwise use download attribute
+            e.preventDefault();
+            if (
+              navigator.canShare &&
+              navigator.canShare({ files: filesArray })
+            ) {
+              navigator.share({
+                text: "video_file",
+                files: filesArray,
+                // title: "Your Video",
+                // url: this.videoEl.src,
+              });
+            }
           }
         });
       });
