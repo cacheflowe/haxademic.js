@@ -1,12 +1,8 @@
 // install:
 // - npm install ws
-// - npm install querystring
 // - npm install express
-// - ...or just npm install once package.json exists
 // run:
 // - node ws-relay.js [--debug]
-// from:
-// - https://github.com/websockets/ws
 
 "use strict";
 process.title = "node-ws";
