@@ -27,7 +27,7 @@ const wssPort = 3001;
 const httpPort = process.env.httpPort || 3000;
 const debug = args.indexOf("--debug") != -1;
 
-function bigLog(msg) {
+function eventLog(msg) {
   console.log("===================================");
   console.log("\x1b[42m%s\x1b[0m", msg);
   console.log("===================================");
@@ -40,7 +40,7 @@ function bigLog(msg) {
 const INDEX = "/index.html";
 const server = express()
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-  .listen(httpPort, () => bigLog(`Running Web server at port: ${httpPort}`));
+  .listen(httpPort, () => eventLog(`Running Web server at port: ${httpPort}`));
 
 /////////////////////
 // BUILD WS SERVER
@@ -48,11 +48,11 @@ const server = express()
 
 // start server
 const wsServer = new WebSocket.Server({ port: wssPort, path: "/ws" }); // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
-bigLog(`Running WebSocket server at port: ${wssPort}`);
+eventLog(`Running WebSocket server at port: ${wssPort}`);
 
 // listen for new connections
 wsServer.on("connection", (connection, request, client) => {
-  bigLog("Client joined - We have " + wsServer.clients.size + " users");
+  eventLog("Client joined - We have " + wsServer.clients.size + " users");
 
   // handle incoming messages
   connection.on("message", (message) => {
@@ -68,6 +68,6 @@ wsServer.on("connection", (connection, request, client) => {
 
   // handle client disconnect
   connection.on("close", () => {
-    bigLog("Client left - We have " + wsServer.clients.size + " users");
+    eventLog("Client left - We have " + wsServer.clients.size + " users");
   });
 });
