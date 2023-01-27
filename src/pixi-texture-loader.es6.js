@@ -1,4 +1,4 @@
-import * as PIXI from '../vendor/pixi/pixi.module.js'
+import * as PIXI from "../vendor/pixi/pixi.mjs";
 
 class PixiTextureLoader {
 

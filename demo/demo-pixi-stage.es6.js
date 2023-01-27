@@ -1,17 +1,16 @@
-import * as PIXI from '../vendor/pixi/pixi.module.js'
-import DemoBase from './demo--base.es6.js';
-import PixiStage from '../src/pixi-stage.es6.js';
-import PixiSpriteScale from '../src/pixi-sprite-scale.es6.js';
+import * as PIXI from "../vendor/pixi/pixi.mjs";
+import DemoBase from "./demo--base.es6.js";
+import PixiStage from "../src/pixi-stage.es6.js";
+import PixiSpriteScale from "../src/pixi-sprite-scale.es6.js";
 
 class PixiStageDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'PixiStage', 'pixi-stage-container', null, true);
+    super(parentEl, [], "PixiStage", "pixi-stage-container", null, true);
   }
 
   init() {
     // create PIXI stage object
-    this.pixiContainer = document.getElementById('pixi-stage-container');
+    this.pixiContainer = document.getElementById("pixi-stage-container");
     // this.pixiContainer.setAttribute('style', 'height: 500px;');
     this.pixiStage = new PixiStage(this.pixiContainer); // , 0xff000000, 'pixi', 2);
 
@@ -19,40 +18,39 @@ class PixiStageDemo extends DemoBase {
     this.loadImage();
   }
 
-  loadImage() {
-    // use PIXI.Loader
+  async loadImage() {
     // let this.sprite = PIXI.Sprite.from('images/cacheflowe-logo-trans-white.png');
-    const loader = PIXI.Loader.shared; // PixiJS exposes a premade instance for you to use.
-    loader.add('cache', '../images/cacheflowe-logo-trans-white.png');
-    loader.load((loader, resources) => {
-      this.buildSprite(resources);
-      this.buildShaders();
-      // start PIXI frame loop
-      this.frameCount = 0;
-      this.pixiStage.addFrameListener(() => this.draw());
-    });
+    PIXI.Assets.add("cache", "../images/cacheflowe-logo-trans-white.png");
+    await PIXI.Assets.load("cache");
 
-    // throughout the process multiple signals can be dispatched.
-    loader.onProgress.add(() => {}); // called once per loaded/errored file
-    loader.onError.add(() => {}); // called once per errored file
-    loader.onLoad.add(() => {}); // called once per loaded file
-    loader.onComplete.add(() => {}); // called once when the queued resources all load.
+    this.buildSprite();
+    this.buildShaders();
+    // start PIXI frame loop
+    this.frameCount = 0;
+    this.pixiStage.addFrameListener(() => this.draw());
   }
 
   // init this.sprite & extras
-  buildSprite(resources) {
+  buildSprite() {
     // build this.bg
     this.bg = new PIXI.Graphics();
     this.bg.beginFill(0x333333, 1);
     this.bg.drawRect(0, 0, this.pixiStage.width(), this.pixiStage.height());
     this.bg.pivot.set(this.bg.width * 0.5, this.bg.height * 0.5);
-    this.bg.position.set(this.pixiStage.width() * 0.5, this.pixiStage.height() * 0.5);
+    this.bg.position.set(
+      this.pixiStage.width() * 0.5,
+      this.pixiStage.height() * 0.5
+    );
     this.pixiStage.container().addChild(this.bg);
 
     // build image this.sprite
-    this.sprite = new PIXI.Sprite(resources['cache'].texture);
+    // debugger;
+    this.sprite = new PIXI.Sprite(PIXI.Assets.get("cache"));
     this.sprite.anchor.set(0.5);
-    this.sprite.position.set(this.pixiStage.width() * 0.5, this.pixiStage.height() * 0.5);
+    this.sprite.position.set(
+      this.pixiStage.width() * 0.5,
+      this.pixiStage.height() * 0.5
+    );
     PixiSpriteScale.scaleToHeight(this.sprite, this.pixiStage.height());
     this.pixiStage.container().addChild(this.sprite);
   }
@@ -79,7 +77,7 @@ class PixiStageDemo extends DemoBase {
     `;
     this.tint = new PIXI.Filter(null, shaderFragTint, {
       iTime: 0,
-      amp:1
+      amp: 1,
     });
     // this.pixiStage.container().filters = [this.tint];
 
@@ -113,54 +111,64 @@ class PixiStageDemo extends DemoBase {
     `;
     this.pattern = new PIXI.Filter(null, this.patternShader, {
       iTime: 0,
-      dimensions: [this.pixiStage.width(), this.pixiStage.height()]
+      dimensions: [this.pixiStage.width(), this.pixiStage.height()],
     });
     this.bg.filters = [this.pattern, this.tint];
   }
 
   draw() {
     this.frameCount++;
-    if(this.sprite != null) {
+    if (this.sprite != null) {
       // update this.bg with window resizes
       this.bg.width = this.pixiStage.width();
       this.bg.height = this.pixiStage.height();
-      this.bg.position.set(this.pixiStage.width() * 0.5, this.pixiStage.height() * 0.5);
+      this.bg.position.set(
+        this.pixiStage.width() * 0.5,
+        this.pixiStage.height() * 0.5
+      );
 
       // position & oscillate logo
-      this.sprite.position.set(this.pixiStage.width() * 0.5, this.pixiStage.height() * 0.5);
-      PixiSpriteScale.scaleToHeight(this.sprite, this.pixiStage.height() * (0.6 + 0.1 * Math.sin(this.frameCount * 0.01)));
+      this.sprite.position.set(
+        this.pixiStage.width() * 0.5,
+        this.pixiStage.height() * 0.5
+      );
+      PixiSpriteScale.scaleToHeight(
+        this.sprite,
+        this.pixiStage.height() * (0.6 + 0.1 * Math.sin(this.frameCount * 0.01))
+      );
 
       // update shaders
       this.tint.uniforms.iTime = this.frameCount * 0.01;
       this.tint.uniforms.amp = 0.75 + 0.25 * Math.sin(this.frameCount * 0.02);
       this.pattern.uniforms.iTime = this.frameCount * 0.01;
-      this.pattern.uniforms.dimensions[0] = this.pixiStage.width();   // if running on entire this.pixiStage.container(), we need to use heightRenderer()
+      this.pattern.uniforms.dimensions[0] = this.pixiStage.width(); // if running on entire this.pixiStage.container(), we need to use heightRenderer()
       this.pattern.uniforms.dimensions[1] = this.pixiStage.height();
     }
   }
 
   initWebcam() {
     // add button to start everything
-    this.startButton = document.createElement('button');
-    this.startButton.innerText = 'Start';
+    this.startButton = document.createElement("button");
+    this.startButton.innerText = "Start";
     this.pixiContainer.appendChild(this.startButton);
 
     // click video to add audio response
-    this.startButton.addEventListener('click', (e) => {
+    this.startButton.addEventListener("click", (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
 
       // init this.pixiStage
-      this.this.pixiStage = new PixiStage((videoEl) => {
-        // attach to DOM and flip to mirror the video
-        this.pixiContainer.appendChild(videoEl);
-        PixiStage.flipH(videoEl);
-      }, (error) => {
-        this.pixiContainer.innerHTML = '[PixiStage ERROR] :: ' + error;
-      });
+      this.this.pixiStage = new PixiStage(
+        (videoEl) => {
+          // attach to DOM and flip to mirror the video
+          this.pixiContainer.appendChild(videoEl);
+          PixiStage.flipH(videoEl);
+        },
+        (error) => {
+          this.pixiContainer.innerHTML = "[PixiStage ERROR] :: " + error;
+        }
+      );
     });
-
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new PixiStageDemo(document.body);
+if (window.autoInitDemo) window.demo = new PixiStageDemo(document.body);
