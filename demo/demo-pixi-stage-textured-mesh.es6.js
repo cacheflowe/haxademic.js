@@ -65,7 +65,7 @@ class PixiStageTexturedMeshDemo extends DemoBase {
 
   buildMesh(texture) {
     // build mesh. requires at least 2 rows/cols
-    this.mesh = new PIXI.SimplePlane(texture, 160, 9);
+    this.mesh = new PIXI.SimplePlane(texture, 128, 64);
     this.mesh.pivot.set(this.mesh.width * 0.5, this.mesh.height * 0.5);
     this.mesh.position.set(
       this.pixiStage.width() * 0.5,
@@ -99,9 +99,11 @@ class PixiStageTexturedMeshDemo extends DemoBase {
     const numVertices = this.mesh.vertexData.length;
     for (let i = 0; i < vertices.length; i += 2) {
       // vertices array are groups of 2. no 3d :)
-      const vertX = this.meshVerticesOrig[i];
+      const vertX = this.meshVerticesOrig[i + 0];
       const vertY = this.meshVerticesOrig[i + 1];
+      let xOffset = vertX + 10 * Math.sin(vertY / 36 + this.frameCount / 20);
       let yOffset = vertY + 10 * Math.sin(vertX / 36 + this.frameCount / 20);
+      vertices[i + 0] = xOffset;
       vertices[i + 1] = yOffset;
       if (uvs) uvs[i] += 0.0005; // scroll x.. uvs might not be built until after first render!
     }
