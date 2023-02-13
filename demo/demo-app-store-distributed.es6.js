@@ -26,10 +26,14 @@ class AppStoreDistributedDemo extends DemoBase {
 
     // init AppStore
     this.appStoreDistributed = new AppStoreDistributed(serverAddr);
-    this.appStoreDebug = new AppStoreDebug(true);
     this.appStoreDistributed.addListener(this);
+    // save state across sessions.
+    // also exclude "KEY_SHARED" from triggering a localStorage save, for example
+    this.appStoreDistributed.initLocalStorage(["KEY_SHARED"]);
     // if we want to check if messages were from ourselves, call the following method, along with _store.senderIsSelf() in storeUpdated()
     console.log(this.appStoreDistributed.initSenderID());
+    // optional debug window
+    this.appStoreDebug = new AppStoreDebug(true);
 
     // add key listener
     window.addEventListener("keydown", (e) => {

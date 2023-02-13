@@ -1,4 +1,5 @@
 class AppStore {
+  static LOCALSTORAGE_KEY = "_store";
 
   constructor() {
     this.state = {};
@@ -8,8 +9,8 @@ class AppStore {
   }
 
   addListener(obj, key) {
-    if(key) {
-      if(!this.methods[key]) this.methods[key] = [];
+    if (key) {
+      if (!this.methods[key]) this.methods[key] = [];
       this.methods[key].push(obj);
     } else {
       this.listeners.push(obj);
@@ -17,8 +18,8 @@ class AppStore {
   }
 
   removeListener(obj, key) {
-    if(key) {
-      if(this.methods[key]) {
+    if (key) {
+      if (this.methods[key]) {
         const index = this.methods[key].indexOf(obj);
         if (index !== -1) this.methods[key].splice(index, 1);
       }
@@ -29,19 +30,22 @@ class AppStore {
   }
 
   set(key, value) {
-    if(typeof key === "undefined") throw new Error('AppStore requires legit keys');
+    if (typeof key === "undefined")
+      throw new Error("AppStore requires legit keys");
     this.state[key] = value;
     this.listeners.forEach((el, i, arr) => {
       el.storeUpdated(key, value);
     });
     // specific listener methods
     const objs = this.methods[key];
-    if(objs) {
+    if (objs) {
       objs.forEach((el) => {
-        if(el[key]) el[key](value);
-        else throw new Error('AppStore listener has no callback: ' + key);
+        if (el[key]) el[key](value);
+        else throw new Error("AppStore listener has no callback: " + key);
       });
     }
+    // save to local storage
+    if (this.persistData) this.saveToLocalStorage(key);
   }
 
   get(key) {
@@ -49,11 +53,29 @@ class AppStore {
   }
 
   log() {
-    for(let key in _store.state) {
+    for (let key in _store.state) {
       console.log(key, _store.state[key]);
     }
   }
 
+  initLocalStorage(keyTriggerExlusions = []) {
+    this.persistData = true;
+    this.keyTriggerExlusions = keyTriggerExlusions; // these keys will not trigger a save to localStorage
+    const savedState = window.localStorage.getItem(AppStore.LOCALSTORAGE_KEY);
+    if (savedState) {
+      this.state = JSON.parse(savedState);
+    }
+  }
+
+  saveToLocalStorage(key) {
+    if (this.keyTriggerExlusions.includes(key)) return;
+    let storeData = JSON.stringify(this.state);
+    window.localStorage.setItem(AppStore.LOCALSTORAGE_KEY, storeData);
+  }
+
+  clearLocalStorage() {
+    window.localStorage.removeItem(AppStore.LOCALSTORAGE_KEY);
+  }
 }
 
 export default AppStore;
