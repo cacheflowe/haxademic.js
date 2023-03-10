@@ -26,17 +26,17 @@ class PointerUtil {
 
   static clickDocumentAtPoint(x, y) {
     let el = document.elementFromPoint(x, y);
-    if(el && el.click) el.click();
+    if (el && el.click) el.click();
     return el;
   }
 
   static dispatchPointerEvent(el, eventType) {
-    const event = document.createEvent('UIEvent');
+    const event = document.createEvent("UIEvent");
     event.initUIEvent(eventType, true, true, window, 0);
-    let touches = [{target: el}];
-    if(!!eventType.match(/touch/)) {
+    let touches = [{ target: el }];
+    if (!!eventType.match(/touch/)) {
       Object.defineProperties(event, {
-        changedTouches: {value: touches}
+        changedTouches: { value: touches },
       });
     }
     el.dispatchEvent(event);
@@ -48,9 +48,10 @@ class PointerUtil {
   }
 
   static disableRightClick(el) {
-    el.oncontextmenu = function(e){ return false; };
+    el.oncontextmenu = function (e) {
+      return false;
+    };
   }
-
 }
 
 export default PointerUtil;
