@@ -1,20 +1,14 @@
 // install:
 // - npm install screenshot-desktop
-// - npm install axios
-// - ...or just npm install once package.json exists
 // run:
 // - node screenshot-test.js [--debug]
-
-"use strict";
-process.title = "node-screenshot";
 
 /////////////////////
 // Imports
 /////////////////////
 
-const fs = require("fs");
-const screenshot = require("screenshot-desktop");
-const axios = require("axios");
+import fs from "fs";
+import screenshot from "screenshot-desktop";
 
 /////////////////////
 // Config
@@ -22,8 +16,8 @@ const axios = require("axios");
 
 const heartbeatInterval = 60 * 1000 * 5;
 const screenshotInterval = 60 * 1000 * 15;
-const appId = "test-app-web";
-const appTitle = "Test Web App";
+const appId = "brewers-protect-the-plate";
+const appTitle = "Brewers Protect the Plate";
 const dashboardURL = "http://localhost/haxademic/www/dashboard-new/";
 
 // globals
@@ -50,14 +44,19 @@ function postToDashboard(imageScreenshot = null) {
   }
 
   // post it!
-  axios
-    .post(dashboardURL, postData)
-    .then((res) => {
-      // console.log(`statusCode: ${res.status}`);
-      // console.log(res);
+  fetch(dashboardURL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(postData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Success:", data);
     })
     .catch((error) => {
-      console.error(error);
+      console.error("Error:", error);
     });
 }
 
@@ -87,3 +86,4 @@ setInterval(() => {
 setInterval(() => {
   postToDashboard();
 }, heartbeatInterval);
+postToDashboard();
