@@ -1,17 +1,16 @@
 class DashboardCheckinPoller {
-
   constructor(dashboardURL, appId, appTitle, interval) {
     this.dashboardURL = dashboardURL;
     this.appId = appId;
     this.appTitle = appTitle;
     this.startTime = Date.now();
     this.restartInterval(interval);
-    this.loadJson();  // check in on init
+    this.loadJson(); // check in on init
   }
 
   restartInterval(interval) {
     let checkinInterval = interval;
-    if(checkinInterval > 1) {
+    if (checkinInterval > 1) {
       window.clearInterval(this.interval);
       this.interval = setInterval(() => {
         this.loadJson();
@@ -21,7 +20,13 @@ class DashboardCheckinPoller {
 
   loadJson() {
     fetch(this.dashboardURL, {
-      method: 'POST',
+      method: "POST",
+      referrerPolicy: "unsafe-url",
+      crossorigin: true,
+      mode: "no-cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         appId: this.appId,
         appTitle: this.appTitle,
@@ -31,21 +36,22 @@ class DashboardCheckinPoller {
         frameRate: 60,
         imageScreenshot: null,
         imageExtra: null,
-      })
+      }),
     })
       .then((response) => {
         return response.json();
-      }).then((jsonData) => {
-        if(this.callback) this.callback(jsonData);
-      }).catch(error => {
-        console.warn('Checkin failed:', JSON.stringify(error));
+      })
+      .then((jsonData) => {
+        if (this.callback) this.callback(jsonData);
+      })
+      .catch((error) => {
+        console.warn("Checkin failed:", JSON.stringify(error));
       });
   }
 
   successCallback(callback) {
     this.callback = callback;
   }
-
 }
 
 export default DashboardCheckinPoller;
