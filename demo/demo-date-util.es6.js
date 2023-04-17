@@ -1,11 +1,10 @@
-import DemoBase from './demo--base.es6.js';
-import DateUtil from '../src/date-util.es6.js';
-import FrameLoop from '../src/frame-loop.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import DateUtil from "../src/date-util.es6.js";
+import FrameLoop from "../src/frame-loop.es6.js";
 
 class DateUtilDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'DateUtil', 'date-util-container');
+    super(parentEl, [], "DateUtil", "date-util-container");
   }
 
   init() {
@@ -23,7 +22,6 @@ class DateUtilDemo extends DemoBase {
       <div><code>getTimeStamp</code> = ${DateUtil.getTimeStamp()}</div>
     `;
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new DateUtilDemo(document.body);
+if (window.autoInitDemo) window.demo = new DateUtilDemo(document.body);
