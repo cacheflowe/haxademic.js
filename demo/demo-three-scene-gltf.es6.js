@@ -1,6 +1,6 @@
 import DemoBase from './demo--base.es6.js';
 import * as THREE from '../vendor/three/three.module.js';
-import GLTFLoader from '../vendor/three/GLTFLoader.js';
+import { GLTFLoader } from '../vendor/three/GLTFLoader.js';
 import PointerPos from '../src/pointer-pos.es6.js';
 import ThreeScene from '../src/three-scene-.es6.js';
 
@@ -102,7 +102,8 @@ class ThreeSceneGltfDemo extends DemoBase {
     var loader = new GLTFLoader();
     loader.load(
       // resource URL
-      '../data/duck.gltf',
+      '../data/models/duck-v1/duck.gltf',
+      // '../data/models/fox/Fox.gltf',
       // called when the resource is loaded
       (gltf) => {
         // add gltf model to scene - extract specific child of gltf scene to add to our ThreeScene

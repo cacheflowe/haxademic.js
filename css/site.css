@@ -1,0 +1,50 @@
+/* Global CSS variables */
+:root {
+  --spacing-company: 3rem;
+  --font-weight: 400;
+  --border-radius: 0;
+}
+
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --background-color: #111;
+  }
+}
+
+/* Typography */
+h2,
+h3,
+hgroup > :last-child {
+  font-weight: 200;
+}
+
+small {
+  color: var(--muted-color);
+}
+
+/* Header */
+.hero {
+  background-color: #394046;
+  background-image: url("https://cacheflowe.com/images/art/digital/cacheflowe-warp-drive.gif");
+  background-position: center;
+  background-size: cover;
+}
+
+header {
+  padding: var(--spacing-company) 0;
+}
+
+header hgroup > :last-child {
+  color: var(--h3-color);
+}
+
+header hgroup,
+.demo h1 {
+  margin-top: var(--spacing-company);
+  margin-bottom: var(--spacing-company);
+}
+
+/* Demos */
+/* .demo h1 {
+  margin
+} */

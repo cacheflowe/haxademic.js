@@ -1,12 +1,12 @@
 import DemoBase from "./demo--base.es6.js";
 import URLUtil from "../src/url-util.es6.js";
 
-class WebRtcTest extends DemoBase {
+class WebRtcImageTransfer extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
       [
-        "!https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js",
+        "!https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js",
         "!https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js",
       ],
       "WebRTC | PeerJS image transfer",
@@ -154,4 +154,4 @@ class WebRtcTest extends DemoBase {
   }
 }
 
-if (window.autoInitDemo) window.demo = new WebRtcTest(document.body);
+if (window.autoInitDemo) window.demo = new WebRtcImageTransfer(document.body);

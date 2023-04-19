@@ -59,7 +59,7 @@ class PixiStageWebcamSquareDemo extends DemoBase {
 
         // attach webcam video element to DOM and flip to mirror the video
         this.debugEl.appendChild(videoEl);
-        videoEl.style.setProperty("width", "240px");
+        videoEl.style.setProperty("max-width", "100%");
         videoEl.style.setProperty("padding", "2rem");
         videoEl.style.setProperty("background", "#000");
         Webcam.flipH(videoEl);

@@ -1,10 +1,15 @@
-import DemoBase from './demo--base.es6.js';
-import KeyboardUtil from '../src/keyboard-util.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import KeyboardUtil from "../src/keyboard-util.es6.js";
 
 class KeyboardUtilDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'KeyboardUtil', 'keyboard-util-container');
+    super(
+      parentEl,
+      [],
+      "KeyboardUtil",
+      "keyboard-util-container",
+      "Press a key to reveal its key code, or press 'b' to see a special message."
+    );
   }
 
   init() {
@@ -16,11 +21,10 @@ class KeyboardUtilDemo extends DemoBase {
         <code>e.shiftKey</code>: <code>${e.shiftKey}</code><br>
       `;
     });
-    KeyboardUtil.addSingleKeyListener('b', (e) => {
+    KeyboardUtil.addSingleKeyListener("b", (e) => {
       this.debugEl.innerHTML = `B was pressed, and that's the one we were looking for!`;
     });
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new KeyboardUtilDemo(document.body);
+if (window.autoInitDemo) window.demo = new KeyboardUtilDemo(document.body);

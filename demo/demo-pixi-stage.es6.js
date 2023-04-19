@@ -23,7 +23,7 @@ class PixiStageDemo extends DemoBase {
     PIXI.Assets.add("cache", "../images/cacheflowe-logo-trans-white.png");
     await PIXI.Assets.load("cache");
 
-    this.buildSprite();
+    this.buildSprite(PIXI.Assets.get("cache"));
     this.buildShaders();
     // start PIXI frame loop
     this.frameCount = 0;
@@ -31,7 +31,7 @@ class PixiStageDemo extends DemoBase {
   }
 
   // init this.sprite & extras
-  buildSprite() {
+  buildSprite(texture) {
     // build this.bg
     this.bg = new PIXI.Graphics();
     this.bg.beginFill(0x333333, 1);
@@ -45,7 +45,7 @@ class PixiStageDemo extends DemoBase {
 
     // build image this.sprite
     // debugger;
-    this.sprite = new PIXI.Sprite(PIXI.Assets.get("cache"));
+    this.sprite = new PIXI.Sprite(texture);
     this.sprite.anchor.set(0.5);
     this.sprite.position.set(
       this.pixiStage.width() * 0.5,

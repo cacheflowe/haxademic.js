@@ -1,159 +1,127 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Haxademic.js</title>
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/barebones.css">
-    <link rel="stylesheet" href="css/haxademic.css">
-    <link rel="stylesheet" href="css/lazy-image-loader.css">
-    <link rel="stylesheet" href="css/lightbox.css">
+    <link rel="stylesheet" href="css/pico.css" />
+    <link rel="stylesheet" href="css/haxademic.css" />
+    <link rel="stylesheet" href="css/lazy-image-loader.css" />
+    <link rel="stylesheet" href="css/lightbox.css" />
+    <link rel="stylesheet" href="css/site.css" />
   </head>
   <body>
-    <div class="container">
-      <h1 style="margin-top: 4rem">Haxademic.js</h1>
-      <p>A personal JavaScript toolkit of general utility and realtime/graphics helper classes.</p>
-      <p>On GitHub: <a href="https://github.com/cacheflowe/haxademic.js">https://github.com/cacheflowe/haxademic.js</a></p>
-      <h2>Demos</h2>
-      <div>
-        <ul>
-          <li><a href="./demo/#app-store-broadcast-channel">AppStoreBroadcastChannel</a></li>
-          <li><a href="./demo/#broadcast-channel">BroadcastChannel</a></li>
-          <li><a href="./demo/#canvas-fractal">Canvas Fractal</a></li>
-          <li><a href="./demo/#date-util">DateUtil</a></li>
-          <li><a href="./demo/#device-motion">DeviceMotion</a></li>
-          <li><a href="./demo/#easing-color">EasingColor</a></li>
-          <li><a href="./demo/#float-buffer">FloatBuffer</a></li>
-          <li><a href="./demo/#gesture-detect">GestureDetect</a></li>
-          <li><a href="./demo/#font-util">FontUtil</a></li>
-          <li><a href="./demo/#frame-loop">FrameLoop</a></li>
-          <li><a href="./demo/#fullscreen-api">Fullscreen API</a></li>
-          <li><a href="./demo/#howler">Howler</a></li>
-          <li><a href="./demo/#keyboard-util">KeyboardUtil</a></li>
-          <li><a href="./demo/#midi-device">MidiDevice</a></li>
-          <li><a href="./demo/#microphone-node">MicrophoneNode | SoundFFT</a></li>
-          <li><a href="./demo/#mobile-util">MobileUtil</a></li>
-          <li><a href="./demo/#model-viewer">ModelViewer</a></li>
-          <li><a href="./demo/#object-pool-particles">ObjectPool | Particles</a></li>
-          <li><a href="./demo/#object-pool-touch-ripples">ObjectPool | Touch Ripples</a></li>
-          <li><a href="./demo/#p5-app-basic">P5App | Basic</a></li>
-          <li><a href="./demo/#p5-sketch-audio">P5Sketch | Audio</a></li>
-          <li><a href="./demo/#p5-sketch-basic">P5Sketch | Basic</a></li>
-          <li><a href="./demo/#pixi-stage">PixiStage</a></li>
-          <li><a href="./demo/#pixi-stage-textured-mesh">PixiStage | Textured Mesh</a></li>
-          <li><a href="./demo/#pixi-stage-textured-mesh-globe">PixiStage | Textured Mesh Globe</a></li>
-          <li><a href="./demo/#pixi-stage-webcam">PixiStage | Webcam</a></li>
-          <li><a href="./demo/#pixi-stage-webcam-square">PixiStage | Webcam Square</a></li>
-          <li><a href="./demo/#pointer-pos">PointerPos</a></li>
-          <li><a href="./demo/#qr-code">QRCode</a></li>
-          <li><a href="./demo/#screen-capture">ScreenCapture</a></li>
-          <li><a href="./demo/#scroll-viz">ScrollViz</a></li>
-          <li><a href="./demo/#serial-device">SerialDevice</a></li>
-          <li><a href="./demo/#solid-socket&server=ws://192.168.1.171:3001">SolidSocket</a></li>
-          <li><a href="./demo/#sound-fft-video">SoundFFT | Video</a></li>
-          <li><a href="./demo/#sound-player">SoundPlayer</a></li>
-          <li><a href="./demo/#sound-player-loops-matched">SoundPlayer | Loops Matched</a></li>
-          <li><a href="./demo/#speech-recognizer">SpeechRecognizer</a></li>
-          <li><a href="./demo/#speech-recognizer-solid-socket">SpeechRecognizer SolidSocket</a></li>
-          <li><a href="./demo/#string-formatter">StringFormatter</a></li>
-          <li><a href="./demo/#three-double-buffer">ThreeDoubleBuffer</a></li>
-          <li><a href="./demo/#three-scene">ThreeScene</a></li>
-          <li><a href="./demo/#three-scene-billboard-particles">ThreeScene | Billboard Particles</a></li>
-          <li><a href="./demo/#three-scene-convex-hull">ThreeScene | ConvexHull</a></li>
-          <li><a href="./demo/#three-scene-fbo-background">ThreeScene | FBO Background</a></li>
-          <li><a href="./demo/#three-scene-gltf">ThreeScene | glTF</a></li>
-          <li><a href="./demo/#three-scene-gltf-animated">ThreeScene | glTF Animated</a></li>
-          <li><a href="./demo/#three-scene-custom-textured-shape">ThreeScene | Textured shape UV animation</a></li>
-          <li><a href="./demo/#three-scene-text-texture">ThreeScene | Canvas text texture</a></li>
-          <li><a href="./demo/#three-scene-video-texture">ThreeScene | Video displace texture</a></li>
-          <li><a href="./demo/#three-scene-ar">ThreeSceneAr</a></li>
-          <li><a href="./demo/#three-scene-fbo">ThreeSceneFbo | Chroma EffectComposer Attempt</a></li>
-          <li><a href="./demo/#three-scene-fbo-chroma">ThreeSceneFbo | Chroma Shader</a></li>
-          <li><a href="./demo/#three-scene-fbo-color-map">ThreeSceneFbo | Color Map</a></li>
-          <li><a href="./demo/#three-scene-gpu-particles-noise">ThreeSceneFbo | GPU Particles</a></li>
-          <li><a href="./demo/#three-scene-plane">ThreeScenePlane</a></li>
-          <li><a href="./demo/#ui-control-panel">UIControlPanel</a></li>
-          <li><a href="./demo/?param=okay#url-util&test=yes">URLUtil</a></li>
-          <li><a href="./demo/#video-recorder">VideoRecorder</a></li>
-          <li><a href="./demo/#video-download">Video Download</a></li>
-          <li><a href="./demo/#vtt-video">VTT | Video</a></li>
-          <li><a href="./demo/#vttcue-audio">VTTCue | Audio</a></li>
-          <li><a href="./demo/#webcam">Webcam</a></li>
-          <li><a href="./demo/#webcam-to-canvas">Webcam | To Canvas</a></li>
-          <li><a href="./demo/#wheel-util">WheelUtil</a></li>
-        </ul>
-      </div>
-      <!-- <p>Check the console for unit tests output.</p> -->
-      <div class="row">
-        <div id="main" class="twelve columns"></div>
-      </div>
+    <!-- Hero -->
+    <div class="hero" data-theme="dark">
+      <header class="container">
+        <hgroup>
+          <h1>Haxademic.js</h1>
+          <p>
+            A personal JavaScript toolkit of general utility and
+            realtime/graphics helper classes.
+          </p>
+          <p>
+            View the code <a href="https://github.com/cacheflowe/haxademic.js">on GitHub</a>
+          </p>
+        </hgroup>
+      </header>
     </div>
+    <!-- ./ Hero -->
+
+    <!-- Main -->
+    <main class="container">
+      <div class="grid">
+        <section>
+          <hgroup>
+            <h2>Demos</h2>
+            <h3>Try them out and see the source</h3>
+          </hgroup>
+          <ul>
+            <li><a href="./demo/#app-store-broadcast-channel">AppStoreBroadcastChannel</a></li>
+            <li><a href="./demo/#broadcast-channel">BroadcastChannel</a></li>
+            <li><a href="./demo/#canvas-fractal">Canvas Fractal</a></li>
+            <li><a href="./demo/#date-util">DateUtil</a></li>
+            <li><a href="./demo/#device-motion">DeviceMotion</a></li>
+            <li><a href="./demo/#easing-color">EasingColor</a></li>
+            <li><a href="./demo/#float-buffer">FloatBuffer</a></li>
+            <li><a href="./demo/#gesture-tracker">GestureTracker</a></li>
+            <li><a href="./demo/#font-util">FontUtil</a></li>
+            <li><a href="./demo/#frame-loop">FrameLoop</a></li>
+            <li><a href="./demo/#fullscreen-api">Fullscreen API</a></li>
+            <li><a href="./demo/#howler">Howler</a></li>
+            <li><a href="./demo/#keyboard-util">KeyboardUtil</a></li>
+            <li><a href="./demo/#midi-interface">MidiInterface</a></li>
+            <li><a href="./demo/#microphone-node">MicrophoneNode | SoundFFT</a></li>
+            <li><a href="./demo/#mobile-util">MobileUtil</a></li>
+            <li><a href="./demo/#model-viewer">ModelViewer</a></li>
+            <li><a href="./demo/#object-pool-particles">ObjectPool | Particles</a></li>
+            <li><a href="./demo/#object-pool-touch-ripples">ObjectPool | Touch Ripples</a></li>
+            <li><a href="./demo/#p5-app-basic">P5App | Basic</a></li>
+            <li><a href="./demo/#p5-sketch-audio">P5Sketch | Audio</a></li>
+            <li><a href="./demo/#p5-sketch-basic">P5Sketch | Basic</a></li>
+            <li><a href="./demo/#pixi-stage">PixiStage</a></li>
+            <li><a href="./demo/#pixi-stage-textured-mesh">PixiStage | Textured Mesh</a></li>
+            <li><a href="./demo/#pixi-stage-textured-mesh-globe">PixiStage | Textured Mesh Globe</a></li>
+            <li><a href="./demo/#pixi-stage-webcam">PixiStage | Webcam</a></li>
+            <li><a href="./demo/#pixi-stage-webcam-square">PixiStage | Webcam Square</a></li>
+            <li><a href="./demo/#pointer-pos">PointerPos</a></li>
+            <li><a href="./demo/#qr-code">QRCode</a></li>
+            <li><a href="./demo/#screen-capture">ScreenCapture</a></li>
+            <li><a href="./demo/#scroll-snap">Scroll Snap</a></li>
+            <li><a href="./demo/#scroll-viz">ScrollViz</a></li>
+            <li><a href="./demo/#serial-device">SerialDevice</a></li>
+            <li><a href="./demo/#solid-socket&server=ws://192.168.1.171:3001">SolidSocket</a></li>
+            <li><a href="./demo/#sound-fft-video">SoundFFT | Video</a></li>
+            <li><a href="./demo/#sound-player">SoundPlayer</a></li>
+            <li><a href="./demo/#sound-player-loops-matched">SoundPlayer | Loops Matched</a></li>
+            <li><a href="./demo/#speech-recognizer">SpeechRecognizer</a></li>
+            <li><a href="./demo/#speech-recognizer-solid-socket">SpeechRecognizer SolidSocket</a></li>
+            <li><a href="./demo/#string-formatter">StringFormatter</a></li>
+            <li><a href="./demo/#three-double-buffer">ThreeDoubleBuffer</a></li>
+            <li><a href="./demo/#three-scene">ThreeScene</a></li>
+            <li><a href="./demo/#three-scene-billboard-particles">ThreeScene | Billboard Particles</a></li>
+            <li><a href="./demo/#three-scene-convex-hull">ThreeScene | ConvexHull</a></li>
+            <li><a href="./demo/#three-scene-fbo-background">ThreeScene | FBO Background</a></li>
+            <li><a href="./demo/#three-scene-gltf">ThreeScene | glTF</a></li>
+            <li><a href="./demo/#three-scene-gltf-animated">ThreeScene | glTF Animated</a></li>
+            <li><a href="./demo/#three-scene-custom-textured-shape">ThreeScene | Textured shape UV animation</a></li>
+            <li><a href="./demo/#three-scene-text-texture">ThreeScene | Canvas text texture</a></li>
+            <li><a href="./demo/#three-scene-video-texture">ThreeScene | Video displace texture</a></li>
+            <li><a href="./demo/#three-scene-ar">ThreeSceneAr</a></li>
+            <li><a href="./demo/#three-scene-fbo">ThreeSceneFbo | Chroma EffectComposer Attempt</a></li>
+            <li><a href="./demo/#three-scene-fbo-chroma">ThreeSceneFbo | Chroma Shader</a></li>
+            <li><a href="./demo/#three-scene-fbo-color-map">ThreeSceneFbo | Color Map</a></li>
+            <li><a href="./demo/#three-scene-gpu-particles-noise">ThreeSceneFbo | GPU Particles</a></li>
+            <li><a href="./demo/#three-scene-plane">ThreeScenePlane</a></li>
+            <li><a href="./demo/#ui-control-panel">UIControlPanel</a></li>
+            <li><a href="./demo/?param=okay#url-util&test=yes">URLUtil</a></li>
+            <li><a href="./demo/#video-recorder">VideoRecorder</a></li>
+            <li><a href="./demo/#video-download">Video Download</a></li>
+            <li><a href="./demo/#vtt-video">VTT | Video</a></li>
+            <li><a href="./demo/#vttcue-audio">VTTCue | Audio</a></li>
+            <li><a href="./demo/#webcam">Webcam</a></li>
+            <li><a href="./demo/#webcam-to-canvas">Webcam | To Canvas</a></li>
+            <li><a href="./demo/#webrtc-image-transfer">WebRTC | Image Transfer</a></li>
+            <li><a href="./demo/#webrtc-video-call">WebRTC | Video Call</a></li>
+            <li><a href="./demo/#wheel-util">WheelUtil</a></li>
+          </ul>
+        </section>
+      </div>
+    </main>
+    <!-- ./ Main -->
+
+    <!-- Footer -->
+    <footer class="container">
+      <small>Built by <a href="https://cacheflowe.com">Cacheflowe</a></small>
+    </footer>
+    <!-- ./ Footer -->
+
+    <!-- Minimal theme switcher -->
+    <script src="js/minimal-theme-switcher.js"></script>
 
     <!-- Vendor -->
     <script src="./vendor/zora.js"></script>
-
-    <!-- Library -->
-    <!-- 
-    <script src="./src/array-util.es6.js"></script>
-    <script src="./src/console.es6.js"></script>
-    <script src="./src/dom-util.es6.js"></script>
-    <script src="./src/easing-float.es6.js"></script>
-    <script src="./src/ease-to-value-callback.es6.js"></script>
-    <script src="./src/elastic-float.es6.js"></script>
-    <script src="./src/easy-scroll.es6.js"></script>
-    <script src="./src/error-util.es6.js"></script>
-    <script src="./src/float-buffer.es6.js"></script>
-    <script src="./src/iframe-url-loader.es6.js"></script>
-    <script src="./src/improved-noise.es6.js"></script>
-    <script src="./src/lightbox.es6.js"></script>
-    <script src="./src/lazy-image-loader.es6.js"></script>
-    <script src="./src/linear-float.es6.js"></script>
-    <script src="./src/math-util.es6.js"></script>
-    <script src="./src/microphone-node.es6.js"></script>
-    <script src="./src/mobile-util.es6.js"></script>
-    <script src="./src/oscillations.es6.js"></script>
-    <script src="./src/page-visibility.es6.js"></script>
-    <script src="./src/penner.es6.js"></script>
-    <script src="./src/pixi-sprite-scale.es6.js"></script>
-    <script src="./src/pixi-stage.es6.js"></script>
-    <script src="./src/pointer-pos.es6.js"></script>
-    <script src="./src/sound-fft.es6.js"></script>
-    <script src="./src/string-formatter.es6.js"></script>
-    <script src="./src/svg-util.es6.js"></script>
-    <script src="./src/user-interaction-timeout.es6.js"></script> 
-    -->
-
-    <!-- Tests -->
-    <!--
-    <script>
-      // load test runner
-      console.important('Running tests:');
-    </script>
-    <script src="./tests/test-helpers.es6.js"></script>
-    <script src="./tests/console-tests.es6.js"></script>
-    <script src="./tests/dom-util-tests.es6.js"></script>
-    <script src="./tests/improved-noise-tests.es6.js"></script>
-    <script src="./tests/easing-float-tests.es6.js"></script>
-    <script src="./tests/ease-to-value-callback-tests.es6.js"></script>
-    <script src="./tests/elastic-float-tests.es6.js"></script>
-    <script src="./tests/easy-scroll-tests.es6.js"></script>
-    <script src="./tests/error-util-tests.es6.js"></script>
-    <script src="./tests/float-buffer-tests.es6.js"></script>
-    <script src="./tests/iframe-url-loader-tests.es6.js"></script>
-    <script src="./tests/lazy-image-loader-tests.es6.js"></script>
-    <script src="./tests/lightbox-tests.es6.js"></script>
-    <script src="./tests/linear-float-tests.es6.js"></script>
-    <script src="./tests/math-util-tests.es6.js"></script>
-    <script src="./tests/mobile-util-tests.es6.js"></script>
-    <script src="./tests/oscillations-tests.es6.js"></script>
-    <script src="./tests/page-visibility-tests.es6.js"></script>
-    <script src="./tests/penner-tests.es6.js"></script>
-    <script src="./tests/pointer-pos-tests.es6.js"></script>
-    <script src="./tests/svg-util-tests.es6.js"></script>
-    <script src="./tests/user-interaction-timeout-tests.es6.js"></script>
-    -->
   </body>
 </html>

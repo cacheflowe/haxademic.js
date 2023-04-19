@@ -11,9 +11,9 @@
 }
 
 html {
-  --white-trans: rgba(255,255,255,0.7);
+  --white-trans: rgba(255, 255, 255, 0.7);
 }
-h1,
+/* h1,
 p {
   background-color: var(--white-trans);
   padding: 1rem;
@@ -22,16 +22,16 @@ p {
 h1:empty,
 p:empty {
   display: none;
-}
+} */
 
 /* Glow/shadow effects */
 
 .shadow {
-  filter: drop-shadow( 0 0.1rem 0.6rem rgba(0,0,0,0.5) );
+  filter: drop-shadow(0 0.1rem 0.6rem rgba(0, 0, 0, 0.5));
 }
 
 .box-shadow {
-  box-shadow: 0px 3px 4px rgba(0,0,0,0.3);
+  box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Vertical centering */
@@ -66,13 +66,13 @@ button,
 select,
 label,
 a {
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 /* Some global resets */
 
 .reset * {
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-touch-callout: none;
   box-sizing: border-box;
   -moz-font-feature-settings: "liga" 0; /* Ligature fix for Firefox */
@@ -125,4 +125,3 @@ a {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
-

@@ -1,5 +1,4 @@
 class VideoRecorder {
-
   // refactored from original code https://github.com/dmnsgn/canvas-record
   // Uses es6 options/override method: https://gist.github.com/ericelliott/f3c2a53a1d4100539f71
   // see also: https://w3c.github.io/mediacapture-fromelement/#dom-htmlmediaelement-capturestream
@@ -7,13 +6,16 @@ class VideoRecorder {
   // more here: https://mozdevs.github.io/MediaRecorder-examples/
   // this also looks like a nice wrapper: https://recordrtc.org/
 
-  constructor(canvas, {
-      fileType = 'mkv',   // can choose `webm` too, but mkv has higher quality output potential. mp4 doesn't seem supported yet
-      frameRate = 0,      // frameRate of zero allows us to manually add frames on rAf loop
-      audioKBPS = 128,    // 128kbps
-      videoMBPS = 20,     // 20mbps
-      callback = null
-    } = {}) {
+  constructor(
+    canvas,
+    {
+      fileType = "mkv", // can choose `webm` too, but mkv has higher quality output potential. mp4 doesn't seem supported yet
+      frameRate = 0, // frameRate of zero allows us to manually add frames on rAf loop
+      audioKBPS = 128, // 128kbps
+      videoMBPS = 20, // 20mbps
+      callback = null,
+    } = {}
+  ) {
     // store options
     this.canvas = canvas;
     this.fileType = fileType;
@@ -24,9 +26,9 @@ class VideoRecorder {
 
     // get mimtype from file extension
     const mimeTypes = {
-      mkv: 'video/x-matroska;codecs=avc1',
-      mp4: 'video/mp4',
-      webm: 'video/webm',
+      mkv: "video/x-matroska;codecs=avc1",
+      mp4: "video/mp4",
+      webm: "video/webm",
     };
     this.mimeType = mimeTypes[fileType];
 
@@ -54,22 +56,22 @@ class VideoRecorder {
   }
 
   start() {
-    console.log('- VideoRecorder started ---');
-    console.log('- fileType:', this.fileType);
-    console.log('- fps:', this.frameRate);
-    console.log('- audioBitsPerSecond:', this.audioBitsPerSecond);
-    console.log('- videoBitsPerSecond:', this.videoBitsPerSecond);
-    console.log('-----------------------------------------');
+    console.log("- VideoRecorder started ---");
+    console.log("- fileType:", this.fileType);
+    console.log("- fps:", this.frameRate);
+    console.log("- audioBitsPerSecond:", this.audioBitsPerSecond);
+    console.log("- videoBitsPerSecond:", this.videoBitsPerSecond);
+    console.log("-----------------------------------------");
     this.isRecording = true;
     this.recorder.start();
   }
 
   addFrame() {
-    if(this.isRecording) {
-      if(this.stream.requestFrame) {
-        this.stream.requestFrame();                      // Firefox
+    if (this.isRecording) {
+      if (this.stream.requestFrame) {
+        this.stream.requestFrame(); // Firefox
       } else {
-        this.stream.getVideoTracks()[0].requestFrame();  // Chrome
+        this.stream.getVideoTracks()[0].requestFrame(); // Chrome
       }
     }
   }
@@ -83,12 +85,15 @@ class VideoRecorder {
   createDownloadLink() {
     this.link = document.createElement("a");
     this.link.download = this.filename;
-    this.link.textContent = 'Download video';
+    this.link.textContent = "Download video";
   }
 
   createRecorder() {
     this.chunks = [];
     this.stream = this.canvas.captureStream(this.frameRate);
+
+    document.getElementById("debug").innerHTML = this.mimeType;
+    console.log(this.mimeType);
 
     this.recorder = new MediaRecorder(this.stream, {
       mimeType: this.mimeType,
@@ -106,7 +111,8 @@ class VideoRecorder {
         this.link.href = URL.createObjectURL(blob);
 
         // auto download or pass back <a> tag if we want a manual download
-        if(this.callback == null) {  // auto-download if no callback
+        if (this.callback == null) {
+          // auto-download if no callback
           const clickEvent = new MouseEvent("click");
           this.link.dispatchEvent(clickEvent);
         } else {

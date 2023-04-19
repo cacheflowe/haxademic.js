@@ -39,9 +39,10 @@ class MidiInterface {
   // midi input listening/handling
 
   listenToAllDevices() {
-    this.inputDeviceNames.forEach((deviceName) =>
-      this.listenToDevice(deviceName)
-    );
+    this.inputDeviceNames.forEach((deviceName) => {
+      console.log(deviceName);
+      this.listenToDevice(deviceName);
+    });
   }
 
   listenToDevice(deviceName) {
