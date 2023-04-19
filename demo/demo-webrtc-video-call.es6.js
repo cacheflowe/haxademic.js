@@ -91,8 +91,8 @@ class WebRtcVideoCall extends DemoBase {
     offerLink.innerText = offerLink.href;
     qrContainer.appendChild(offerLink);
 
-    // add QR code
-    let qrCode = new QRCode("qrcode", offerLink.href); // appends to id of "qrcode"
+    // add QR code - appends to id of "qrcode"
+    let qrCode = new QRCode("qrcode", offerLink.href);
   }
 
   initKioskConnectionListeners() {
@@ -261,6 +261,7 @@ class WebRtcVideoCall extends DemoBase {
     videoEl.defaultMuted = true;
     videoEl.setAttribute("width", "300");
     videoEl.setAttribute("height", "300");
+    videoEl.setAttribute("playsinline", "playsinline");
     videoEl.setAttribute("autoplay", "autoplay");
     videoEl.setAttribute("muted", "true");
     videoEl.srcObject = stream;
