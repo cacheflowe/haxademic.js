@@ -18,6 +18,11 @@ class WebRtcVideoCall extends DemoBase {
   // From:
   // - https://peerjs.com/docs/
   // - https://github.com/ourcodeworld/videochat-peerjs-example/blob/master/public/source/js/script.js
+  // Try it out:
+  // - https://ourcodeworld.com/articles/read/1030/how-to-create-a-video-chat-with-peerjs-in-javascript
+  // - https://cacheflowe.github.io/haxademic.js/demo/#webrtc-video-call
+  // - https://192.168.1.155/haxademic.js/demo/#webrtc-video-call - apache w/ssl
+  // - http://localhost:5173/demo/#webrtc-video-call - Vite
 
   init() {
     // is there an offer in the URL?
@@ -128,7 +133,7 @@ class WebRtcVideoCall extends DemoBase {
         if (this.clientConnections.indexOf(callPeerId) === -1) {
           console.log("Client stream added", callPeerId);
           this.streamPeer = stream;
-          this.displayVideoStream(stream, "Client Video");
+          this.displayVideoStream(stream, false, "Client Video");
         } else {
           console.log("Client already connected", callPeerId);
         }
@@ -186,7 +191,7 @@ class WebRtcVideoCall extends DemoBase {
     this.loadLocalWebcam({
       success: (stream) => {
         this.localVideoStream = stream;
-        this.displayVideoStream(stream, "Local Video");
+        this.displayVideoStream(stream, true, "Local Video");
         if (!this.isKiosk) this.startCallFromClient();
       },
       error: (err) => {
@@ -205,7 +210,7 @@ class WebRtcVideoCall extends DemoBase {
       console.log(this.streamPeer, stream);
       if (!this.streamPeer) {
         this.streamPeer = stream;
-        this.displayVideoStream(stream, "Kiosk Video");
+        this.displayVideoStream(stream, false, "Kiosk Video");
       }
     });
   }
@@ -250,7 +255,7 @@ class WebRtcVideoCall extends DemoBase {
     );
   }
 
-  displayVideoStream(stream, label) {
+  displayVideoStream(stream, isOwnVideo, label) {
     // build label to identify stream
     let labelEl = document.createElement("div");
     labelEl.innerText = label;
@@ -258,12 +263,14 @@ class WebRtcVideoCall extends DemoBase {
 
     // Retrieve the video element according to the desired
     let videoEl = document.createElement("video");
-    videoEl.defaultMuted = true;
+    // TODO: mute if video is our own
+    if (isOwnVideo) {
+      videoEl.defaultMuted = true;
+      videoEl.setAttribute("muted", "true");
+    }
     videoEl.setAttribute("width", "100%");
-    // videoEl.setAttribute("height", "300");
     videoEl.setAttribute("playsinline", "playsinline");
     videoEl.setAttribute("autoplay", "autoplay");
-    videoEl.setAttribute("muted", "true");
     videoEl.srcObject = stream;
     this.el.appendChild(videoEl);
   }
