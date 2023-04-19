@@ -11,7 +11,7 @@ class WebRtcVideoCall extends DemoBase {
       ],
       "WebRTC | PeerJS video call",
       "webrtc-video-call-container",
-      "Just scan the QR code, and you should be able make a call back!"
+      "Scan the QR code, and you should see a peer-to-peer video call!"
     );
   }
 
