@@ -259,8 +259,8 @@ class WebRtcVideoCall extends DemoBase {
     // Retrieve the video element according to the desired
     let videoEl = document.createElement("video");
     videoEl.defaultMuted = true;
-    videoEl.setAttribute("width", "300");
-    videoEl.setAttribute("height", "300");
+    videoEl.setAttribute("width", "100%");
+    // videoEl.setAttribute("height", "300");
     videoEl.setAttribute("playsinline", "playsinline");
     videoEl.setAttribute("autoplay", "autoplay");
     videoEl.setAttribute("muted", "true");
