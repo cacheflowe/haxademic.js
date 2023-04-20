@@ -33,13 +33,7 @@ class WebRtcVideoCall extends DemoBase {
 
     // create peer object
     this.peer = new Peer({
-      // host: "localhost",
-      // port: 5173,
-      // path: "/demo",
-      // debug: 3,
-      // config: {
-      //   iceServers: [{ url: "stun:stun1.l.google.com:19302" }],
-      // },
+      id: "cacheflowe-kiosk", // make sure to remove this when not testing
     });
     this.conn = null;
     this.isKiosk = !this.kioskOfferId;
@@ -54,11 +48,10 @@ class WebRtcVideoCall extends DemoBase {
 
     // load video
     this.initWebCam();
+  }
 
-    // add listener
-    document.body.addEventListener("keydown", (e) => {
-      this.sendJSON(42);
-    });
+  keyDown(key) {
+    this.sendJSON(key);
   }
 
   log(...args) {

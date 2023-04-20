@@ -25,7 +25,7 @@ class DemoBase {
     let id =
       document.location.hash.indexOf("&") == -1
         ? document.location.hash
-        : document.location.hash.split("&")[0]; // URLUtil.getHashQueryVariable('demo');
+        : document.location.hash.split("&")[0];
     return id.substring(1);
   }
 
@@ -33,16 +33,6 @@ class DemoBase {
     return `./demo-${DemoBase.getDemoId()}.es6.js?v=${Math.round(
       Math.random() * 9999999
     )}`;
-  }
-
-  static injectScript(src) {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.addEventListener("load", resolve);
-      script.addEventListener("error", (e) => reject(e.error));
-      document.head.appendChild(script);
-    });
   }
 
   constructor(
@@ -69,9 +59,7 @@ class DemoBase {
     }
     this.loadJsDependenciesSerial(jsFiles);
     this.addBackLink();
-    window.addEventListener("keydown", (e) =>
-      this.keyDown(e.keyCode ? e.keyCode : e.which)
-    );
+    window.addEventListener("keydown", (e) => this.keyDown(e.key));
   }
 
   addBackLink() {
@@ -111,13 +99,16 @@ class DemoBase {
     if (this.jsFiles.length > 0) {
       // load from front of array
       let nextJsFile = this.jsFiles.shift();
+      // check for exclamation point to indicate non-module js dependency
       var moduleStatus = "module";
       if (nextJsFile.indexOf("!") == 0) {
         nextJsFile = nextJsFile.substring(1);
         moduleStatus = null;
       }
       console.log("Loading global js:", nextJsFile);
+      // cache-bust
       nextJsFile += `?v=${Math.round(Math.random() * 9999999)}`;
+      // load into <head>
       DOMUtil.loadJavascript(
         nextJsFile,
         () => this.loadNextScript(),

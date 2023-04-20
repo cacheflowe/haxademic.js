@@ -35,17 +35,16 @@ class AppStoreDistributedDemo extends DemoBase {
     // optional debug window
     this.appStoreDebug = new AppStoreDebug(true);
 
-    // add key listener
-    window.addEventListener("keydown", (e) => {
-      this.log.log(`key pressed: ${e.key}`);
-      this.appStoreDistributed.set("KEY_SHARED", e.key, true);
-    });
-
     // Add Pointerpos for mouse position
     this.pointerPos = new PointerPos((e, x, y) => {
       this.appStoreDistributed.set("MOUSE_X", x, true);
       this.appStoreDistributed.set("MOUSE_Y", y, true);
     });
+  }
+
+  keyDown(key) {
+    this.log.log(`key pressed: ${key}`);
+    this.appStoreDistributed.set("KEY_SHARED", key, true);
   }
 
   storeUpdated(key, value) {
