@@ -1,11 +1,14 @@
-import DemoBase from './demo--base.es6.js';
+import DemoBase from "./demo--base.es6.js";
 
 class QRCodeDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [
-      "!../vendor/qrcode.min.js",
-    ], 'QRCode', 'qr-container');
+    super(
+      parentEl,
+      ["!../vendor/qrcode.min.js"],
+      "QRCode",
+      "qr-container",
+      "Uses qrcode.min.js"
+    );
   }
 
   init() {
@@ -13,12 +16,11 @@ class QRCodeDemo extends DemoBase {
       text: "https://cacheflowe.com/",
       width: 128,
       height: 128,
-      colorDark : "#000000",
-      colorLight : "#ffffff",
+      colorDark: "#000000",
+      colorLight: "#ffffff",
       // correctLevel : QRCode.CorrectLevel.H
     });
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new QRCodeDemo(document.body);
+if (window.autoInitDemo) window.demo = new QRCodeDemo(document.body);

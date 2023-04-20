@@ -163,12 +163,12 @@ class ThreeSceneDemo extends DemoBase {
 
   keyDown(key) {
     // asynchronous save post-render(). callback brings the encoded image back from the render loop
-    if (key == "1") {
+    if (key == "j") {
       this.threeScene.saveJpg((imageBase64) => {
         this.debugEl.innerHTML += `<img src="${imageBase64}" style="width: 250px; box-shadow: 0 0 5px #000000;">`;
       }, 0.5);
     }
-    if (key == "2") {
+    if (key == "p") {
       this.threeScene.savePng((imageBase64) => {
         this.debugEl.innerHTML += `<img src="${imageBase64}" style="width: 250px; box-shadow: 0 0 5px #000000;">`;
       });

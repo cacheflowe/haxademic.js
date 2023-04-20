@@ -55,7 +55,7 @@ class PixiStageTexturedMeshDemo extends DemoBase {
 
   loadImage() {
     // load image & init after
-    this.texture = new PIXI.Texture.from("../images/checkerboard-16-9.png");
+    this.texture = PIXI.Texture.from("../images/checkerboard-16-9.png");
     this.texture.once("update", (texture) => {
       // use `once` instead of `on`, since event can fire twice. this is noted in the PIXI docs
       this.buildMesh(texture);

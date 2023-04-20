@@ -3,11 +3,13 @@
   --spacing-company: 3rem;
   --font-weight: 400;
   --border-radius: 0;
+  --text-bg: rgba(255, 255, 255, 0.6);
 }
 
 @media only screen and (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --background-color: #111;
+    --text-bg: rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -23,6 +25,7 @@ small {
 }
 
 /* Header */
+
 .hero {
   background-color: #394046;
   background-image: url("https://cacheflowe.com/images/art/digital/cacheflowe-warp-drive.gif");
@@ -45,6 +48,24 @@ header hgroup,
 }
 
 /* Demos */
-/* .demo h1 {
-  margin
-} */
+
+.demo h1 {
+  margin-bottom: 0;
+}
+.fullscreen .demo h1 {
+  padding-bottom: 0;
+}
+.demo p:first-of-type {
+  padding-top: 0;
+}
+
+h1:empty,
+p:empty {
+  display: none;
+}
+
+.fullscreen h1,
+.fullscreen p {
+  background-color: var(--text-bg);
+  padding: 1rem;
+}

@@ -72,7 +72,7 @@ class DOMUtil {
     return script;
   }
 
-  static injectScriptAlt(src) {
+  static injectScriptSync(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = src;

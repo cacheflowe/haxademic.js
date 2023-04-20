@@ -52,6 +52,7 @@ class DemoBase {
       this.el = document.getElementById(elId);
       if (fullscreen) {
         this.el.classList.add("fullscreen-bg");
+        document.body.classList.add("fullscreen");
         MobileUtil.addFullscreenListener();
         MobileUtil.addFullscreenEl(this.el, true);
       }
@@ -71,8 +72,11 @@ class DemoBase {
 
     // add src link
     let srcBtn = document.createElement("a");
+    let sourceBase = `https://github.com/cacheflowe/haxademic.js/blob/master/demo/demo-`;
+    let sourceLink = `${sourceBase}${DemoBase.getDemoId()}.es6.js`;
+    // let sourceLink = DemoBase.demoJsFile(); - points to local source:// file, but GitHub is nicer
     srcBtn.innerText = "Demo source";
-    srcBtn.setAttribute("href", DemoBase.demoJsFile());
+    srcBtn.setAttribute("href", sourceLink);
     srcBtn.setAttribute("target", "_blank");
     srcBtn.setAttribute("style", "float: right");
     srcBtn.setAttribute("role", "button");
@@ -135,6 +139,10 @@ class DemoBase {
         <p id="debug"></p>
       </main>
     `);
+  }
+
+  injectCSS(css) {
+    DOMUtil.injectCSS(css);
   }
 
   init() {

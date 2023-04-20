@@ -1,29 +1,5 @@
 /* Demos */
 
-.container {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.container.dark {
-  color: #fff;
-}
-
-html {
-  --white-trans: rgba(255, 255, 255, 0.7);
-}
-/* h1,
-p {
-  background-color: var(--white-trans);
-  padding: 1rem;
-  margin: -1rem 0 2rem 0;
-}
-h1:empty,
-p:empty {
-  display: none;
-} */
-
 /* Glow/shadow effects */
 
 .shadow {

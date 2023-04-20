@@ -7,7 +7,8 @@ class CanvasFractalDemo extends DemoBase {
       [],
       "Canvas | Fractal",
       "canvas-fractal-container",
-      'Press "r" to generate a random hash.<br>Press "s" to save.<br>Add "&hash=FF00AA44....." to the URL to create a link into a deterministic, reproducable shape. Check the console for the current hash.'
+      'Press "r" to generate a random hash.<br>Press "s" to save.<br>Add "&hash=FF00AA44....." to the URL to create a link into a deterministic, reproducable shape. Check the console for the current hash.',
+      true
     );
   }
 
