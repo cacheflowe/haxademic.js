@@ -1,5 +1,4 @@
 class ObjectPool {
-
   // An object pool that grows as needed.
   // Contract:
   // * Object has a public `isActive()` function
@@ -19,7 +18,7 @@ class ObjectPool {
     let freeObject = this.objects.find((el) => {
       return el.isActive() == false;
     });
-    if(freeObject) {
+    if (freeObject) {
       return freeObject;
     } else {
       this.objects.push(new this.klass());
@@ -28,11 +27,11 @@ class ObjectPool {
   }
 
   anyActive() {
-    return null != this.objects.find((el) => {
+    let activeObject = this.objects.find((el) => {
       return el.isActive() == true;
     });
+    return activeObject != null;
   }
-
 }
 
 export default ObjectPool;

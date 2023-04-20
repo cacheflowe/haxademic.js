@@ -29,7 +29,8 @@ class AppStoreDebug {
       font-family: arial;
       font-size: 12px;
       position: fixed;
-      top: 0;left: 0;
+      top: 0;
+      left: 0;
       padding: 12px;
       height: 100%;
       overflow-y: auto;

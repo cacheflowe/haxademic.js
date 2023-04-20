@@ -21,12 +21,13 @@ class PixiStage {
       width: this.elSize.width,
       height: this.elSize.height,
       backgroundColor: bgColor,
-      backgroundAlpha: true,
+      backgroundAlpha: 1,
       resizeTo: !sizeOverride ? this.el : null, // resize to container unless we're providing a hard-coded canvas size
-      autoDensity: true,
-      antialias: true,
+      autoDensity: false,
+      antialias: false,
       resolution: pixelRatio,
       preserveDrawingBuffer: true, // allows saving of canvas, but hurts perf
+      powerPreference: "high-performance",
     });
 
     el.appendChild(this.app.view);
