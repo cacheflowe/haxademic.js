@@ -1,17 +1,19 @@
-import DemoBase from './demo--base.es6.js';
-import * as THREE from '../vendor/three/three.module.js';
-import DragDropUtil from '../src/drag-drop-util.es6.js';
-import FrameLoop from '../src/frame-loop.es6.js';
-import MobileUtil from '../src/mobile-util.es6.js';
-import PointerPos from '../src/pointer-pos.es6.js';
-import ThreeScene from '../src/three-scene-.es6.js';
-import ThreeSceneFBO from '../src/three-scene-fbo.es6.js';
-import ThreeChromaShader from '../src/three-chroma-shader.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import DragDropUtil from "../src/drag-drop-util.es6.js";
+import FrameLoop from "../src/frame-loop.es6.js";
+import MobileUtil from "../src/mobile-util.es6.js";
+import PointerPos from "../src/pointer-pos.es6.js";
+import ThreeScene from "../src/three-scene-.es6.js";
+import ThreeSceneFBO from "../src/three-scene-fbo.es6.js";
+import ThreeChromaShader from "../src/three-chroma-shader.es6.js";
 
 class ThreeSceneFBODemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], `
+    super(
+      parentEl,
+      [],
+      `
       <div class="container">
         <style>
           .drop-over {
@@ -22,7 +24,8 @@ class ThreeSceneFBODemo extends DemoBase {
         <div id="three-scene-fbo-chroma" style="width: 100%; height: 600px;"></div>
         <div id="video-debug"></div>
       </div>
-    `);
+    `
+    );
   }
 
   init() {
@@ -36,7 +39,7 @@ class ThreeSceneFBODemo extends DemoBase {
   }
 
   setupScene() {
-    this.el = document.getElementById('three-scene-fbo-chroma');
+    this.el = document.getElementById("three-scene-fbo-chroma");
     this.threeScene = new ThreeScene(this.el, 0xff0000);
     this.threeScene.getRenderer().setClearColor(0xff0000, 0);
     this.scene = this.threeScene.getScene();
@@ -52,20 +55,21 @@ class ThreeSceneFBODemo extends DemoBase {
 
   setupDragDrop() {
     DragDropUtil.dropFile(this.el, (fileResult) => {
-      if(!!fileResult.match(/video/)) {
+      if (!!fileResult.match(/video/)) {
         this.videoEl.src = fileResult;
         this.videoEl.play();
       }
-      if(!!fileResult.match(/image/)) {
+      if (!!fileResult.match(/image/)) {
         var loader = new THREE.TextureLoader();
-        loader.load(fileResult,
+        loader.load(
+          fileResult,
           (texture) => {
             this.planeBg.material.map = texture;
             this.planeBg.material.needsUpdate = true;
           },
           undefined,
           (err) => {
-            console.error('An error happened.', err);
+            console.error("An error happened.", err);
           }
         );
       }
@@ -77,10 +81,10 @@ class ThreeSceneFBODemo extends DemoBase {
   buildBgMesh() {
     // build shape
     this.planeBg = new THREE.Mesh(
-      new THREE.PlaneGeometry(1920/4, 1080/4),
+      new THREE.PlaneGeometry(1920 / 4, 1080 / 4),
       new THREE.MeshBasicMaterial({
         color: 0x00ffff,
-        side: THREE.FrontSide,  // DoubleSide
+        side: THREE.FrontSide, // DoubleSide
         wireframe: false,
       })
     );
@@ -90,7 +94,12 @@ class ThreeSceneFBODemo extends DemoBase {
   buildVideoMesh() {
     // build shape
     let planeResolution = 1;
-    this.planeGeometry = new THREE.PlaneGeometry(400*0.5, 320*0.5, planeResolution, planeResolution);
+    this.planeGeometry = new THREE.PlaneGeometry(
+      400 * 0.5,
+      320 * 0.5,
+      planeResolution,
+      planeResolution
+    );
     this.planeMaterial = new THREE.ShaderMaterial({
       side: THREE.FrontSide,
       vertexShader: ThreeChromaShader.vertexShader,
@@ -100,27 +109,27 @@ class ThreeSceneFBODemo extends DemoBase {
         tDiffuse: { value: this.threeFBO.getTexture() },
         thresholdSensitivity: { value: 0.2 },
         smoothing: { value: 0.8 },
-        colorToReplace: { value: new THREE.Color( 0x000000 ) }
-      }
+        colorToReplace: { value: new THREE.Color(0x000000) },
+      },
     });
-    this.plane = new THREE.Mesh( this.planeGeometry, this.planeMaterial );
+    this.plane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
     this.plane.position.set(0, 0, 25);
     this.scene.add(this.plane);
   }
 
   buildVideoTexture() {
     // setup
-    this.videoDebugEl = document.getElementById('video-debug');
+    this.videoDebugEl = document.getElementById("video-debug");
 
     // add video element
-    this.videoEl = document.createElement('video');
-    this.videoEl.src = '../data/wash-your-hands-512.mp4';
-    this.videoEl.style.setProperty('width', '320px');
-    this.videoEl.setAttribute('loop', 'true');
-    this.videoEl.setAttribute('muted', 'true');
-    this.videoEl.setAttribute('playsinline', 'true');
-    this.videoEl.setAttribute('preload', 'auto');
-    this.videoEl.setAttribute('crossOrigin', 'anonymous');
+    this.videoEl = document.createElement("video");
+    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
+    this.videoEl.style.setProperty("width", "320px");
+    this.videoEl.setAttribute("loop", "true");
+    this.videoEl.setAttribute("muted", "true");
+    this.videoEl.setAttribute("playsinline", "true");
+    this.videoEl.setAttribute("preload", "auto");
+    this.videoEl.setAttribute("crossOrigin", "anonymous");
     this.videoEl.defaultMuted = true;
     this.videoEl.muted = true;
     this.videoEl.play();
@@ -131,30 +140,33 @@ class ThreeSceneFBODemo extends DemoBase {
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
     this.videoTexture.minFilter = THREE.LinearFilter;
     this.videoTexture.magFilter = THREE.LinearFilter;
-    this.videoTexture.format = THREE.RGBAFormat;  // THREE.RGBFormat?
+    this.videoTexture.format = THREE.RGBAFormat; // THREE.RGBFormat?
 
     // set texture on FBO plane
-    this.threeFBO.setMaterial(new THREE.MeshBasicMaterial({
-      map: this.videoTexture,
-      color: 0xffffff,
-      transparent: true,
-    }));
+    this.threeFBO.setMaterial(
+      new THREE.MeshBasicMaterial({
+        map: this.videoTexture,
+        color: 0xffffff,
+        transparent: true,
+      })
+    );
   }
 
   startAnimation() {
-    window._frameLoop = (new FrameLoop()).addListener(this);
+    window._frameLoop = new FrameLoop().addListener(this);
   }
 
   frameLoop(frameCount) {
     // update camera
-    this.planeBg.rotation.y = this.plane.rotation.y = -0.5 + 1.0 * this.pointerPos.xNorm(this.el);
-    this.planeBg.rotation.x = this.plane.rotation.x = -0.5 + 1.0 * this.pointerPos.yNorm(this.el);
+    this.planeBg.rotation.y = this.plane.rotation.y =
+      -0.5 + 1.0 * this.pointerPos.xNorm(this.el);
+    this.planeBg.rotation.x = this.plane.rotation.x =
+      -0.5 + 1.0 * this.pointerPos.yNorm(this.el);
 
     // render FBO and then main scene
     this.threeFBO.render(this.threeScene.getRenderer());
     this.threeScene.render();
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneFBODemo(document.body);
+if (window.autoInitDemo) window.demo = new ThreeSceneFBODemo(document.body);

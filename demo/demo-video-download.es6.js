@@ -15,7 +15,7 @@ class VideoDownloadDemo extends DemoBase {
   init() {
     // add video element
     this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/wash-your-hands.mp4";
+    this.videoEl.src = "../data/videos/wash-your-hands.mp4";
     this.videoEl.style.setProperty("width", "100%");
     this.videoEl.setAttribute("loop", "true");
     this.videoEl.setAttribute("muted", "true");
@@ -27,7 +27,7 @@ class VideoDownloadDemo extends DemoBase {
     // add link
     this.linkEl = document.createElement("a");
     this.linkEl.innerText = "Download Video";
-    this.linkEl.setAttribute("href", "../data/wash-your-hands.mp4");
+    this.linkEl.setAttribute("href", "../data/videos/wash-your-hands.mp4");
     this.linkEl.setAttribute("download", "wash-your-hands.mp4");
     this.el.appendChild(this.linkEl);
 

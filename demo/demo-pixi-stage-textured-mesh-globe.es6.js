@@ -57,7 +57,7 @@ class PixiStageTexturedMeshGlobeDemo extends DemoBase {
     // add video element
     this.videoEl = document.createElement("video");
     this.videoEl.setAttribute("crossOrigin", "anonymous");
-    this.videoEl.src = "../data/wash-your-hands-512.mp4";
+    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
     this.videoEl.setAttribute("loop", "true");
     this.videoEl.setAttribute("muted", "true");
     this.videoEl.setAttribute("playsinline", "true");
