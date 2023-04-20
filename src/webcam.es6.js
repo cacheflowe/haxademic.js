@@ -1,26 +1,31 @@
-class Webcam {
+//     facingMode: {
+//       exact: "environment",
+//     },
 
-  constructor(callback, errorCallback) {
-    navigator.mediaDevices.getUserMedia({'video': true})
-      .then(stream => {
+class Webcam {
+  constructor(callback, errorCallback, mobileBackCamera = false) {
+    const videoOptions = mobileBackCamera
+      ? { facingMode: "environment" }
+      : true;
+    navigator.mediaDevices
+      .getUserMedia({ video: videoOptions })
+      .then((stream) => {
         // add video stream to video element and return it
-        let videoEl = document.createElement('video');
-        videoEl.setAttribute('autoplay', true);
-        videoEl.setAttribute('playsinline', true);
+        let videoEl = document.createElement("video");
+        videoEl.setAttribute("autoplay", true);
+        videoEl.setAttribute("playsinline", true);
         videoEl.srcObject = stream;
         callback(videoEl);
       })
-      .catch(error => {
-        if(errorCallback) errorCallback(error);
-        else console.error('Error accessing media devices.', error);
-      }
-    );
+      .catch((error) => {
+        if (errorCallback) errorCallback(error);
+        else console.error("Error accessing media devices.", error);
+      });
   }
 
   static flipH(videoEl) {
-    videoEl.style.transform = 'rotateY(180deg)';
+    videoEl.style.transform = "rotateY(180deg)";
   }
-
 }
 
 export default Webcam;
