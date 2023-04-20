@@ -9,7 +9,7 @@ class StringFormatterDemo extends DemoBase {
 
   init() {
     this.printTests();
-    this.runUnitTests();
+    StringFormatterDemo.runUnitTests();
   }
 
   printTests() {
@@ -50,8 +50,8 @@ class StringFormatterDemo extends DemoBase {
     `;
   }
 
-  runUnitTests() {
-    zora.test("StringFormatter.formatPhone", (test) => {
+  static async runUnitTests() {
+    await zora.test("StringFormatter.formatPhone", (test) => {
       test.ok(StringFormatter.formatPhone("3035558888"));
       test.equal(StringFormatter.formatPhone("3035558888"), "(303) 555-8888");
     });
@@ -78,10 +78,12 @@ class StringFormatterDemo extends DemoBase {
       test.ok(StringFormatter.addCommasToNumber("3000000"));
       test.equal(StringFormatter.addCommasToNumber("3000000"), "3,000,000");
     });
-    zora.test("StringFormatter.timeFromSeconds", (test) => {
+    let result = await zora.test("StringFormatter.timeFromSeconds", (test) => {
       test.ok(StringFormatter.timeFromSeconds(30000, true));
       test.equal(StringFormatter.timeFromSeconds(30000, true), "08:20:00");
+      console.log(test);
     });
+    console.log(zora, result);
   }
 }
 

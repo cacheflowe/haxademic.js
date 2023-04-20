@@ -56,28 +56,10 @@ class ObjectPoolTouchRipplesDemo extends DemoBase {
         }
       }
 
-      @keyframes myAnim {
-        0%,
-        50%,
-        100% {
-          opacity: 1;
-        }
-
-        25%,
-        75% {
-          opacity: 0;
-        }
-      }
-
       .animating {
-        /*
         animation-name: sendPulse;
         animation-duration: 0.5s;
         animation-iteration-count: 1;
-        animation-iteration-count: infinite;
-        */
-        animation: myAnim 2s ease 0s infinite normal forwards;
-
       }
     `);
   }
@@ -129,8 +111,8 @@ class RippleParticle {
 
     setTimeout(() => {
       this.active = false;
-      // this.container.removeChild(this.el);
-      // this.el.classList.remove("animating");
+      this.container.removeChild(this.el);
+      this.el.classList.remove("animating");
     }, 1000);
   }
 }
