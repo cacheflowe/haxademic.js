@@ -17,9 +17,8 @@ class PixiStageDemo extends DemoBase {
 
   init() {
     // create PIXI stage object
-    this.pixiContainer = document.getElementById("pixi-stage-container");
     // this.pixiContainer.setAttribute('style', 'height: 500px;');
-    this.pixiStage = new PixiStage(this.pixiContainer); // , 0xff000000, 'pixi', 2);
+    this.pixiStage = new PixiStage(this.el); // , 0xff000000, 'pixi', 2);
 
     // load image before building other objects
     this.loadImage();
@@ -161,30 +160,6 @@ class PixiStageDemo extends DemoBase {
       this.pattern.uniforms.dimensions[0] = this.pixiStage.width(); // if running on entire this.pixiStage.container(), we need to use heightRenderer()
       this.pattern.uniforms.dimensions[1] = this.pixiStage.height();
     }
-  }
-
-  initWebcam() {
-    // add button to start everything
-    this.startButton = document.createElement("button");
-    this.startButton.innerText = "Start";
-    this.pixiContainer.appendChild(this.startButton);
-
-    // click video to add audio response
-    this.startButton.addEventListener("click", (e) => {
-      this.startButton.parentNode.removeChild(this.startButton);
-
-      // init this.pixiStage
-      this.this.pixiStage = new PixiStage(
-        (videoEl) => {
-          // attach to DOM and flip to mirror the video
-          this.pixiContainer.appendChild(videoEl);
-          PixiStage.flipH(videoEl);
-        },
-        (error) => {
-          this.pixiContainer.innerHTML = "[PixiStage ERROR] :: " + error;
-        }
-      );
-    });
   }
 }
 
