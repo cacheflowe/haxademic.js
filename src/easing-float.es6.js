@@ -2,7 +2,7 @@ class EasingFloat {
   constructor(value = 0, easeFactor = 8, completeRange = 0.001) {
     this.val = value;
     this.targetVal = value;
-    this.setEaseFactor(easeFactor);
+    this.easeFactor = easeFactor <= 1 ? 1 / easeFactor : easeFactor;
     this.completeRange = completeRange;
     this.speed = 0;
     this.delay = 0;
