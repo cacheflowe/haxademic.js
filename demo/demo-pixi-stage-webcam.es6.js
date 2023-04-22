@@ -8,17 +8,14 @@ class PixiStageWebcamDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      [
-        // '!../vendor/pixi/pixi.min.js'
-      ],
+      null,
       "PixiStage | Webcam",
-      "pixi-stage-webcam-mesh-container"
+      "pixi-stage-webcam-mesh-container",
+      "Video texture in PIXI, cropped to fill, with a bonus shader"
     );
   }
 
   init() {
-    this.container = document.querySelector(".container");
-    // create PIXI stage object
     this.el.setAttribute("style", "height: 300px;");
     this.pixiStage = new PixiStage(this.el, 0xffff0000);
 
@@ -28,47 +25,20 @@ class PixiStageWebcamDemo extends DemoBase {
   }
 
   buildTexture() {
-    const graphics = new PIXI.Graphics();
-
-    // bg
-    graphics.beginFill(0x000000);
-    graphics.drawRect(0, 0, this.pixiStage.width(), this.pixiStage.height());
-    graphics.endFill();
-    // checkers
-    let rectSize = 20;
-    var boxCount = 0;
-    for (var x = 0; x < this.pixiStage.width(); x += rectSize) {
-      for (var y = 0; y < this.pixiStage.height(); y += rectSize) {
-        if (boxCount % 2 == 0) {
-          graphics.beginFill(0xffffff);
-          graphics.drawRect(x, y, rectSize, rectSize);
-          graphics.endFill();
-        }
-        boxCount++;
-      }
-    }
-
-    this.texture = this.pixiStage.graphicsToTexture(graphics);
+    this.texture = PixiStage.newTestPatternTexture(
+      this.pixiStage.renderer(),
+      this.pixiStage.width() - 40,
+      this.pixiStage.height() - 40
+    );
     this.buildMesh(this.texture);
     this.animate();
-  }
-
-  loadImage() {
-    // load image & init after
-    this.texture = PIXI.Texture.from("../images/checkerboard-16-9.png");
-    this.texture.once("update", (texture) => {
-      // use `once` instead of `on`, since event can fire twice. this is noted in the PIXI docs
-      console.log(texture);
-      this.mesh.texture = texture;
-      texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT; // texture repating
-    });
   }
 
   buildWebcamButton() {
     // add button to start everything
     this.startButton = document.createElement("button");
     this.startButton.innerText = "Start";
-    this.container.appendChild(this.startButton);
+    this.el.appendChild(this.startButton);
 
     // click video to load webcam
     this.startButton.addEventListener("click", (e) => {
@@ -93,7 +63,7 @@ class PixiStageWebcamDemo extends DemoBase {
           Webcam.flipH(videoEl);
         },
         (error) => {
-          this.container.innerHTML = "[Webcam ERROR] :: " + error;
+          this.el.innerHTML = "[Webcam ERROR] :: " + error;
         }
       );
     });

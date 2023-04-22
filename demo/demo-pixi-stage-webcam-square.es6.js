@@ -8,9 +8,7 @@ class PixiStageWebcamSquareDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      [
-        // '!../vendor/pixi/pixi.min.js'
-      ],
+      null,
       "PixiStage | Webcam Square",
       "pixi-stage-webcam-square",
       "Click to start the camera, then click to download an image."
@@ -18,7 +16,7 @@ class PixiStageWebcamSquareDemo extends DemoBase {
   }
 
   init() {
-    // build webcam button first
+    this.el.setAttribute("style", "width: 512px;");
     this.buildWebcamButton();
   }
 
@@ -40,7 +38,6 @@ class PixiStageWebcamSquareDemo extends DemoBase {
       (videoEl) => {
         // create PIXI stage object at a static size,
         // inside a smaller container
-        this.el.setAttribute("style", "width: 512px;");
         this.pixiStage = new PixiStage(this.el, 0xffff0000, "pixi", 1, {
           width: 1024,
           height: 1024,

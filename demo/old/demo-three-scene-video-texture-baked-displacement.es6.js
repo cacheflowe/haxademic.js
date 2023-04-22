@@ -15,11 +15,6 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
       ],
       `
       <div class="container">
-        <style>
-          .drop-over {
-            outline: 10px dashed #009900;
-          }
-        </style>
         <h1>ThreeScene | Video Texture</h1>
         <div id="three-scene" style="width: 100%; height: 0; padding-bottom: 100%;"></div>
         <div id="video-debug"></div>
@@ -37,6 +32,7 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.setupInput();
     this.setupUI();
     this.setupDragDrop();
+    this.addDropOverCSS();
   }
 
   setupScene() {

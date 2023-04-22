@@ -1,4 +1,24 @@
 class VideoUtil {
+  // factory helpers
+
+  static buildVideoEl(videoPath, muted = true) {
+    let videoEl = document.createElement("video");
+    videoEl.setAttribute("preload", "auto");
+    videoEl.setAttribute("playsinline", "true");
+    videoEl.setAttribute("crossOrigin", "anonymous");
+    videoEl.setAttribute("loop", "true");
+    videoEl.setAttribute("src", videoPath);
+    videoEl.setAttribute("autoplay", "true");
+    if (muted) {
+      videoEl.setAttribute("muted", "true");
+      videoEl.volume = 0;
+      videoEl.defaultMuted = true;
+      videoEl.muted = true;
+    }
+    return videoEl;
+  }
+
+  // listener helpers/examples
   // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
 
   static addCompleteListener(videoEl, callback) {

@@ -1,19 +1,24 @@
-import DemoBase from './demo--base.es6.js';
-import * as THREE from '../vendor/three/three.module.js';
-import FrameLoop from '../src/frame-loop.es6.js';
-import ThreeScene from '../src/three-scene-.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import FrameLoop from "../src/frame-loop.es6.js";
+import ThreeScene from "../src/three-scene-.es6.js";
 // VideoRecorder is included in DemoBase
 // import VideoRecorder from '../src/video-recorder.es6.js';
 
 class VideoRecorderDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'VideoRecorder', 'webgl-container');
+    super(
+      parentEl,
+      [],
+      "VideoRecorder",
+      "webgl-container",
+      "Shows the seamless recording of a canvas element, exported to a downloadable video file. Just wait a couple of rotations..."
+    );
   }
 
   init() {
     // setup
-    this.el.style.height = '500px';
+    this.el.setAttribute("style", "height: 500px;");
     this.setupScene();
     this.buildCube();
     this.addLights();
@@ -25,7 +30,7 @@ class VideoRecorderDemo extends DemoBase {
   // recording setup
 
   initAnimation() {
-    window._frameLoop = (new FrameLoop(this.loopFrames)).addListener(this);
+    window._frameLoop = new FrameLoop(this.loopFrames).addListener(this);
   }
 
   // ANIMATE
@@ -52,13 +57,16 @@ class VideoRecorderDemo extends DemoBase {
     let cubeSize = 150;
     this.materialCube = new THREE.MeshPhongMaterial({
       color: 0x00ffbb, // 0x00ffbb
-      emissive : 0x000000, // 0x000000
-      specular : 0x666666,
-      shininess : 10,
-      flatShading : false
+      emissive: 0x000000, // 0x000000
+      specular: 0x666666,
+      shininess: 10,
+      flatShading: false,
     });
 
-    this.cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4), this.materialCube);
+    this.cubeMesh = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
+      this.materialCube
+    );
     this.cubeMesh.castShadow = true;
     this.cubeMesh.position.set(0, 30, 0);
     this.scene.add(this.cubeMesh);
@@ -75,16 +83,15 @@ class VideoRecorderDemo extends DemoBase {
   // WINDOW RESIZE
 
   addResizeListener() {
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener("resize", () => this.resize());
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
     }, 400);
   }
 
   resize() {
     this.threeScene.resize();
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new VideoRecorderDemo(document.body);
+if (window.autoInitDemo) window.demo = new VideoRecorderDemo(document.body);

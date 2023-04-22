@@ -4,7 +4,13 @@ import FrameLoop from "../src/frame-loop.es6.js";
 
 class DateUtilDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "DateUtil", "date-util-container");
+    super(
+      parentEl,
+      [],
+      "DateUtil",
+      "date-util-container",
+      "Date and time utilities"
+    );
   }
 
   init() {

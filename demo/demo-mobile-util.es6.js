@@ -1,70 +1,76 @@
-import DemoBase from './demo--base.es6.js';
-import MobileUtil from '../src/mobile-util.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import MobileUtil from "../src/mobile-util.es6.js";
 
 class MobileUtilDemo extends DemoBase {
+  static CSS = `
+    .container {
+      padding-bottom: 500px;
+    }
+    body.mobile .is-mobile,
+    body.desktop .is-desktop {
+      color: #090;
+    }
+    button:active {
+      background-color: #090;
+    }
+    #fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      border: 5px solid #0f0;
+      pointer-events: none;
+    }
+    #fullscreen-top,
+    #fullscreen-bottom {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 40px;
+      height: 40px;
+      background-color: #f00;
+    }
+    #fullscreen-bottom {
+      background-color: #00f;
+      top: auto;
+      bottom: 0;
+    }
+  `;
 
   constructor(parentEl) {
-    super(parentEl, [], `
-    <div class="container" style="padding-bottom: 500px">
-      <style>
-        body.mobile .is-mobile,
-        body.desktop .is-desktop {
-          color: #090;
-        }
-        button:active {
-          background-color: #090;
-        }
-        #fullscreen {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          box-sizing: border-box;
-          border: 5px solid #0f0;
-          pointer-events: none;
-        }
-        #fullscreen-top,
-        #fullscreen-bottom {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 40px;
-          height: 40px;
-          background-color: #f00;
-        }
-        #fullscreen-bottom {
-          background-color: #00f;
-          top: auto;
-          bottom: 0;
-        }
-      </style>
-      <h1>MobileUtil</h1>
-      <div id="info"></div>
-    </div>`);
+    super(
+      parentEl,
+      [],
+      "MobileUtil",
+      "mobile-util-demo",
+      "Demos some MobileUtil methods, primarily staying fullscreen with a shifting URL bar, and locking the touch screen from scrolling. Also, some basic platform detection."
+    );
   }
 
   init() {
+    this.injectCSS(MobileUtilDemo.CSS);
     this.initButtons();
     this.buildDisplay();
 
     MobileUtil.setDeviceInputClass();
     MobileUtil.enablePseudoStyles();
     MobileUtil.addFullscreenListener();
-    MobileUtil.addFullscreenEl(document.getElementById('fullscreen'), true);
+    MobileUtil.addFullscreenEl(document.getElementById("fullscreen"), true);
   }
 
   initButtons() {
-    this.el = document.querySelector('.container');
-    this.el.addEventListener('click', (e) => {
-      if(e.target.id == "buttonLock")     MobileUtil.lockTouchScreen(true);
-      if(e.target.id == "buttonUnlock")   MobileUtil.lockTouchScreen(false);
+    this.el = document.querySelector(".container");
+    this.el.addEventListener("click", (e) => {
+      if (e.target.id == "buttonLock") MobileUtil.lockTouchScreen(true);
+      if (e.target.id == "buttonUnlock") MobileUtil.lockTouchScreen(false);
     });
   }
 
   buildDisplay() {
-    this.el = document.getElementById('info');
-    this.el.innerHTML = `
+    // this.el = document.getElementById('info');
+    this.el.innerHTML += `
       <div><code>setDeviceInputClass()</code> <span class="is-mobile">.mobile</span> | <span class="is-desktop">.desktop</span></div>
       <div><code>enablePseudoStyles()</code> :active ready!</div>
       <div><code>isMobileBrowser()</code> = ${MobileUtil.isMobileBrowser()}</div>
@@ -81,7 +87,6 @@ class MobileUtilDemo extends DemoBase {
       </div>
     `;
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new MobileUtilDemo(document.body);
+if (window.autoInitDemo) window.demo = new MobileUtilDemo(document.body);

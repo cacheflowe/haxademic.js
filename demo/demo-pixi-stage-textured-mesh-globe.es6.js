@@ -1,26 +1,23 @@
 import * as PIXI from "../vendor/pixi/pixi.mjs";
 import DemoBase from "./demo--base.es6.js";
 import PixiStage from "../src/pixi-stage.es6.js";
+import VideoUtil from "../src/video-util.es6.js";
 
 class PixiStageTexturedMeshGlobeDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      [
-        //  '!../vendor/pixi/pixi.min.js'
-      ],
+      null,
       "PixiStage | Textured Mesh Globe",
-      "pixi-stage-textured-mesh-globe-container"
+      "pixi-stage-textured-mesh-globe-container",
+      "Warped video mesh for spherical projection"
     );
   }
 
-  async init() {
+  init() {
     // create PIXI stage object
-    this.pixiContainer = document.getElementById(
-      "pixi-stage-textured-mesh-globe-container"
-    );
-    this.pixiContainer.setAttribute("style", "height: 500px;");
-    this.pixiStage = new PixiStage(this.pixiContainer, 0xff000000);
+    this.el.setAttribute("style", "height: 500px;");
+    this.pixiStage = new PixiStage(this.el, 0xff000000);
 
     // load image before building other objects
     // this.buildTestTexture();
@@ -28,43 +25,22 @@ class PixiStageTexturedMeshGlobeDemo extends DemoBase {
   }
 
   buildTestTexture() {
-    const graphics = new PIXI.Graphics();
-
-    // bg
-    graphics.beginFill(0x000000);
-    graphics.drawRect(0, 0, this.pixiStage.width(), this.pixiStage.height());
-    graphics.endFill();
-    // checkers
-    let rectSize = 20;
-    var boxCount = 0;
-    for (var x = 0; x < this.pixiStage.width(); x += rectSize) {
-      for (var y = 0; y < this.pixiStage.height(); y += rectSize) {
-        if (boxCount % 2 == 0) {
-          graphics.beginFill(0xffffff);
-          graphics.drawRect(x, y, rectSize, rectSize);
-          graphics.endFill();
-        }
-        boxCount++;
-      }
-    }
-
-    this.texture = this.pixiStage.graphicsToTexture(graphics);
+    this.texture = PixiStage.newTestPatternTexture(
+      this.pixiStage.renderer(),
+      this.pixiStage.width(),
+      this.pixiStage.height()
+    );
     this.buildMesh(this.texture);
     this.animate();
   }
 
   loadVideo() {
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.setAttribute("crossOrigin", "anonymous");
-    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("muted", "true");
-    this.videoEl.setAttribute("playsinline", "true");
-    this.videoEl.setAttribute("preload", "auto");
-    this.videoEl.defaultMuted = true;
-    this.videoEl.muted = true;
-    this.videoEl.play();
+    let videoPath = "../data/videos/wash-your-hands-512.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
+    // this.videoEl.play();
+
+    // attch backing video element to DOM for debug view
     this.videoEl.style.setProperty("width", "320px"); // for debug view
     this.videoEl.style.setProperty("border", "1px solid #090");
     document.body.appendChild(this.videoEl);

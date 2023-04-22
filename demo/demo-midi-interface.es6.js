@@ -5,13 +5,19 @@ import MidiInterface from "../src/midi-interface.es6.js";
 
 class MidiInterfaceDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "MidiInterface", "midi-container");
+    super(
+      parentEl,
+      [],
+      "MidiInterface",
+      "midi-container",
+      "Basic MIDI integration with external devices"
+    );
   }
 
   async init() {
     this.eventLog = new EventLog(this.debugEl);
     this.midiContainer = document.getElementById("midi-container");
-    // this.startWithButton();
+    this.startWithButton();
     this.initMidi();
     this.initKeyCommands();
   }

@@ -2,57 +2,61 @@ import DemoBase from "./demo--base.es6.js";
 import FrameLoop from "../src/frame-loop.es6.js";
 import PointerPos from "../src/pointer-pos.es6.js";
 
-class FrameLoopDemo extends DemoBase {
+class PointerPosDemo extends DemoBase {
+  static CSS = `
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+    }
+    #specific-el {
+      width:100%;
+      padding: 2rem;
+      background: rgba(0,0,0,0.25);
+    }
+    #specific-el.entered {
+      background-color: rgba(0,255,0,0.5);
+    }
+  `;
+
+  static HTML = `
+    <div>
+      <div><code>PointerPos.isTouching()</code> = <span id="is-touching"></span></div>
+      <div><code>PointerPos.isTouchInput()</code> = <span id="is-touch-input"></span></div>
+      <div><code>PointerPos.x()</code> = <span id="pos-x"></span></div>
+      <div><code>PointerPos.y()</code> = <span id="pos-y"></span></div>
+      <div><code>PointerPos.xNorm()</code> = <span id="pos-x-percent"></span></div>
+      <div><code>PointerPos.yNorm()</code> = <span id="pos-y-percent"></span></div>
+      <div><code>PointerPos.xDelta()</code> = <span id="pos-x-delta"></span></div>
+      <div><code>PointerPos.yDelta()</code> = <span id="pos-y-delta"></span></div>
+      <div><code>PointerPos.xDeltaTotal()</code> = <span id="pos-x-delta-total"></span></div>
+      <div><code>PointerPos.yDeltaTotal()</code> = <span id="pos-y-delta-total"></span></div>
+      <div><code>PointerPos.numPointers()</code> = <span id="num-pointers"></span></div>
+      <div id="specific-el">
+        <div>Specific element relative position:</div>
+        <div><code>PointerPos.x(el)</code> = <span id="specific-pos-x"></span></div>
+        <div><code>PointerPos.y(el)</code> = <span id="specific-pos-y"></span></div>
+        <div><code>PointerPos.xNorm(el)</code> = <span id="specific-pos-x-percent"></span></div>
+        <div><code>PointerPos.yNorm(el)</code> = <span id="specific-pos-y-percent"></span></div>
+        <div><code>PointerPos.insideEl(el)</code> = <span id="specific-pos-inside"></span></div>
+      </div>
+      <button id="button-drag">Button - check drag thresh</button>
+    </div>
+  `;
+
   constructor(parentEl) {
     super(
       parentEl,
       [],
-      `
-      <main class="container demo">
-        <style>
-          * {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-          }
-          #specific-el {
-            width:100%;
-            padding: 2rem;
-            background: rgba(0,0,0,0.25);
-          }
-          #specific-el.entered {
-            background-color: rgba(0,255,0,0.5);
-          }
-        </style>
-        <h1>PointerPos</h1>
-        <div><code>PointerPos.isTouching()</code> = <span id="is-touching"></span></div>
-        <div><code>PointerPos.isTouchInput()</code> = <span id="is-touch-input"></span></div>
-        <div><code>PointerPos.x()</code> = <span id="pos-x"></span></div>
-        <div><code>PointerPos.y()</code> = <span id="pos-y"></span></div>
-        <div><code>PointerPos.xNorm()</code> = <span id="pos-x-percent"></span></div>
-        <div><code>PointerPos.yNorm()</code> = <span id="pos-y-percent"></span></div>
-        <div><code>PointerPos.xDelta()</code> = <span id="pos-x-delta"></span></div>
-        <div><code>PointerPos.yDelta()</code> = <span id="pos-y-delta"></span></div>
-        <div><code>PointerPos.xDeltaTotal()</code> = <span id="pos-x-delta-total"></span></div>
-        <div><code>PointerPos.yDeltaTotal()</code> = <span id="pos-y-delta-total"></span></div>
-        <div><code>PointerPos.numPointers()</code> = <span id="num-pointers"></span></div>
-        <div id="specific-el">
-          <div>Specific element relative position:</div>
-          <div><code>PointerPos.x(el)</code> = <span id="specific-pos-x"></span></div>
-          <div><code>PointerPos.y(el)</code> = <span id="specific-pos-y"></span></div>
-          <div><code>PointerPos.xNorm(el)</code> = <span id="specific-pos-x-percent"></span></div>
-          <div><code>PointerPos.yNorm(el)</code> = <span id="specific-pos-y-percent"></span></div>
-          <div><code>PointerPos.insideEl(el)</code> = <span id="specific-pos-inside"></span></div>
-        </div>
-        <button id="button-drag">Button - check drag thresh</button>
-        <p id="debug"></p>
-      </main>
-    `
+      "PointerPos",
+      "pointer-pos-container",
+      "Pointer position tracking"
     );
   }
 
   init() {
-    this.el = document.getElementById("container");
+    this.injectCSS(PointerPosDemo.CSS);
+    this.injectHTML(PointerPosDemo.HTML);
     window._frameLoop = new FrameLoop().addListener(this);
     this.initPointerPos();
   }
@@ -149,10 +153,10 @@ class FrameLoopDemo extends DemoBase {
     this.outputTextSpecificPosY.innerHTML = this.pointerPos.y(this.specificEl);
     this.outputTextSpecificPosxNorm.innerHTML = (
       this.pointerPos.xNorm(this.specificEl) + ""
-    ).substr(0, 4);
+    ).substring(0, 4);
     this.outputTextSpecificPosyNorm.innerHTML = (
       this.pointerPos.yNorm(this.specificEl) + ""
-    ).substr(0, 4);
+    ).substring(0, 4);
     let insideSpecificEl = this.pointerPos.insideEl(this.specificEl);
     this.outputTextSpecificInside.innerHTML = insideSpecificEl + "";
     if (insideSpecificEl) {
@@ -163,4 +167,4 @@ class FrameLoopDemo extends DemoBase {
   }
 }
 
-if (window.autoInitDemo) window.demo = new FrameLoopDemo(document.body);
+if (window.autoInitDemo) window.demo = new PointerPosDemo(document.body);

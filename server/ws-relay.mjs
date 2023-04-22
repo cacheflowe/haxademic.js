@@ -2,7 +2,7 @@
 // - npm install ws
 // - npm install express
 // run:
-// - node ws-relay.js [--debug]
+// - node ws-relay.mjs [--debug]
 
 "use strict";
 process.title = "node-ws";
@@ -11,8 +11,10 @@ process.title = "node-ws";
 // Imports
 /////////////////////
 
-const WebSocket = require("ws");
-const express = require("express");
+import express from "express";
+import WebSocket, { WebSocketServer } from "ws";
+
+// const wss = new WebSocketServer({ port: 8080 });
 
 /////////////////////
 // Config
@@ -43,7 +45,7 @@ const server = express()
 /////////////////////
 
 // start server
-const wsServer = new WebSocket.Server({ port: wssPort, path: "/ws" }); // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
+const wsServer = new WebSocketServer({ port: wssPort, path: "/ws" }); // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
 eventLog(`Running WebSocket server at port: ${wssPort}`);
 
 // listen for new connections
@@ -51,13 +53,13 @@ wsServer.on("connection", (connection, request, client) => {
   eventLog("Client joined - We have " + wsServer.clients.size + " users");
 
   // handle incoming messages
-  connection.on("message", (message) => {
+  connection.on("message", (message, isBinary) => {
     if (debug) console.log(`[JSON IN]: ${message}`);
 
     // relay incoming message to all clients
     wsServer.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
+        client.send(message, { binary: isBinary });
       }
     });
   });

@@ -6,37 +6,25 @@ import PointerPos from "../src/pointer-pos.es6.js";
 import ThreeScene from "../src/three-scene-.es6.js";
 import ThreeSceneFBO from "../src/three-scene-fbo.es6.js";
 import ThreeChromaShader from "../src/three-chroma-shader.es6.js";
+import VideoUtil from "../src/video-util.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import { EffectComposer } from "../vendor/three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "../vendor/three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "../vendor/three/examples/jsm/postprocessing/ShaderPass.js";
 
 class ThreeSceneFBODemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      [
-        "!../vendor/three/three.min.js",
-        "!../vendor/three/shaders/CopyShader.js",
-        "!../vendor/three/shaders/HorizontalBlurShader.js",
-        "!../vendor/three/shaders/VerticalBlurShader.js",
-        "!../vendor/three/postprocessing/EffectComposer.js",
-        "!../vendor/three/postprocessing/RenderPass.js",
-        "!../vendor/three/postprocessing/MaskPass.js",
-        "!../vendor/three/postprocessing/ShaderPass.js",
-      ],
-      `
-      <div class="container">
-        <style>
-          .drop-over {
-            outline: 10px dashed #009900;
-          }
-        </style>
-        <h1>ThreeSceneFBO</h1>
-        <div id="three-scene-fbo" style="width: 100%; height: 600px;"></div>
-        <div id="video-debug"></div>
-      </div>
-    `
+      [],
+      "ThreeSceneFBO",
+      "three-scene-fbo",
+      "Video texture in an FBO for post-processing effects"
     );
   }
 
   init() {
+    this.addDropOverCSS();
     this.setupScene();
     this.buildImageMesh();
     this.buildVideoTexture();
@@ -45,10 +33,11 @@ class ThreeSceneFBODemo extends DemoBase {
     this.setupInput();
     this.startAnimation();
     this.setupDragDrop();
+    this.addDropOverCSS();
   }
 
   setupScene() {
-    this.el = document.getElementById("three-scene-fbo");
+    this.el.setAttribute("style", "height: 600px;");
     this.threeScene = new ThreeScene(this.el, 0xff0000);
     this.threeScene.getRenderer().setClearColor(0xff0000, 0);
     this.scene = this.threeScene.getScene();
@@ -123,23 +112,11 @@ class ThreeSceneFBODemo extends DemoBase {
   }
 
   buildVideoTexture() {
-    // setup
-    this.videoDebugEl = document.getElementById("video-debug");
-
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
+    let videoPath = "../data/videos/wash-your-hands.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
     this.videoEl.style.setProperty("width", "320px");
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("muted", "true");
-    this.videoEl.setAttribute("playsinline", "true");
-    this.videoEl.setAttribute("preload", "auto");
-    this.videoEl.setAttribute("crossOrigin", "anonymous");
-    this.videoEl.defaultMuted = true;
-    this.videoEl.muted = true;
-    this.videoEl.play();
-    this.videoDebugEl.appendChild(this.videoEl);
-    // this.videoEl.volume = 0;
+    this.debugEl.appendChild(this.videoEl);
 
     // add THREE video texture
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
@@ -159,18 +136,18 @@ class ThreeSceneFBODemo extends DemoBase {
 
   buildPostProcessing() {
     // set up effects chain on render buffer
-    this.composer = new THREE.EffectComposer(
+    this.composer = new EffectComposer(
       this.threeScene.getRenderer(),
       this.threeFBO.getRenderTarget()
     );
-    // this.composer = new THREE.EffectComposer(this.threeScene.getRenderer());
+    // this.composer = new EffectComposer(this.threeScene.getRenderer());
     this.composer.addPass(
-      new THREE.RenderPass(this.threeFBO.getScene(), this.threeFBO.getCamera())
+      new RenderPass(this.threeFBO.getScene(), this.threeFBO.getCamera())
     );
     this.composer.renderToScreen = false;
 
     // add chroma filter
-    this.chroma = new THREE.ShaderPass(ThreeChromaShader);
+    this.chroma = new ShaderPass(ThreeChromaShader);
     this.chroma.material.transparent = true;
     this.chroma.uniforms.thresholdSensitivity.value = 0.1;
     this.chroma.uniforms.smoothing.value = 0.9;

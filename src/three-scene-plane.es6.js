@@ -1,8 +1,7 @@
-import * as THREE from '../vendor/three/three.module.js';
+import * as THREE from "../vendor/three/three.module.js";
 
 class ThreeScenePlane {
-
-  constructor(width, height, bgColor=0xff0000, transparent=false) {
+  constructor(width, height, bgColor = 0xff0000, transparent = false) {
     this.width = width;
     this.height = height;
     this.bgColor = bgColor;
@@ -15,12 +14,17 @@ class ThreeScenePlane {
   buildScene() {
     // scene & camera
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.001, 1000);
-    this.camera.position.z = (this.height / 2) / Math.tan(Math.PI / 8);
+    this.camera = new THREE.PerspectiveCamera(
+      45,
+      this.width / this.height,
+      0.001,
+      1000
+    );
+    this.camera.position.z = this.height / 2 / Math.tan(Math.PI / 8);
 
     // camera-filling plane
     this.plane = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(this.width, this.height, 1),
+      new THREE.PlaneGeometry(this.width, this.height, 1),
       new THREE.MeshBasicMaterial({ color: 0x00ffff })
     );
     this.scene.add(this.plane);
@@ -31,18 +35,18 @@ class ThreeScenePlane {
     let options = {
       antialias: true,
       depthBuffer: false,
-      stencilBuffer: false
+      stencilBuffer: false,
     };
-    if(this.transparent) options.alpha = true;
+    if (this.transparent) options.alpha = true;
     this.renderer = new THREE.WebGLRenderer(options);
-    this.renderer.setClearColor(this.bgColor, (this.transparent) ? 0 : 1);
-		this.renderer.setPixelRatio(this.devicePixelRatio);
+    this.renderer.setClearColor(this.bgColor, this.transparent ? 0 : 1);
+    this.renderer.setPixelRatio(this.devicePixelRatio);
     this.renderer.setSize(this.width, this.height);
     this.render();
   }
 
   setMaterial(material) {
-    return this.plane.material = material;
+    return (this.plane.material = material);
   }
 
   getWidth() {
@@ -76,7 +80,6 @@ class ThreeScenePlane {
   render() {
     this.renderer.render(this.scene, this.camera);
   }
-
 }
 
 export default ThreeScenePlane;

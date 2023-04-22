@@ -1,14 +1,20 @@
-import DemoBase from './demo--base.es6.js';
-import * as THREE from '../vendor/three/three.module.js';
-import EasingFloat from '../src/easing-float.es6.js';
-import PointerPos from '../src/pointer-pos.es6.js';
-import MobileUtil from '../src/mobile-util.es6.js';
-import ThreeScene from '../src/three-scene-.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import EasingFloat from "../src/easing-float.es6.js";
+import PointerPos from "../src/pointer-pos.es6.js";
+import MobileUtil from "../src/mobile-util.es6.js";
+import ThreeScene from "../src/three-scene-.es6.js";
 
 class ThreeSceneDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeScene | Billboard Particles', 'three-scene-billboard-particles', null, true);
+    super(
+      parentEl,
+      [],
+      "ThreeScene | Billboard Particles",
+      "three-scene-billboard-particles",
+      "Mandala particles from that one project",
+      true
+    );
   }
 
   init() {
@@ -26,7 +32,7 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0x1E1E3A);
+    this.threeScene = new ThreeScene(this.el, 0x1e1e3a);
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
   }
@@ -34,9 +40,9 @@ class ThreeSceneDemo extends DemoBase {
   startAnimation() {
     this.frameCount = 0;
     this.animate();
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener("resize", () => this.resize());
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
     }, 400);
   }
 
@@ -113,12 +119,11 @@ class ThreeSceneDemo extends DemoBase {
       }
     `;
 
-
     let stats;
 
-    // build geometry for particles 
+    // build geometry for particles
     // const buffGeom = new THREE.CircleBufferGeometry( 1, 8 );
-    const buffGeom = new THREE.PlaneBufferGeometry( 1, 1, 1 );
+    const buffGeom = new THREE.PlaneBufferGeometry(1, 1, 1);
     let geometry = new THREE.InstancedBufferGeometry();
     geometry.index = buffGeom.index;
     geometry.attributes = buffGeom.attributes;
@@ -126,19 +131,19 @@ class ThreeSceneDemo extends DemoBase {
     const particleCount = 75000;
 
     // create positions
-    const translateArray = new Float32Array( particleCount * 3 );
+    const translateArray = new Float32Array(particleCount * 3);
     var radius = 0.35;
     var radiusOscRads = 0;
     var radiusOscFreq = 0.1;
     var rads = 0;
-    var radInc = Math.PI/180;
+    var radInc = Math.PI / 180;
     this.meshRadius = 200;
     this.meshDepth = 800;
     var cupDepth = particleCount / 3;
     var backSideCup = true;
     var curZ = -1;
-    var zInc = 1/particleCount * 1.85; // * 2 if we want it to have even depth behind the camera
-    for ( let i = 0, i3 = 0, l = particleCount; i < l; i ++, i3 += 3 ) {
+    var zInc = (1 / particleCount) * 1.85; // * 2 if we want it to have even depth behind the camera
+    for (let i = 0, i3 = 0, l = particleCount; i < l; i++, i3 += 3) {
       // random positions
       /*
       translateArray[ i3 + 0 ] = Math.random() * 2 - 1;
@@ -146,40 +151,43 @@ class ThreeSceneDemo extends DemoBase {
       translateArray[ i3 + 2 ] = Math.random() * 2 - 1;
       */
       // spiral
-      var curRadius = radius * (1. + 0.25 * Math.sin(radiusOscRads));
+      var curRadius = radius * (1 + 0.25 * Math.sin(radiusOscRads));
       // var curRadius = radius + (radius * (0.5 * Math.sin(radiusOscRads)));
       radiusOscRads += radiusOscFreq;
 
       // cup on the backside
-      if(backSideCup) {
-        let growProgress = (i/cupDepth);
-        let radiusGrow = 0.05 + 0.85 * Math.sin(growProgress * Math.PI/2);
+      if (backSideCup) {
+        let growProgress = i / cupDepth;
+        let radiusGrow = 0.05 + 0.85 * Math.sin((growProgress * Math.PI) / 2);
         // let radiusGrow = Math.sin(growProgress * Math.PI/2);
-        if(growProgress > 1) radiusGrow = 1;
+        if (growProgress > 1) radiusGrow = 1;
         curRadius *= radiusGrow;
       }
       // curRadius = radius;
       var x = Math.cos(rads) * curRadius;
       var y = Math.sin(rads) * curRadius;
       // var z = curZ;
-      var z = curZ + (0.01 * Math.sin(i/10));
-      translateArray[ i3 + 0 ] = x;
-      translateArray[ i3 + 1 ] = y;
-      translateArray[ i3 + 2 ] = z;
+      var z = curZ + 0.01 * Math.sin(i / 10);
+      translateArray[i3 + 0] = x;
+      translateArray[i3 + 1] = y;
+      translateArray[i3 + 2] = z;
 
       // step
       rads += radInc;
       curZ += zInc;
     }
 
-    geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
+    geometry.setAttribute(
+      "translate",
+      new THREE.InstancedBufferAttribute(translateArray, 3)
+    );
     this.mat4 = new THREE.Matrix4();
 
-    this.material = new THREE.RawShaderMaterial( {
+    this.material = new THREE.RawShaderMaterial({
       uniforms: {
-        "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
+        map: { value: new THREE.TextureLoader().load("../data/particle.png") },
         // "map": { value: new THREE.TextureLoader().load('../data/particle-circle-no-alpha.png')},
-        "time": { value: 0.0 },
+        time: { value: 0.0 },
         // "modelViewMatrixInverse": { value: this.mat4 }   // https://gist.github.com/spite/9110247
       },
       vertexShader: this.vshader,
@@ -192,12 +200,11 @@ class ThreeSceneDemo extends DemoBase {
       // trying - https://discourse.threejs.org/t/threejs-and-the-transparent-problem/11553/7
       depthWrite: false,
       depthTest: true,
-
     });
 
-    this.mesh = new THREE.Mesh( geometry, this.material );
+    this.mesh = new THREE.Mesh(geometry, this.material);
     this.mesh.scale.set(this.meshRadius, this.meshRadius, this.meshDepth);
-    this.scene.add( this.mesh );
+    this.scene.add(this.mesh);
 
     // stats = new Stats();
     // this.el.appendChild( stats.dom );
@@ -219,19 +226,23 @@ class ThreeSceneDemo extends DemoBase {
     // console.log(mInv);
     // this.material.uniforms['modelViewMatrixInverse'] = mInv;
     this.mat4.copy(mInv);
-    */ 
+    */
 
     // update shader
     const time = performance.now() * 0.0001;
-    this.material.uniforms[ "time" ].value = time;
+    this.material.uniforms["time"].value = time;
 
     // rotate shape
     const cameraAmp = 0.08;
-    this.cameraYEase.setTarget(-cameraAmp + cameraAmp*2 * this.pointerPos.xNorm(this.el)).update();
-    this.cameraXEase.setTarget(-cameraAmp + cameraAmp*2 * this.pointerPos.yNorm(this.el)).update();
+    this.cameraYEase
+      .setTarget(-cameraAmp + cameraAmp * 2 * this.pointerPos.xNorm(this.el))
+      .update();
+    this.cameraXEase
+      .setTarget(-cameraAmp + cameraAmp * 2 * this.pointerPos.yNorm(this.el))
+      .update();
     this.mesh.rotation.x = this.cameraXEase.value();
     this.mesh.rotation.y = this.cameraYEase.value();
-    this.mesh.position.set(0, 0, 0 + 600 * Math.sin(time*2));
+    this.mesh.position.set(0, 0, 0 + 600 * Math.sin(time * 2));
   }
 
   animate() {
@@ -245,7 +256,6 @@ class ThreeSceneDemo extends DemoBase {
   resize() {
     this.threeScene.resize();
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneDemo(document.body);
+if (window.autoInitDemo) window.demo = new ThreeSceneDemo(document.body);

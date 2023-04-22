@@ -5,7 +5,13 @@ import PointerPos from "../src/pointer-pos.es6.js";
 
 class GestureTrackerDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "GestureTracker", "gesture-detect-container");
+    super(
+      parentEl,
+      [],
+      "GestureTracker",
+      "gesture-detect-container",
+      "Time-windowed gesture detection demo"
+    );
   }
 
   init() {

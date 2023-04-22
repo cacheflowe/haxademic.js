@@ -1,10 +1,15 @@
-import DemoBase from './demo--base.es6.js';
-import FrameLoop from '../src/frame-loop.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import FrameLoop from "../src/frame-loop.es6.js";
 
 class FrameLoopDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'FrameLoop', 'frame-loop-container');
+    super(
+      parentEl,
+      [],
+      "FrameLoop",
+      "frame-loop-container",
+      "Like Processing's <code>frameCount</code>, but with more features for looping animations, modulo looping, and rendering"
+    );
   }
 
   init() {
@@ -27,7 +32,6 @@ class FrameLoopDemo extends DemoBase {
       <div><code>getIsTick</code> = ${_frameLoop.getIsTick()}</div>
     `;
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new FrameLoopDemo(document.body);
+if (window.autoInitDemo) window.demo = new FrameLoopDemo(document.body);

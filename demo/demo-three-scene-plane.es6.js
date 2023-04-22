@@ -3,37 +3,28 @@ import FrameLoop from "../src/frame-loop.es6.js";
 import ThreeScene from "../src/three-scene-.es6.js";
 import ThreeScenePlane from "../src/three-scene-plane.es6.js";
 import ThreeChromaShader from "../src/three-chroma-shader.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import { EffectComposer } from "../vendor/three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "../vendor/three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "../vendor/three/examples/jsm/postprocessing/ShaderPass.js";
+import { HorizontalBlurShader } from "../vendor/three/examples/jsm/shaders/HorizontalBlurShader.js";
+import { VerticalBlurShader } from "../vendor/three/examples/jsm/shaders/VerticalBlurShader.js";
+
+import VideoUtil from "../src/video-util.es6.js";
 
 class ThreeScenePlaneDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      [
-        "!../vendor/three/three.min.js",
-        "!../vendor/three/shaders/CopyShader.js",
-        "!../vendor/three/shaders/HorizontalBlurShader.js",
-        "!../vendor/three/shaders/VerticalBlurShader.js",
-        "!../vendor/three/postprocessing/EffectComposer.js",
-        "!../vendor/three/postprocessing/RenderPass.js",
-        "!../vendor/three/postprocessing/MaskPass.js",
-        "!../vendor/three/postprocessing/ShaderPass.js",
-      ],
-      `
-      <div class="container">
-        <style>
-          body {
-            background: #00ff00;
-          }
-        </style>
-        <h1>ThreeScenePlane</h1>
-        <div id="three-scene-plane"></div>
-        <div id="video-debug"></div>
-      </div>
-    `
+      [],
+      "ThreeScenePlane",
+      "three-scene-plane",
+      "Video texture in a 2D plane FBO for post-processing effects"
     );
   }
 
   init() {
+    // this.injectCSS(`body { background: #00bb00; }`);
     this.setupScene();
     this.buildVideoTexture();
     this.buildPostProcessing();
@@ -42,7 +33,7 @@ class ThreeScenePlaneDemo extends DemoBase {
 
   setupScene() {
     this.el = document.getElementById("three-scene-plane");
-    this.threeScene = new ThreeScenePlane(256, 256, 0xff0000, true);
+    this.threeScene = new ThreeScenePlane(768, 512, 0xff0000, true);
     this.el.appendChild(this.threeScene.canvasEl());
   }
 
@@ -53,25 +44,16 @@ class ThreeScenePlaneDemo extends DemoBase {
     this.videoDebugEl = document.getElementById("video-debug");
 
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
+    let videoPath = "../data/videos/wash-your-hands.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
     this.videoEl.style.setProperty("width", "320px");
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("muted", "true");
-    this.videoEl.setAttribute("playsinline", "true");
-    this.videoEl.setAttribute("preload", "auto");
-    this.videoEl.setAttribute("crossOrigin", "anonymous");
-    this.videoEl.defaultMuted = true;
-    this.videoEl.muted = true;
-    this.videoEl.play();
-    this.videoDebugEl.appendChild(this.videoEl);
-    // this.videoEl.volume = 0;
+    this.debugEl.appendChild(this.videoEl);
 
     // add THREE video texture
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
     this.videoTexture.minFilter = THREE.LinearFilter;
     this.videoTexture.magFilter = THREE.LinearFilter;
-    this.videoTexture.format = THREE.RGBFormat;
+    this.videoTexture.format = THREE.RGBAFormat;
 
     // set texture on FBO plane
     this.threeScene.setMaterial(
@@ -83,39 +65,21 @@ class ThreeScenePlaneDemo extends DemoBase {
     );
   }
 
-  // createDisplacementMap() {
-  //   // create canvas
-  // 	this.canvasMap = document.createElement('canvas');
-  //   this.canvasMap.setAttribute('width', '512');
-  //   this.canvasMap.setAttribute('height', '512');
-  // 	this.ctx = this.canvasMap.getContext('2d');
-  //   setTimeout(() => {
-  //     this.videoDebugEl.appendChild(this.canvasMap);
-  //   }, 200);
-
-  //   // create THREE texture from canvas
-  //   this.canvasTexture = new THREE.Texture(this.canvasMap);
-  //   this.canvasTexture.needsUpdate = true;
-  // }
-
   buildPostProcessing() {
-    this.composer = new THREE.EffectComposer(this.threeScene.getRenderer());
+    this.composer = new EffectComposer(this.threeScene.getRenderer());
     this.composer.addPass(
-      new THREE.RenderPass(
-        this.threeScene.getScene(),
-        this.threeScene.getCamera()
-      )
+      new RenderPass(this.threeScene.getScene(), this.threeScene.getCamera())
     );
 
-    this.hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
-    this.hblur.uniforms.h.value = 0.005;
-    // this.composer.addPass(this.hblur);
+    this.hblur = new ShaderPass(HorizontalBlurShader);
+    this.hblur.uniforms.h.value = 0.002;
+    this.composer.addPass(this.hblur);
 
-    this.vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
-    this.vblur.uniforms.v.value = 0.005;
-    // this.composer.addPass(this.vblur);
+    this.vblur = new ShaderPass(VerticalBlurShader);
+    this.vblur.uniforms.v.value = 0.002;
+    this.composer.addPass(this.vblur);
 
-    this.chroma = new THREE.ShaderPass(ThreeChromaShader);
+    this.chroma = new ShaderPass(ThreeChromaShader);
     this.chroma.material.transparent = true;
     this.composer.addPass(this.chroma);
     this.chroma.uniforms.thresholdSensitivity.value = 0.2;

@@ -1,20 +1,21 @@
-import DemoBase from './demo--base.es6.js';
+import DemoBase from "./demo--base.es6.js";
 
 class P5SketchAudioDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [
-      "!../vendor/p5/p5.js",  // load non-module code
-      "!../vendor/p5/addons/p5.sound.min.js",
-    ], `
-      <div class="container">
-        <h1>P5Sketch | Audio</h1>
-        <div id="p5-sketch" style="height: 400px;"></div>
-      </div>
-    `);
+    super(
+      parentEl,
+      [
+        "!../vendor/p5/p5.js", // load non-module code
+        "!../vendor/p5/addons/p5.sound.min.js",
+      ],
+      "P5Sketch | Audio",
+      "p5-container",
+      "A basic p5js demo with audio input and a shader"
+    );
   }
 
   init() {
+    this.el.setAttribute("style", "height: 500px;");
     // init custom sketch subclass
     this.buildSubclass();
   }
@@ -23,19 +24,18 @@ class P5SketchAudioDemo extends DemoBase {
     // Dynamically import P5Sketch after loading non-module p5js.
     // Then create our custom sketch subclass
     // let {P5Sketch} = await import('../src/p5-sketch.es6.js');
-    let obj = await import('../src/p5-sketch.es6.js');
+    let obj = await import("../src/p5-sketch.es6.js");
     let P5Sketch = obj.default;
 
     // create custom p5 sketch subclass
     class CustomSketch extends P5Sketch {
-
       setupFirstFrame() {
         // store main renderer canvas as a p5.Element. this prevents error when calling pg.image()
         this.mainCanvas = new p5.Element(this.canvas, this);
 
         // load microphone(?)
         this.micInput = true;
-        if(this.micInput) {
+        if (this.micInput) {
           this.mic = new p5.AudioIn();
           this.mic.start();
           this.fft = new p5.FFT();
@@ -43,7 +43,9 @@ class P5SketchAudioDemo extends DemoBase {
         }
 
         // load shaders
-        this.lightLeakShader = P.p.createShader(P5Sketch.defaultVertShader, `
+        this.lightLeakShader = P.p.createShader(
+          P5Sketch.defaultVertShader,
+          `
           // from: http://glslsandbox.com/e#24303.0
           precision mediump float;
           varying vec2 vTexCoord;
@@ -61,9 +63,12 @@ class P5SketchAudioDemo extends DemoBase {
           	vec3 col = vec3(0.5 * sin(3.0 * p.x) + 0.5, 0.5 * sin(3.0 * p.y) + 0.5, sin(p.x + p.y));
           	gl_FragColor = vec4(col, 1.0);
           }
-        `);
+        `
+        );
 
-        this.lumaShader = p.createShader(P5Sketch.defaultVertShader, `
+        this.lumaShader = p.createShader(
+          P5Sketch.defaultVertShader,
+          `
             precision mediump float;
             varying vec2 vTexCoord;
             uniform sampler2D tex;
@@ -79,9 +84,12 @@ class P5SketchAudioDemo extends DemoBase {
               float gray = luma(texColor.rgb);            // convert the texture to grayscale by using the luma function
               gl_FragColor = vec4(vec3(gray), 1.);
             }
-          `);
+          `
+        );
 
-          this.glitchShader = p.createShader(P5Sketch.defaultVertShader, `
+        this.glitchShader = p.createShader(
+          P5Sketch.defaultVertShader,
+          `
             precision mediump float;
             varying vec2 vTexCoord;
             uniform sampler2D tex;
@@ -121,11 +129,12 @@ class P5SketchAudioDemo extends DemoBase {
 
               gl_FragColor = mix(origColor, c, amp);
             }
-          `);
+          `
+        );
 
-          // create pg for post-processing
-          this.pg = this.createGraphics(p.width, p.height);//, p5.prototype.WEBGL, this);
-          this.pg.background(0)
+        // create pg for post-processing
+        this.pg = this.createGraphics(p.width, p.height); //, p5.prototype.WEBGL, this);
+        this.pg.background(0);
       }
 
       draw() {
@@ -138,10 +147,14 @@ class P5SketchAudioDemo extends DemoBase {
         // draw shape
         p.fill(255);
         p.noStroke();
-        p.translate(-p.width/2, -p.height/2, 1);
-        p.circle(p.width/2 + p.width * 0.25 * Math.sin(p.frameCount * 0.05), p.height/2, 100);
+        p.translate(-p.width / 2, -p.height / 2, 1);
+        p.circle(
+          p.width / 2 + p.width * 0.25 * Math.sin(p.frameCount * 0.05),
+          p.height / 2,
+          100
+        );
 
-        if(p.micInput == true) {
+        if (p.micInput == true) {
           let spectrum = p.fft.analyze();
           p.drawAudioSpectrum(spectrum);
           p.drawAudioDots(spectrum);
@@ -158,7 +171,7 @@ class P5SketchAudioDemo extends DemoBase {
         // p.text(p.frameRate+"", 20, 20);
 
         // run shader. rect supplies geometry to affect
-        if(p.frameCount % 100 < 50) {
+        if (p.frameCount % 100 < 50) {
           // test shader
           // this.lumaShader.setUniform('tex', this.pg);
           // p.shader(this.lumaShader);
@@ -166,9 +179,9 @@ class P5SketchAudioDemo extends DemoBase {
           // p.resetShader();
 
           // apply glitch shader
-          p.glitchShader.setUniform('tex', p.pg);
-          p.glitchShader.setUniform('iTime', p.frameCount * 0.1);
-          p.glitchShader.setUniform('amp', 1.);
+          p.glitchShader.setUniform("tex", p.pg);
+          p.glitchShader.setUniform("iTime", p.frameCount * 0.1);
+          p.glitchShader.setUniform("amp", 1);
           p.shader(p.glitchShader);
           p.rect(0, 0, p.width, p.height);
           p.resetShader();
@@ -200,7 +213,7 @@ class P5SketchAudioDemo extends DemoBase {
           // increment grid position
           x += spacing;
           i++;
-          if(x > this.width) {
+          if (x > this.width) {
             x = 0;
             y += spacing;
           }
@@ -208,10 +221,9 @@ class P5SketchAudioDemo extends DemoBase {
       }
     }
 
-    this.p5El = document.getElementById('p5-sketch');
+    this.p5El = this.el; // document.getElementById('p5-sketch');
     this.p5Sketch = new CustomSketch(this.p5El);
   }
 }
 
-
-if(window.autoInitDemo) window.demo = new P5SketchAudioDemo(document.body);
+if (window.autoInitDemo) window.demo = new P5SketchAudioDemo(document.body);

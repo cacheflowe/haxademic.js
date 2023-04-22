@@ -1,6 +1,7 @@
 import DemoBase from "./demo--base.es6.js";
 import FrameLoop from "../src/frame-loop.es6.js";
 import SoundFFT from "../src/sound-fft.es6.js";
+import VideoUtil from "../src/video-util.es6.js";
 
 class SoundFFTVideoDemo extends DemoBase {
   constructor(parentEl) {
@@ -12,11 +13,9 @@ class SoundFFTVideoDemo extends DemoBase {
     window._frameLoop = new FrameLoop().addListener(this);
 
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/videos/wash-your-hands.mp4";
+    let videoPath = "../data/videos/wash-your-hands.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, false);
     this.videoEl.style.setProperty("width", "100%");
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("playsinline", "true");
     this.videoEl.volume = 0.3;
     this.el.appendChild(this.videoEl);
 

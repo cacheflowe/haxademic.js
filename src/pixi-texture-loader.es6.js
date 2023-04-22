@@ -1,6 +1,6 @@
 import * as PIXI from "../vendor/pixi/pixi.mjs";
 
-class PixiTextureLoader {
+export default class PixiTextureLoader {
   constructor(assetsLoadedCallback, keepFinalCallback = false) {
     this.assetsLoadedCallback = assetsLoadedCallback;
     this.keepFinalCallback = keepFinalCallback;
@@ -51,5 +51,3 @@ class PixiTextureLoader {
     });
   }
 }
-
-export default PixiTextureLoader;

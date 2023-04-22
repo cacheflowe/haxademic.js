@@ -68,9 +68,9 @@ class SpeechRecognizer {
   }
 
   onRecognitionError(e) {
-    if (event.error == 'no-speech') console.log('SpeechRecognition.error("no-speech")');
-    if (event.error == 'audio-capture') console.log('SpeechRecognition.error("no-microphone")');
-    if (event.error == 'not-allowed') console.log('SpeechRecognition.error("blocked/denied")');
+    if (e.error == 'no-speech') console.log('SpeechRecognition.error("no-speech")');
+    if (e.error == 'audio-capture') console.log('SpeechRecognition.error("no-microphone")');
+    if (e.error == 'not-allowed') console.log('SpeechRecognition.error("blocked/denied")');
     // this.recognizing = false;
   }
 

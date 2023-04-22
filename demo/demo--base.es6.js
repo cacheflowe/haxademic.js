@@ -89,6 +89,14 @@ class DemoBase {
     }
   }
 
+  addDropOverCSS() {
+    this.injectCSS(`
+      .drop-over {
+        outline: 10px dashed #009900;
+      }
+    `);
+  }
+
   keyDown(key) {
     // override
   }
@@ -143,6 +151,10 @@ class DemoBase {
 
   injectCSS(css) {
     DOMUtil.injectCSS(css);
+  }
+
+  injectHTML(html) {
+    this.el.appendChild(DOMUtil.stringToDomElement(html.trim()));
   }
 
   init() {

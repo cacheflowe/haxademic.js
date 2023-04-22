@@ -1,20 +1,22 @@
-import DemoBase from './demo--base.es6.js';
+import DemoBase from "./demo--base.es6.js";
 
 class P5SketchBasicDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [
-      "!../vendor/p5/p5.js",  // load non-module code
-      '../src/p5-sketch.es6.js',
-    ], `
-      <div class="container">
-        <h1>P5Sketch | Basic</h1>
-        <div id="p5-sketch" style="height: 400px;"></div>
-      </div>
-    `);
+    super(
+      parentEl,
+      [
+        "!../vendor/p5/p5.js", // load non-module code
+        "../src/p5-sketch.es6.js",
+      ],
+      "P5Sketch | Basic",
+      "p5-container",
+      "A basic p5js demo"
+    );
   }
 
   init() {
+    this.el.setAttribute("style", "height: 500px;");
+
     // init custom sketch subclass
     this.buildSubclass();
   }
@@ -22,7 +24,7 @@ class P5SketchBasicDemo extends DemoBase {
   async buildSubclass() {
     // Dynamically import P5Sketch after loading non-module p5js.
     // Then create our custom sketch subclass
-    let obj = await import('../src/p5-sketch.es6.js');
+    let obj = await import("../src/p5-sketch.es6.js");
     let P5Sketch = obj.default;
 
     // create custom p5 sketch subclass
@@ -34,16 +36,19 @@ class P5SketchBasicDemo extends DemoBase {
         // draw shape
         p.fill(255);
         p.noStroke();
-        p.translate(-p.width/2, -p.height/2, 1);
-        p.circle(p.width/2 + p.width * 0.25 * Math.sin(p.frameCount * 0.05), p.height/2, 100);
+        p.translate(-p.width / 2, -p.height / 2, 1);
+        p.circle(
+          p.width / 2 + p.width * 0.25 * Math.sin(p.frameCount * 0.05),
+          p.height / 2,
+          100
+        );
       }
     }
 
     // init custom sketch
-    this.p5El = document.getElementById('p5-sketch');
+    this.p5El = this.el; // document.getElementById("p5-sketch");
     this.p5Sketch = new CustomSketch(this.p5El);
   }
 }
 
-
-if(window.autoInitDemo) window.demo = new P5SketchBasicDemo(document.body);
+if (window.autoInitDemo) window.demo = new P5SketchBasicDemo(document.body);

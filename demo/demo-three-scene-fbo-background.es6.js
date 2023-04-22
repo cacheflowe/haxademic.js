@@ -1,17 +1,23 @@
-import DemoBase from './demo--base.es6.js';
-import * as THREE from '../vendor/three/three.module.js';
-import PointerPos from '../src/pointer-pos.es6.js';
-import MobileUtil from '../src/mobile-util.es6.js';
-import ThreeSceneFBO from '../src/three-scene-fbo.es6.js';
-import ThreeScene from '../src/three-scene-.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import PointerPos from "../src/pointer-pos.es6.js";
+import MobileUtil from "../src/mobile-util.es6.js";
+import ThreeSceneFBO from "../src/three-scene-fbo.es6.js";
+import ThreeScene from "../src/three-scene-.es6.js";
 
 class ThreeSceneFboBackgroundDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeScene | FBO Background', 'three-scene-fbo-background', 'A THREE.js scene with a shader background', true);
+    super(
+      parentEl,
+      [],
+      "ThreeScene | FBO Background",
+      "three-scene-fbo-background",
+      "A THREE.js scene with a shader background",
+      true
+    );
   }
 
-  // Info: 
+  // Info:
   // - https://discourse.threejs.org/t/how-do-i-use-my-own-custom-shader-as-a-scene-background/13598/4
   // - https://stackoverflow.com/questions/19865537/three-js-set-background-image
 
@@ -53,9 +59,9 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
   startAnimation() {
     this.frameCount = 0;
     this.animate();
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener("resize", () => this.resize());
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
     }, 400);
   }
 
@@ -63,20 +69,25 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
     let cubeSize = 150;
     this.materialCube = new THREE.MeshPhongMaterial({
       color: 0x00ffbb, // 0x00ffbb
-      emissive : 0x000000, // 0x000000
-      specular : 0x666666,
-      shininess : 10,
-      flatShading : false
+      emissive: 0x000000, // 0x000000
+      specular: 0x666666,
+      shininess: 10,
+      flatShading: false,
     });
 
-    this.cubeMesh = new THREE.Mesh(new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4), this.materialCube);
+    this.cubeMesh = new THREE.Mesh(
+      new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
+      this.materialCube
+    );
     // this.cubeMesh.castShadow = true;
     // this.cubeMesh.position.set(0, 0, 0);
     this.scene.add(this.cubeMesh);
   }
 
   buildBackground() {
-    this.bgTexture = new THREE.TextureLoader().load('../images/checkerboard-16-9.png');
+    this.bgTexture = new THREE.TextureLoader().load(
+      "../images/checkerboard-16-9.png"
+    );
     this.scene.background = this.bgTexture;
   }
 
@@ -87,15 +98,15 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
 
     // add debug renderer to DOM
     this.debugEl.appendChild(debugFboCanvas);
-    debugFboCanvas.style.setProperty('width', '128px');
-    debugFboCanvas.style.setProperty('height', '128px');
-    debugFboCanvas.style.setProperty('border', '2px solid #000');
-    debugFboCanvas.style.setProperty('box-sizing', 'border-box');
+    debugFboCanvas.style.setProperty("width", "128px");
+    debugFboCanvas.style.setProperty("height", "128px");
+    debugFboCanvas.style.setProperty("border", "2px solid #000");
+    debugFboCanvas.style.setProperty("box-sizing", "border-box");
 
     // create shader material
-    this.gradientMaterial = new THREE.RawShaderMaterial( {
+    this.gradientMaterial = new THREE.RawShaderMaterial({
       uniforms: {
-        "time": { value: 0.0 },
+        time: { value: 0.0 },
       },
       vertexShader: ThreeSceneFBO.defaultRawVertShader,
       fragmentShader: `
@@ -126,7 +137,9 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
   }
 
   updateBgAspect() {
-    const imageAspect = this.bgTexture.image ? this.bgTexture.image.width / this.bgTexture.image.height : 1;
+    const imageAspect = this.bgTexture.image
+      ? this.bgTexture.image.width / this.bgTexture.image.height
+      : 1;
     const aspect = imageAspect / this.threeScene.getAspectRatio();
 
     this.bgTexture.offset.x = aspect > 1 ? (1 - 1 / aspect) / 2 : 0;
@@ -137,11 +150,11 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
   }
 
   updateShaderBg() {
-    if(!this.threeFBO) return;
+    if (!this.threeFBO) return;
 
-    // update & render shader 
+    // update & render shader
     const time = performance.now() * 0.0001;
-    this.gradientMaterial.uniforms[ "time" ].value = time;
+    this.gradientMaterial.uniforms["time"].value = time;
     this.threeFBO.render(this.threeScene.getRenderer());
     this.updateBgAspect();
   }
@@ -150,21 +163,21 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
     // cube
     this.cubeMesh.rotation.y = -1 + 2 * this.pointerPos.xNorm(this.el);
     this.cubeMesh.rotation.x = -1 + 2 * this.pointerPos.yNorm(this.el);
-    if(this.materialCube.map) this.materialCube.map.needsUpdate = true;
+    if (this.materialCube.map) this.materialCube.map.needsUpdate = true;
   }
 
   animate() {
     this.updateCube();
-    this.updateShaderBg()
+    this.updateShaderBg();
     this.threeScene.render();
     this.frameCount++;
     requestAnimationFrame(() => this.animate());
   }
-  
+
   resize() {
     this.threeScene.resize();
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneFboBackgroundDemo(document.body);
+if (window.autoInitDemo)
+  window.demo = new ThreeSceneFboBackgroundDemo(document.body);

@@ -1,17 +1,22 @@
-import DemoBase from './demo--base.es6.js';
-import * as THREE from '../vendor/three/three.module.js';
-import {ConvexGeometry} from '../vendor/three/ConvexGeometry.js';
-import ConvexHull from '../vendor/three/ConvexHull.js';
-import ColorUtil from '../src/color-util.es6.js';
-import FrameLoop from '../src/frame-loop.es6.js';
-import MobileUtil from '../src/mobile-util.es6.js';
-import PointerPos from '../src/pointer-pos.es6.js';
-import ThreeScene from '../src/three-scene-.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import { ConvexGeometry } from "../vendor/three/examples/jsm/geometries/ConvexGeometry.js";
+import ColorUtil from "../src/color-util.es6.js";
+import FrameLoop from "../src/frame-loop.es6.js";
+import MobileUtil from "../src/mobile-util.es6.js";
+import PointerPos from "../src/pointer-pos.es6.js";
+import ThreeScene from "../src/three-scene-.es6.js";
 
 class ThreeSceneConvexHullDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeScene | ConvexHull', 'three-scene-convex-hull', null, true);
+    super(
+      parentEl,
+      [],
+      "ThreeScene | ConvexHull",
+      "three-scene-convex-hull",
+      "ConvexHull geometry demo",
+      true
+    );
   }
 
   init() {
@@ -37,14 +42,14 @@ class ThreeSceneConvexHullDemo extends DemoBase {
 
   startAnimation() {
     // do resize
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener("resize", () => this.resize());
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
     }, 400);
     // set up frame loop
     let frames = 200;
     // super.initRecording(this.threeScene.canvasEl(), frames, 1, 30);
-    window._frameLoop = (new FrameLoop(frames, 4)).addListener(this);
+    window._frameLoop = new FrameLoop(frames, 4).addListener(this);
   }
 
   frameLoop(frameCount) {
@@ -55,22 +60,24 @@ class ThreeSceneConvexHullDemo extends DemoBase {
 
   buildConvexHullShape() {
     // remove old mesh
-    if(this.mesh) this.scene.remove(this.mesh);
+    if (this.mesh) this.scene.remove(this.mesh);
 
     // build new mesh
     let max = 100.0;
     let points = [];
     for (var i = 0; i <= 15; i++) {
-      points.push(new THREE.Vector3(
-        Math.random() * max - max/2,
-        Math.random() * max - max/2,
-        Math.random() * max - max/2)
+      points.push(
+        new THREE.Vector3(
+          Math.random() * max - max / 2,
+          Math.random() * max - max / 2,
+          Math.random() * max - max / 2
+        )
       );
     }
     this.mesh = new THREE.Mesh(
       new ConvexGeometry(points),
       new THREE.MeshPhongMaterial({
-          color: ColorUtil.randomColorHexInt()
+        color: ColorUtil.randomColorHexInt(),
       })
     );
     this.mesh.castShadow = true;
@@ -90,7 +97,7 @@ class ThreeSceneConvexHullDemo extends DemoBase {
       new THREE.PlaneBufferGeometry(planeSize, planeSize),
       new THREE.ShadowMaterial({ opacity: 0.5 })
     );
-    plane.rotation.x = -Math.PI/2;
+    plane.rotation.x = -Math.PI / 2;
     plane.position.set(0, -110, 0);
     plane.receiveShadow = true;
     this.scene.add(plane);
@@ -114,7 +121,7 @@ class ThreeSceneConvexHullDemo extends DemoBase {
 
   updateObjects() {
     // make a new shape sometimes
-    if(_frameLoop.getIsTick() && _frameLoop.getCurTick() == 0) {
+    if (_frameLoop.getIsTick() && _frameLoop.getCurTick() == 0) {
       this.buildConvexHullShape();
     }
     // cube
@@ -126,7 +133,7 @@ class ThreeSceneConvexHullDemo extends DemoBase {
   resize() {
     this.threeScene.resize();
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneConvexHullDemo(document.body);
+if (window.autoInitDemo)
+  window.demo = new ThreeSceneConvexHullDemo(document.body);

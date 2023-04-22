@@ -4,12 +4,17 @@ import MicrophoneNode from "../src/microphone-node.es6.js";
 
 class MicrophoneNodeDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "MicrophoneNode", "fft-container");
+    super(
+      parentEl,
+      [],
+      "MicrophoneNode",
+      "fft-container",
+      "Add a real-time microphone input"
+    );
   }
 
   init() {
     // setup
-    document.body.style.setProperty("background-color", "#ccc");
     this.fftEl = document.getElementById("fft-container");
     this.fftAttached = false;
 

@@ -1,29 +1,25 @@
-/**
- * @author alteredq / http://alteredqualia.com/
- */
+import { Pass } from './Pass.js';
 
-THREE.MaskPass = function ( scene, camera ) {
+class MaskPass extends Pass {
 
-	THREE.Pass.call( this );
+	constructor( scene, camera ) {
 
-	this.scene = scene;
-	this.camera = camera;
+		super();
 
-	this.clear = true;
-	this.needsSwap = false;
+		this.scene = scene;
+		this.camera = camera;
 
-	this.inverse = false;
+		this.clear = true;
+		this.needsSwap = false;
 
-};
+		this.inverse = false;
 
-THREE.MaskPass.prototype = Object.assign( Object.create( THREE.Pass.prototype ), {
+	}
 
-	constructor: THREE.MaskPass,
+	render( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
 
-	render: function ( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
-
-		var context = renderer.getContext();
-		var state = renderer.state;
+		const context = renderer.getContext();
+		const state = renderer.state;
 
 		// don't update color or depth
 
@@ -37,7 +33,7 @@ THREE.MaskPass.prototype = Object.assign( Object.create( THREE.Pass.prototype ),
 
 		// set up stencil
 
-		var writeValue, clearValue;
+		let writeValue, clearValue;
 
 		if ( this.inverse ) {
 
@@ -81,26 +77,25 @@ THREE.MaskPass.prototype = Object.assign( Object.create( THREE.Pass.prototype ),
 
 	}
 
-} );
+}
 
+class ClearMaskPass extends Pass {
 
-THREE.ClearMaskPass = function () {
+	constructor() {
 
-	THREE.Pass.call( this );
+		super();
 
-	this.needsSwap = false;
+		this.needsSwap = false;
 
-};
+	}
 
-THREE.ClearMaskPass.prototype = Object.create( THREE.Pass.prototype );
-
-Object.assign( THREE.ClearMaskPass.prototype, {
-
-	render: function ( renderer /*, writeBuffer, readBuffer, deltaTime, maskActive */ ) {
+	render( renderer /*, writeBuffer, readBuffer, deltaTime, maskActive */ ) {
 
 		renderer.state.buffers.stencil.setLocked( false );
 		renderer.state.buffers.stencil.setTest( false );
 
 	}
 
-} );
+}
+
+export { MaskPass, ClearMaskPass };

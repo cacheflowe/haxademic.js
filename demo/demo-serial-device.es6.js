@@ -3,7 +3,13 @@ import SerialDevice from "../src/serial-device.es6.js";
 
 class SerialDeviceDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "SerialDevice", "serial-container");
+    super(
+      parentEl,
+      [],
+      "SerialDevice",
+      "serial-container",
+      "Shows how to communicate with an Arduino or other serial device."
+    );
   }
 
   async init() {

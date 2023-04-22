@@ -7,28 +7,21 @@ import PointerPos from "../src/pointer-pos.es6.js";
 import ThreeScene from "../src/three-scene-.es6.js";
 import ThreeSceneFBO from "../src/three-scene-fbo.es6.js";
 import ThreeChromaShader from "../src/three-chroma-shader.es6.js";
+import VideoUtil from "../src/video-util.es6.js";
 
 class ThreeSceneFBODemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
       [],
-      `
-      <div class="container">
-        <style>
-          .drop-over {
-            outline: 10px dashed #009900;
-          }
-        </style>
-        <h1>ThreeSceneFBO</h1>
-        <div id="three-scene-fbo-chroma" style="width: 100%; height: 600px;"></div>
-        <div id="video-debug"></div>
-      </div>
-    `
+      "ThreeSceneFBO",
+      "three-scene-fbo",
+      "Video texture in an FBO for post-processing effects"
     );
   }
 
   init() {
+    this.addDropOverCSS();
     this.setupScene();
     this.buildBgMesh();
     this.buildVideoTexture();
@@ -36,14 +29,14 @@ class ThreeSceneFBODemo extends DemoBase {
     this.setupInput();
     this.startAnimation();
     this.setupDragDrop();
+    this.addDropOverCSS();
   }
 
   setupScene() {
-    this.el = document.getElementById("three-scene-fbo-chroma");
+    this.el.setAttribute("style", "height: 500px;");
     this.threeScene = new ThreeScene(this.el, 0xff0000);
     this.threeScene.getRenderer().setClearColor(0xff0000, 0);
     this.scene = this.threeScene.getScene();
-    this.el.appendChild(this.threeScene.canvasEl());
     this.threeFBO = new ThreeSceneFBO(768, 768, 0x00ffff);
   }
 
@@ -118,23 +111,11 @@ class ThreeSceneFBODemo extends DemoBase {
   }
 
   buildVideoTexture() {
-    // setup
-    this.videoDebugEl = document.getElementById("video-debug");
-
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
+    let videoPath = "../data/videos/wash-your-hands.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
     this.videoEl.style.setProperty("width", "320px");
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("muted", "true");
-    this.videoEl.setAttribute("playsinline", "true");
-    this.videoEl.setAttribute("preload", "auto");
-    this.videoEl.setAttribute("crossOrigin", "anonymous");
-    this.videoEl.defaultMuted = true;
-    this.videoEl.muted = true;
-    this.videoEl.play();
-    this.videoDebugEl.appendChild(this.videoEl);
-    // this.videoEl.volume = 0;
+    this.debugEl.appendChild(this.videoEl);
 
     // add THREE video texture
     this.videoTexture = new THREE.VideoTexture(this.videoEl);

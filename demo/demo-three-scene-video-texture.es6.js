@@ -6,28 +6,22 @@ import MobileUtil from "../src/mobile-util.es6.js";
 import PointerPos from "../src/pointer-pos.es6.js";
 import ThreeScene from "../src/three-scene-.es6.js";
 import UIControlPanel from "../src/ui-control-panel.es6.js";
+import VideoUtil from "../src/video-util.es6.js";
 
 class ThreeSceneVideoDisplaceTextureDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
       ["!../vendor/guify.min.js"],
-      `
-      <div class="container">
-        <style>
-          .drop-over {
-            outline: 10px dashed #009900;
-          }
-        </style>
-        <h1>ThreeScene | Video Texture</h1>
-        <div id="three-scene" style="width: 100%; height: 0; padding-bottom: 100%;"></div>
-        <div id="video-debug"></div>
-      </div>
-    `
+      "ThreeScene | Video Texture Displacement",
+      "three-scene-video-texture",
+      "Video texture in an FBO for post-processing effects"
     );
   }
 
   init() {
+    this.el.setAttribute("style", "height: 600px;");
+    this.addDropOverCSS();
     this.setupScene();
     this.addLights();
     this.buildVideoMesh();
@@ -35,10 +29,10 @@ class ThreeSceneVideoDisplaceTextureDemo extends DemoBase {
     this.setupInput();
     this.setupUI();
     this.setupDragDrop();
+    this.addDropOverCSS();
   }
 
   setupScene() {
-    this.el = document.getElementById("three-scene");
     this.threeScene = new ThreeScene(this.el, 0x111111);
     this.scene = this.threeScene.getScene();
   }
@@ -98,19 +92,10 @@ class ThreeSceneVideoDisplaceTextureDemo extends DemoBase {
     this.videoDebugEl = document.getElementById("video-debug");
 
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
+    let videoPath = "../data/videos/wash-your-hands.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
     this.videoEl.style.setProperty("width", "320px");
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("muted", "true");
-    this.videoEl.setAttribute("playsinline", "true");
-    this.videoEl.setAttribute("preload", "auto");
-    this.videoEl.setAttribute("crossOrigin", "anonymous");
-    this.videoEl.defaultMuted = true;
-    this.videoEl.muted = true;
-    this.videoEl.play();
-    this.videoDebugEl.appendChild(this.videoEl);
-    // this.videoEl.volume = 0;
+    this.debugEl.appendChild(this.videoEl);
 
     // add THREE video texture
     this.videoTexture = new THREE.VideoTexture(this.videoEl);

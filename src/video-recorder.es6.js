@@ -84,7 +84,8 @@ class VideoRecorder {
 
   createDownloadLink() {
     this.link = document.createElement("a");
-    this.link.download = this.filename;
+    this.link.setAttribute("download", this.filename);
+    this.link.setAttribute("role", "button");
     this.link.textContent = "Download video";
   }
 
@@ -92,8 +93,7 @@ class VideoRecorder {
     this.chunks = [];
     this.stream = this.canvas.captureStream(this.frameRate);
 
-    document.getElementById("debug").innerHTML = this.mimeType;
-    console.log(this.mimeType);
+    console.log("VideoRecorder:", this.mimeType);
 
     this.recorder = new MediaRecorder(this.stream, {
       mimeType: this.mimeType,

@@ -5,7 +5,14 @@ import PixiSpriteScale from "../src/pixi-sprite-scale.es6.js";
 
 class PixiStageDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "PixiStage", "pixi-stage-container", null, true);
+    super(
+      parentEl,
+      [],
+      "PixiStage",
+      "pixi-stage-container",
+      "A basic PIXI.js app wrapper",
+      true
+    );
   }
 
   init() {
@@ -28,6 +35,16 @@ class PixiStageDemo extends DemoBase {
     // start PIXI frame loop
     this.frameCount = 0;
     this.pixiStage.addFrameListener(() => this.draw());
+  }
+
+  loadImageAlt() {
+    // load image & init after
+    this.texture = PIXI.Texture.from("../images/checkerboard-16-9.png");
+    this.texture.once("update", (texture) => {
+      // use `once` instead of `on`, since event can fire twice. this is noted in the PIXI docs
+      PixiStage.setTextureRepeat(texture, true);
+      this.mesh.texture = texture;
+    });
   }
 
   // init this.sprite & extras

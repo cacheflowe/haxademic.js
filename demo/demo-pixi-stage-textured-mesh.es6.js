@@ -6,49 +6,25 @@ class PixiStageTexturedMeshDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      [
-        //  '!../vendor/pixi/pixi.min.js'
-      ],
+      null,
       "PixiStage | Textured Mesh",
-      "pixi-stage-textured-mesh-container"
+      "pixi-stage-textured-mesh-container",
+      "A custom textured PIXI mesh with animated vertices and UV coords"
     );
   }
 
   init() {
-    // create PIXI stage object
-    this.pixiContainer = document.getElementById(
-      "pixi-stage-textured-mesh-container"
-    );
-    this.pixiContainer.setAttribute("style", "height: 500px;");
-    this.pixiStage = new PixiStage(this.pixiContainer, 0xffff0000);
-
-    // load image before building other objects
+    this.el.setAttribute("style", "height: 500px;");
+    this.pixiStage = new PixiStage(this.el, 0xffff0000);
     this.buildTexture();
-    // this.loadImage();
   }
 
   buildTexture() {
-    const graphics = new PIXI.Graphics();
-
-    // bg
-    graphics.beginFill(0x000000);
-    graphics.drawRect(0, 0, this.pixiStage.width(), this.pixiStage.height());
-    graphics.endFill();
-    // checkers
-    let rectSize = 20;
-    var boxCount = 0;
-    for (var x = 0; x < this.pixiStage.width(); x += rectSize) {
-      for (var y = 0; y < this.pixiStage.height(); y += rectSize) {
-        if (boxCount % 2 == 0) {
-          graphics.beginFill(0xffffff);
-          graphics.drawRect(x, y, rectSize, rectSize);
-          graphics.endFill();
-        }
-        boxCount++;
-      }
-    }
-
-    this.texture = this.pixiStage.graphicsToTexture(graphics);
+    this.texture = PixiStage.newTestPatternTexture(
+      this.pixiStage.renderer(),
+      this.pixiStage.width(),
+      this.pixiStage.height()
+    );
     this.buildMesh(this.texture);
     this.animate();
   }

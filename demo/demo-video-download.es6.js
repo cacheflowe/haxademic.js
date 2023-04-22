@@ -1,5 +1,6 @@
 import DemoBase from "./demo--base.es6.js";
 import MobileUtil from "../src/mobile-util.es6.js";
+import VideoUtil from "../src/video-util.es6.js";
 
 class VideoDownloadDemo extends DemoBase {
   constructor(parentEl) {
@@ -8,21 +9,16 @@ class VideoDownloadDemo extends DemoBase {
       [],
       "Video Download",
       "video-download-container",
-      "Share a video file on mobile with the Share API. Needs user interaction and https to work."
+      "Save a video file directly to the camera roll on mobile via the Share API. Needs user interaction and https to work!"
     );
   }
 
   init() {
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/videos/wash-your-hands.mp4";
+    let videoPath = "../data/videos/wash-your-hands.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
     this.videoEl.style.setProperty("width", "100%");
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("muted", "true");
-    this.videoEl.setAttribute("playsinline", "true");
-    this.videoEl.setAttribute("autoplay", "true");
-    this.videoEl.volume = 0;
-    this.el.appendChild(this.videoEl);
+    this.debugEl.appendChild(this.videoEl);
 
     // add link
     this.linkEl = document.createElement("a");

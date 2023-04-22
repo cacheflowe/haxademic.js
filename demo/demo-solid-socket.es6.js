@@ -10,24 +10,25 @@ class SolidSocketDemo extends DemoBase {
     super(
       parentEl,
       [],
-      `
-    <div class="container">
-      <style>
-        html, body {
-          width: 100%;
-          height: 100vh;
-        }
-        #results {
-          pointer-events: none;
-        }
-        .has-socket h1 {
-          color: #00ff00;
-        }
-        .no-socket h1 {
-          color: #ff0000;
-        }
-      </style>
-      <h1>SolidSocket</h1>
+      "SolidSocket",
+      "solid-socket",
+      "Run /server/ws-relay.mjs and add your socket server address to the URL as a hash: #server=ws://192.168.1.171:3001/ws"
+    );
+  }
+
+  init() {
+    this.injectCSS(`
+      #results {
+        pointer-events: none;
+      }
+      .has-socket h1 {
+        color: #00ff00;
+      }
+      .no-socket h1 {
+        color: #ff0000;
+      }
+    `);
+    this.injectHTML(`
       <div>
         <button id="button1">Button 1</button>
         <button id="button2">Button 2</button>
@@ -36,15 +37,8 @@ class SolidSocketDemo extends DemoBase {
         <button id="button5">saveUserData</button>
         <button id="button6">reset</button>
       </div>
-      <div id="results"></div>
-    </div>`,
-      null,
-      "Add your socket server address to the URL as a hash: #server=ws://192.168.1.171:3001"
-    );
-  }
-
-  init() {
-    this.log = new EventLog(document.getElementById("results"));
+    `);
+    this.log = new EventLog(this.debugEl);
     this.pointerPos = new PointerPos(this.pointerMoved.bind(this));
     this.initSocket();
     this.addClicks();
@@ -109,8 +103,7 @@ class SolidSocketDemo extends DemoBase {
   }
 
   onMessage(msg) {
-    // console.log(msg.data);
-    this.log.log(JSON.stringify(msg.data));
+    this.log.log(msg.data);
   }
 
   onError(e) {

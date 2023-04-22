@@ -17,7 +17,6 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   init() {
-    // setup
     this.setupInput();
     this.setupScene();
     this.buildCube();
@@ -32,7 +31,7 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0xffffff, false);
+    this.threeScene = new ThreeScene(this.el, 0xeeeeee, false);
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
     this.threeScene.buildRaycaster(
