@@ -197,4 +197,5 @@ class MobileUtil {
 
 MobileUtil.FULLSCREEN_LISTENING = false;
 
+export const isMobileBrowser = MobileUtil.isMobileBrowser;
 export default MobileUtil;
