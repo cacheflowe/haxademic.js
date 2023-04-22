@@ -8,7 +8,6 @@
  *  @use    {@code var _point = new ElasticFloat( 100, 100, 100, 0.75, 0.4 ); }
  */
 class ElasticFloat {
-
   constructor(value = 0, fric = 0.8, accel = 0.2) {
     this.val = value;
     this.fric = fric;
@@ -29,24 +28,25 @@ class ElasticFloat {
     this.val = value;
     return this;
   }
-  
+
   setTarget(target) {
     this.targetVal = target;
     return this;
   }
-  
+
   setFriction(fric) {
     this.fric = fric;
     return this;
   }
-  
+
   setAccel(accel) {
     this.accel = accel;
     return this;
   }
 
   update() {
-    this.speed = ((this.targetVal - this.val) * this.accel + this.speed) * this.fric;
+    this.speed =
+      ((this.targetVal - this.val) * this.accel + this.speed) * this.fric;
     this.val += this.speed;
     return this.val;
   }
