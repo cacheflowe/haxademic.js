@@ -57,22 +57,12 @@ export default class PixiVideoPlayer {
       //   texture.baseTexture.resource.autoUpdate = true;
       this.videoSprite.texture = texture;
       // TODO - TRUN OFF OLD RENDERTING UNTIL RELOADED!!
+      // TODO - this can lead to a texture size mismatch and PIXI error
     });
 
     // this.videoSrcEl.play();
     // let texture = PIXI.Texture.from(this.videoSrcEl);
   }
-
-  // buildSprite(videoPath, fps = 60) {
-  //   // grab texture and video element from cache, set on object for use elsewhere
-  //   // this.texture = PixiVideoPlayer.textureCache[videoPath];
-  //   this.texture.baseTexture.resource.autoUpdate = true;
-  //   this.videoSrcEl = this.texture.baseTexture.resource.source;
-
-  //   // init video sprite
-  //   this.videoSprite = new PIXI.Sprite(this.texture);
-  //   console.log(this.videoSprite);
-  // }
 
   sprite() {
     return this.videoSprite;

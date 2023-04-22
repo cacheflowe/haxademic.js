@@ -26,29 +26,29 @@ class PointerPos {
     this.startListener = this.pointerStart.bind(this);
     this.moveListener = this.pointerMove.bind(this);
     this.endListener = this.pointerEnd.bind(this);
-    document.addEventListener('mousedown', this.startListener);
-    document.addEventListener('mousemove', this.moveListener);
-    document.addEventListener('mouseup', this.endListener);
-    document.addEventListener('touchstart', this.startListener);
-    document.addEventListener('touchmove', this.moveListener);
-    document.addEventListener('touchend', this.endListener);
+    document.addEventListener("mousedown", this.startListener);
+    document.addEventListener("mousemove", this.moveListener);
+    document.addEventListener("mouseup", this.endListener);
+    document.addEventListener("touchstart", this.startListener);
+    document.addEventListener("touchmove", this.moveListener);
+    document.addEventListener("touchend", this.endListener);
   }
 
   removeTouchListeners() {
-    document.removeEventListener('touchstart', this.startListener);
-    document.removeEventListener('touchmove', this.moveListener);
-    document.removeEventListener('touchend', this.endListener);
+    document.removeEventListener("touchstart", this.startListener);
+    document.removeEventListener("touchmove", this.moveListener);
+    document.removeEventListener("touchend", this.endListener);
   }
 
   removeMouseListeners() {
-    document.removeEventListener('mousedown', this.startListener);
-    document.removeEventListener('mousemove', this.moveListener);
-    document.removeEventListener('mouseup', this.endListener);
+    document.removeEventListener("mousedown", this.startListener);
+    document.removeEventListener("mousemove", this.moveListener);
+    document.removeEventListener("mouseup", this.endListener);
   }
 
   checkInputType(e) {
     if (this.hasCheckedTouchEvents) return;
-    this.isTouchEvents = e.type == 'touchstart';
+    this.isTouchEvents = e.type == "touchstart";
     if (this.isTouchEvents) {
       this.removeMouseListeners();
     } else {
@@ -59,10 +59,10 @@ class PointerPos {
 
   pointerStart(e) {
     this.checkInputType(e);
-    this.curX = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
-    this.curY = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
-    this.pointerCount = (this.isTouchEvents) ? e.touches.length : 1;
-    this.touches = (this.pointerCount > 1) ? e.touches : null;
+    this.curX = this.isTouchEvents ? e.touches[0].clientX : e.clientX;
+    this.curY = this.isTouchEvents ? e.touches[0].clientY : e.clientY;
+    this.pointerCount = this.isTouchEvents ? e.touches.length : 1;
+    this.touches = this.pointerCount > 1 ? e.touches : null;
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.totalDeltaX = 0;
@@ -72,10 +72,10 @@ class PointerPos {
   }
 
   pointerMove(e) {
-    let x = (this.isTouchEvents) ? e.touches[0].clientX : e.clientX;
-    let y = (this.isTouchEvents) ? e.touches[0].clientY : e.clientY;
-    this.pointerCount = (this.isTouchEvents) ? e.touches.length : 1;
-    this.touches = (this.pointerCount > 1) ? e.touches : null;
+    let x = this.isTouchEvents ? e.touches[0].clientX : e.clientX;
+    let y = this.isTouchEvents ? e.touches[0].clientY : e.clientY;
+    this.pointerCount = this.isTouchEvents ? e.touches.length : 1;
+    this.touches = this.pointerCount > 1 ? e.touches : null;
     this.lastX = this.curX;
     this.lastY = this.curY;
     this.curX = x;
@@ -86,7 +86,15 @@ class PointerPos {
       this.totalDeltaX += Math.abs(deltaX);
       this.totalDeltaY += Math.abs(deltaY);
     }
-    if (this.callbackMove) this.callbackMove(e, this.curX, this.curY, deltaX, deltaY, this.pointerActive);
+    if (this.callbackMove)
+      this.callbackMove(
+        e,
+        this.curX,
+        this.curY,
+        deltaX,
+        deltaY,
+        this.pointerActive
+      );
   }
 
   pointerEnd(e) {
