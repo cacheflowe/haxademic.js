@@ -8,24 +8,20 @@ class AppStoreDebug {
 
   initKeyListener() {
     window.addEventListener("keyup", (e) => {
-      var key = e.keyCode ? e.keyCode : e.which;
-      // console.log('key', key);
-      if (key == 32) {
+      if (e.key == "/") {
         this.showing = !this.showing;
       }
       if (this.showing == false) {
-        this.container.innerHTML = "";
-        this.container.style.display = "none";
+        this.hide();
       } else {
-        this.printStore();
-        this.container.style.display = "block";
+        this.show();
       }
     });
   }
 
   buildElement() {
-    this.container = document.createElement("div");
-    this.container.style.cssText = `
+    this.el = document.createElement("div");
+    this.el.style.cssText = `
       font-family: arial;
       font-size: 12px;
       position: fixed;
@@ -39,12 +35,22 @@ class AppStoreDebug {
       background: rgba(0,0,0,0.8);
       color: #fff !important;
     `;
-    document.body.appendChild(this.container);
-    if (!this.showing) this.container.style.display = "none";
+    document.body.appendChild(this.el);
+    if (!this.showing) this.hide();
   }
 
   storeUpdated(key, value) {
     if (this.showing) this.printStore();
+  }
+
+  show() {
+    this.printStore();
+    this.el.style.display = "block";
+  }
+
+  hide() {
+    this.el.innerHTML = "";
+    this.el.style.display = "none";
   }
 
   printStore() {
@@ -56,7 +62,7 @@ class AppStoreDebug {
       htmlStr += `<tr><td>${storeKey}</td><td>${val}</td></tr>`;
     }
     htmlStr += "</table>";
-    this.container.innerHTML = htmlStr;
+    this.el.innerHTML = htmlStr;
   }
 }
 
