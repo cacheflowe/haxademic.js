@@ -19,6 +19,7 @@
     "express": "^4.18.2",
     "fetch": "^1.1.0",
     "http": "^0.0.1-security",
+    "sharp": "^0.32.0",
     "websocket": "^1.0.34",
     "ws": "^8.13.0"
   }
