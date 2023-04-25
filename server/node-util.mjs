@@ -40,6 +40,11 @@ export async function fileSizeMb(filePath) {
   return (await fileSizeBytes(filePath)) / (1024 * 1000);
 }
 
+export async function imageFileToBase64(filePath) {
+  let fileData = fs.readFileSync(filePath);
+  return Buffer.from(fileData).toString("base64");
+}
+
 export async function writeStringToFile(filePath, contentStr) {
   return await fs.writeFileSync(filePath, contentStr);
 }
