@@ -89,18 +89,6 @@ class DemoBase {
     }
   }
 
-  addDropOverCSS() {
-    this.injectCSS(`
-      .drop-over {
-        outline: 10px dashed #009900;
-      }
-    `);
-  }
-
-  keyDown(key) {
-    // override
-  }
-
   loadJsDependenciesSerial(jsFiles) {
     if (jsFiles == null || jsFiles.length == 0) return this.init();
     this.jsFiles = jsFiles;
@@ -149,16 +137,51 @@ class DemoBase {
     `);
   }
 
+  init() {
+    // please override
+  }
+
+  keyDown(key) {
+    // override
+  }
+
+  // modifiers for different demos
+
+  addDropOverCSS() {
+    this.injectCSS(`
+      .drop-over {
+        outline: 10px dashed #009900;
+      }
+    `);
+  }
+
+  addNotyf() {
+    DOMUtil.loadJavascript("https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js");
+    this.loadRemoteCSS("https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css");
+  }
+
+  notyfSuccess(msg) {
+    if (!window.Notyf) return console.error("Notyf not loaded!");
+    if (this.notyf == null) this.notyf = new Notyf({ duration: 5000 });
+    this.notyf.success(msg);
+  }
+
+  notyfError(msg) {
+    if (!window.Notyf) return console.error("Notyf not loaded!");
+    if (this.notyf == null) this.notyf = new Notyf({ duration: 5000 });
+    this.notyf.error(msg);
+  }
+
   injectCSS(css) {
     DOMUtil.injectCSS(css);
   }
 
-  injectHTML(html) {
-    this.el.appendChild(DOMUtil.stringToDomElement(html.trim()));
+  loadRemoteCSS(cssFile) {
+    DOMUtil.loadCSS(cssFile);
   }
 
-  init() {
-    // please override
+  injectHTML(html) {
+    this.el.appendChild(DOMUtil.stringToDomElement(html.trim()));
   }
 
   /////////////////////////////
