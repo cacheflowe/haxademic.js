@@ -82,6 +82,14 @@ class DOMUtil {
     });
   }
 
+  static loadCSS(url) {
+    const cssTag = document.createElement("link");
+    cssTag.setAttribute("rel", "stylesheet");
+    cssTag.setAttribute("href", url);
+    document.head.appendChild(cssTag);
+    return cssTag;
+  }
+
   static injectCSS(cssString) {
     const styleEl = document.createElement("style");
     styleEl.textContent = cssString;
