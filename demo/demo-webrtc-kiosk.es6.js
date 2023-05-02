@@ -1,6 +1,7 @@
 import DemoBase from "./demo--base.es6.js";
 import DOMUtil from "../src/dom-util.es6.js";
 import URLUtil from "../src/url-util.es6.js";
+import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.mjs";
 
 class WebRtcKioskDemo extends DemoBase {
   constructor(parentEl) {
@@ -20,261 +21,151 @@ class WebRtcKioskDemo extends DemoBase {
   // - Add a uuid for the current QR code, so we can check that the user can only scan once
 
   init() {
+    URLUtil.reloadOnHashChange(); // helps w/pasting the offer link from kiosk tab
     this.addNotyf();
     let offer = URLUtil.getHashQueryVariable("offer");
+    let qrId = URLUtil.getHashQueryVariable("qrId");
     if (offer) {
-      this.client = new WebRtcClient(this, offer);
+      this.client = new ClientCustom(offer, qrId);
     } else {
-      this.client = new WebRtcKiosk(this);
+      this.client = new KioskCustom(this);
     }
   }
 }
 
 //////////////////////////////
-// Shared super class
+// Custom classes
 //////////////////////////////
 
-class WebRtcPeer {
-  constructor(demoApp, el) {
-    this.demoApp = demoApp;
-    this.el = el;
-    this.addScopedListeners();
-    this.initPeerConnection();
-  }
+class KioskCustom extends WebRtcKiosk {
+  // Custom kiosk features:
+  // - Advertise the kiosk connection via QR code
+  // - Disconnect from server after 3 minutes
+  // - Keep list of active users
 
-  addScopedListeners() {
-    this.callbackConnected = this.serverConnected.bind(this);
-    this.callbackDisconnected = this.serverDisconnected.bind(this);
-    this.callbackError = this.serverError.bind(this);
+  static MAX_SESSION_LENGTH = 1000 * 60 * 3; // 3 minutes
 
-    this.callbackPeerConnected = this.peerConnected.bind(this);
-    this.callbackPeerData = this.peerData.bind(this);
-    this.callbackPeerClose = this.peerClose.bind(this);
-    this.callbackPeerError = this.peerError.bind(this);
-
-    // kiosk-only:
-    this.callbackClientConnected = this.clientConnected.bind(this);
-  }
-
-  // peer server connection listeners --------------------------------
-
-  initPeerConnection() {
-    this.conn = null;
-
-    // init connection to Peerjs server
-    this.peer = new Peer();
-    this.peer.on("open", this.callbackConnected);
-    this.peer.on("disconnected", this.callbackConnected);
-    this.peer.on("error", this.callbackError);
-
-    // kiosk-only:
-    this.peer.on("connection", this.callbackClientConnected);
-  }
-
-  serverConnected(peerID) {
-    this.peerID = peerID;
-    // log the connection
-    this.el.appendChild(
-      DOMUtil.stringToElement(
-        `<div><p>Connected with peerID: <pre>${peerID}</pre></p></div>`
-      )
-    );
-  }
-
-  isServerConnected() {
-    return this.peer.disconnected === false;
-  }
-
-  serverDisconnected() {
-    this.demoApp.notyfError("Server disconnected!");
-  }
-
-  serverError(err) {
-    console.error(err);
-    this.demoApp.notyfError(err.type);
-  }
-
-  checkServerConnection() {
-    console.log("this.isServerConnected", this.isServerConnected());
-    if (this.isServerConnected() == false) {
-      this.peer.reconnect();
-    }
-  }
-
-  // peer-to-peer connection listeners --------------------------
-
-  addConnectionListeners(conn) {
-    conn.on("open", this.callbackPeerConnected);
-    conn.on("data", this.callbackPeerData);
-    conn.on("close", this.callbackPeerClose);
-    conn.on("error", this.callbackPeerError);
-  }
-
-  removeConnectionListeners(conn) {
-    this.demoApp.notyfError("peer cleaned: " + conn.peer);
-    conn.off("open", this.callbackPeerConnected);
-    conn.off("data", this.callbackPeerData);
-    conn.off("close", this.callbackPeerClose);
-    conn.off("error", this.callbackPeerError);
-  }
-
-  clientConnected(conn) {}
-
-  peerConnected() {
-    this.demoApp.notyfSuccess("peerConnected");
-    setTimeout(() => {
-      this.sendJSON({ cmd: "message", base64Img: "HELLO" });
-    }, 1000);
-  }
-
-  peerData(data) {
-    this.receiveData(data);
-    this.demoApp.notyfSuccess("peerData" + data);
-  }
-
-  peerClose() {
-    this.demoApp.notyfError("peerClose");
-  }
-
-  peerError(err) {
-    this.demoApp.notyfError("peerError" + err.type);
-  }
-
-  // JSON communication on dataChannel --------------------------
-
-  sendJSON(data) {
-    if (this.conn) {
-      this.conn.send(data);
-      console.log("sent data:", data);
-    } else console.error("No connection, can't send data");
-  }
-
-  receiveData(data) {
-    console.log("Received data:", data);
-    this.demoApp.notyfSuccess("Data cmd: " + data.cmd);
-  }
-}
-
-//////////////////////////////
-// Kiosk
-//////////////////////////////
-
-class WebRtcKiosk extends WebRtcPeer {
   constructor(demoApp) {
-    super(demoApp, demoApp.el);
-    this.maxClientConnectionTime = 1000 * 60 * 3; // 3 minutes
-    this.buildQRContainer();
-    this.connections = [];
-    console.important("KIOSK");
-    this.reconnectInterval = setInterval(() => {
-      this.checkServerConnection();
-    }, 5000);
+    super(demoApp.el, KioskCustom.MAX_SESSION_LENGTH);
+
+    // for debugging --
+    this.el = demoApp.el;
+    this.demoApp = demoApp;
   }
 
-  buildQRContainer() {
-    let qrContainer = document.createElement("div");
-    qrContainer.id = "qrcode";
-    this.el.appendChild(qrContainer);
-  }
+  // overrides for debugging notifications ------------
 
-  checkServerConnection() {
-    super.checkServerConnection();
-    this.manageConnections();
-  }
+  buildQrCode(container) {
+    this.qrId = this.generateUUID();
+    super.buildQrCode(container, `&qrId=${this.qrId}`);
 
-  serverConnected(peerID) {
-    super.serverConnected(peerID);
+    // log the connection
     this.demoApp.notyfSuccess("Kiosk connected to Peer server");
     this.demoApp.notyfSuccess("Listening for clients...");
-    this.advertiseKioskConnection(peerID);
   }
 
-  async advertiseKioskConnection(peerID) {
-    // add link to connect
-    let offerLink = document.createElement("a");
-    offerLink.href = `${window.location.href}&offer=${peerID}`;
-    offerLink.innerText = offerLink.href;
-    this.el.appendChild(offerLink);
+  // overrides for debugging notifications ------------
 
-    // add QR code
-    let qrCode = new QRCode("qrcode", offerLink.href);
+  peerConnected() {
+    super.peerConnected();
+    this.demoApp.notyfSuccess("peerConnected");
   }
 
   clientConnected(conn) {
-    let newConnId = conn.peer;
-    this.addConnectionListeners(conn);
-    this.connections.push(conn);
-    conn.connectTime = Date.now();
-    console.log("Client connected!", newConnId);
+    super.clientConnected(conn);
     this.demoApp.notyfSuccess("Client connected!");
-    setTimeout(() => this.manageConnections(), 1000);
   }
 
-  connectionIsGood(conn) {
-    return (
-      conn.open && Date.now() - conn.connectTime < this.maxClientConnectionTime
-    );
-  }
+  peerDataReceived(data) {
+    super.peerDataReceived(data);
+    // get sender connection
+    let senderPeerID = data.sender;
+    let conn = this.connections.find((c) => c.peer == senderPeerID);
 
-  peerClose() {
-    super.peerClose();
-    this.manageConnections();
+    // check handshake message
+    if (data.cmd === "handshake") {
+      if (this.qrId == data.qrId) {
+        // qrID matches one-time QR code
+        this.sendJSON(conn, { cmd: "handshakeSuccess" });
+        this.buildQrCode(this.qrContainer);
+      } else {
+        conn.close(); // will be cleaned up by manageConnections()
+      }
+    }
+
+    // check for name
+    if (data.cmd === "username") {
+      conn.username = data.name;
+      this.manageConnections();
+    }
+    this.demoApp.notyfSuccess("peerData" + data);
   }
 
   manageConnections() {
-    // remove any connections that have been closed
-    let removedAny = false;
-    this.connections.forEach((conn, i) => {
-      console.log(conn);
-      if (this.connectionIsGood(conn) == false) {
-        this.removeConnectionListeners(conn);
-        conn.close();
-        removedAny = true;
-      }
-    });
-    // filter old connections from array
-    if (removedAny) {
-      this.connections = this.connections.filter((conn) => {
-        return this.connectionIsGood(conn);
-      });
-    }
-    // update debug info
+    super.manageConnections();
+    // debug connection info
+    let users = this.connections.map((c) => c.username).join(", ");
     this.demoApp.debugEl.innerHTML = `
       <div>Connections: ${this.connections.length}</div>
+      <div>Users: ${users}</div>
       <div>isServerConnected: ${this.isServerConnected()}</div>
     `;
   }
 }
 
-//////////////////////////////
-// Client
-//////////////////////////////
+class ClientCustom extends WebRtcClient {
+  // Custom client features:
+  // - Send username
+  // - Disconnect if handshake fails (based on qrId)
+  // - Advance if handshake is successful
 
-class WebRtcClient extends WebRtcPeer {
-  constructor(demoApp, offer) {
-    super(demoApp, demoApp.el);
-    this.offer = offer;
+  constructor(offer, qrId) {
+    super(offer);
+    this.qrId = qrId;
   }
 
-  serverConnected(peerID) {
-    super.serverConnected(peerID);
-    this.demoApp.notyfSuccess("Client connected to Peer server");
-    this.peerID = peerID;
-    this.connectToKiosk();
+  peerConnected() {
+    // on connection, send handshake request
+    this.sendJSON(this.conn, { cmd: "handshake", qrId: this.qrId });
   }
 
-  connectToKiosk() {
-    this.demoApp.notyfSuccess("Connecting to kiosk...");
-    this.conn = this.peer.connect(this.offer);
-    this.addConnectionListeners(this.conn);
+  peerDataReceived(data) {
+    console.log("Received data:", data);
+    if (data.cmd == "handshakeSuccess") {
+      console.log("Connection success! Show UI...");
+      this.showTextInput();
+    }
   }
 
-  // serverError(err) {
-  //   // attempt to reconnect here?
-  //   // but only if we're a kiosk?
-  //   // this.peer.destroy();
-  //   super.serverError(err);
-  // }
+  serverError(err) {
+    super.serverError(err);
+    console.log("We couldn't connect!");
+  }
+
+  peerClose() {
+    super.peerClose();
+    // we got kicked out - do something here
+    console.log("We got kicked out!");
+  }
+
+  // for demo only -------------
+
+  showTextInput() {
+    // inject form html
+    document.getElementById("debug").innerHTML = `
+      <div>Connected to kiosk!</div>
+      <div>Enter your name:</div>
+      <input id="name" type="text" />
+      <button id="submit">Submit</button>
+    `;
+
+    // add event listener
+    document.getElementById("submit").addEventListener("click", () => {
+      let name = document.getElementById("name").value;
+      this.sendJSON(this.conn, { cmd: "username", name: name });
+      // this.close();
+    });
+  }
 }
 
 if (window.autoInitDemo) window.demo = new WebRtcKioskDemo(document.body);
