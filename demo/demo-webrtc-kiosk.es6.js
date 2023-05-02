@@ -39,9 +39,10 @@ class WebRtcKioskDemo extends DemoBase {
 
 class KioskCustom extends WebRtcKiosk {
   // Custom kiosk features:
-  // - Advertise the kiosk connection via QR code
-  // - Disconnect from server after 3 minutes
-  // - Keep list of active users
+  // - Advertise the kiosk connection via single-use QR code
+  // - Disconnect clients from server after 3 minutes\
+  // - Handshake to allow client connections
+  // - Keep list of active users with username
 
   static MAX_SESSION_LENGTH = 1000 * 60 * 3; // 3 minutes
 
@@ -75,6 +76,8 @@ class KioskCustom extends WebRtcKiosk {
     super.clientConnected(conn);
     this.demoApp.notyfSuccess("Client connected!");
   }
+
+  // do handshake with client
 
   peerDataReceived(data) {
     super.peerDataReceived(data);
