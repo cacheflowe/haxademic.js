@@ -1,3 +1,6 @@
+import Peer from "../vendor/peerjs.min.js";
+import QRCode from "../vendor/qrcode_.min.js";
+
 class WebRtcPeer {
   constructor() {
     this.addScopedListeners();
@@ -59,6 +62,7 @@ class WebRtcPeer {
   // peer-to-peer connection listeners --------------------------
 
   addConnectionListeners(conn) {
+    if (!conn) return;
     conn.on("open", this.callbackPeerConnected);
     conn.on("data", this.callbackPeerData);
     conn.on("close", this.callbackPeerClose);
@@ -66,6 +70,7 @@ class WebRtcPeer {
   }
 
   removeConnectionListeners(conn) {
+    if (!conn) return;
     console.log("peer cleaned: " + conn.peer);
     conn.off("open", this.callbackPeerConnected);
     conn.off("data", this.callbackPeerData);
@@ -79,6 +84,7 @@ class WebRtcPeer {
 
   peerClose() {
     console.log("peerClose");
+    this.emit("peerClose", {});
   }
 
   peerError(err) {
@@ -87,7 +93,7 @@ class WebRtcPeer {
 
   // JSON communication on dataChannel --------------------------
 
-  sendJSON(conn, data) {
+  sendJSON(data, conn = this.conn) {
     if (conn) {
       data.sender = this.peerID;
       conn.send(data);
@@ -97,25 +103,39 @@ class WebRtcPeer {
 
   peerDataReceived(data) {
     console.log("Received data:", data);
+    this.emit("peerDataReceived", data);
   }
 
-  // helpers --------------------------------------------
+  // event listener system -------------------------------------------
+  // borrowed from: https://github.com/jeromeetienne/microevent.js/blob/master/microevent.js
 
-  generateUUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-      var d = new Date().getTime();
-      d += performance.now(); // use high-precision timer if available
-      var r = (d + Math.random() * 16) % 16 | 0;
-      d = Math.floor(d / 16);
-      return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
-    });
+  addListener(event, fct) {
+    this._events = this._events || {};
+    this._events[event] = this._events[event] || [];
+    this._events[event].push(fct);
+  }
+
+  removeListener(event, fct) {
+    this._events = this._events || {};
+    if (event in this._events === false) return;
+    this._events[event].splice(this._events[event].indexOf(fct), 1);
+  }
+
+  emit(event /* , args... */) {
+    this._events = this._events || {};
+    if (event in this._events === false) return;
+    for (var i = 0; i < this._events[event].length; i++) {
+      this._events[event][i].apply(
+        this,
+        Array.prototype.slice.call(arguments, 1)
+      );
+    }
   }
 
   // clean up --------------------------------------------
 
   dispose() {
-    clearInterval(this.reconnectInterval);
-    super.dispose();
+    this._events = null;
   }
 }
 
@@ -145,10 +165,10 @@ class WebRtcKiosk extends WebRtcPeer {
 
   serverConnected(peerID) {
     super.serverConnected(peerID);
-    this.buildQrCode(this.qrContainer);
+    this.buildQrCode();
   }
 
-  buildQrCode(container, urlParams = "") {
+  async buildQrCode(urlParams = "") {
     // can override with your own urlParams
     // build URL for client connection
     let connectionURL = `${window.location.href}&offer=${this.peerID}${urlParams}`;
@@ -156,14 +176,28 @@ class WebRtcKiosk extends WebRtcPeer {
     // add link container if it doesn't exist
     if (!this.offerLink) {
       this.offerLink = document.createElement("a");
-      this.offerLink.id = "qrcode";
-      container.appendChild(this.offerLink);
     }
 
     // add QR code
+    // - update wrapped link
+    // - create/update canvas for QR code
     this.offerLink.innerHTML = "";
     this.offerLink.href = connectionURL;
-    let qrCode = new QRCode("qrcode", connectionURL);
+    this.canvas = this.canvas ? this.canvas : document.createElement("canvas");
+    this.offerLink.appendChild(this.canvas);
+    // build QR code
+    let options = {
+      errorCorrectionLevel: "Q", // L, M, Q, H
+      margin: 4,
+      scale: 5, // pixels per square
+      width: 256, // overides `scale`
+      color: {
+        dark: "#000000",
+        light: "#ff2222",
+      },
+    };
+    await QRCode.toCanvas(this.canvas, connectionURL, options);
+    this.emit("qrCode", this.offerLink);
   }
 
   serverDisconnected() {
@@ -210,6 +244,7 @@ class WebRtcKiosk extends WebRtcPeer {
         return this.connectionIsGood(conn);
       });
     }
+    this.emit("connections", this.connections);
   }
 
   closeAllConnections() {

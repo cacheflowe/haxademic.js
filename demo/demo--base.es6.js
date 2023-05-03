@@ -158,17 +158,19 @@ class DemoBase {
   addNotyf() {
     DOMUtil.loadJavascript("https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js");
     this.loadRemoteCSS("https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css");
+    window._notyfSuccess = (args) => this.notyfSuccess(args);
+    window._notyfError = (args) => this.notyfError(args);
   }
 
   notyfSuccess(msg) {
     if (!window.Notyf) return console.error("Notyf not loaded!");
-    if (this.notyf == null) this.notyf = new Notyf({ duration: 5000 });
+    if (!this.notyf) this.notyf = new Notyf({ duration: 5000 });
     this.notyf.success(msg);
   }
 
   notyfError(msg) {
     if (!window.Notyf) return console.error("Notyf not loaded!");
-    if (this.notyf == null) this.notyf = new Notyf({ duration: 5000 });
+    if (!this.notyf) this.notyf = new Notyf({ duration: 5000 });
     this.notyf.error(msg);
   }
 
