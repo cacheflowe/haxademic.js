@@ -28,11 +28,14 @@ class WebRtcKioskDemo extends DemoBase {
           this.showTextInput();
         }
       });
+      this.client.addListener("connectionFailed", (data) => {
+        _notyfError("connectionFailed!");
+      });
       this.client.addListener("peerClose", (data) => {
         _notyfError("peerClose!");
       });
     } else {
-      this.client = new KioskCustom(this);
+      this.client = new KioskCustom();
       this.client.addListener("qrCode", (qrEl) => {
         this.el.appendChild(qrEl);
         _notyfSuccess("Kiosk connected to Peer server");
@@ -54,7 +57,7 @@ class WebRtcKioskDemo extends DemoBase {
       });
       this.client.addListener("usernames", (usernamesArray) => {
         this.debugEl.innerHTML += `
-          <div>Usernamess: ${usernamesArray.join(", ")}</div>
+          <div>Usernames: ${usernamesArray.join(", ")}</div>
         `;
       });
     }
@@ -91,17 +94,21 @@ class KioskCustom extends WebRtcKiosk {
 
   static MAX_SESSION_LENGTH = 1000 * 60 * 3; // 3 minutes
 
-  constructor(demoApp) {
-    super(KioskCustom.MAX_SESSION_LENGTH);
+  constructor() {
+    super(KioskCustom.MAX_SESSION_LENGTH, new ShortUniqueId()());
   }
 
   // overrides for debugging notifications ------------
 
+  shortUid() {
+    this.uid = !this.uid ? new ShortUniqueId() : this.uid;
+    return this.uid();
+  }
+
   buildQrCode() {
     // override to append handshake ID to querystring
     // uses ShortUniqueId module
-    this.uid = !this.uid ? new ShortUniqueId() : this.uid;
-    this.qrId = this.uid();
+    this.qrId = this.shortUid();
     super.buildQrCode(`&qrId=${this.qrId}`);
   }
 
@@ -120,7 +127,7 @@ class KioskCustom extends WebRtcKiosk {
         // qrID matches one-time QR code! handshake is good
         this.sendJSON({ cmd: "handshakeSuccess" }, conn);
         this.emit("handshakeSuccess", conn);
-        this.buildQrCode(this.qrContainer);
+        this.buildQrCode();
       } else {
         this.emit("handshakeFailure", conn);
         conn.close(); // will be cleaned up by manageConnections()

@@ -2,9 +2,9 @@ import Peer from "../vendor/peerjs.min.js";
 import QRCode from "../vendor/qrcode_.min.js";
 
 class WebRtcPeer {
-  constructor() {
+  constructor(customPeerId = null) {
     this.addScopedListeners();
-    this.initServerConnection();
+    this.initServerConnection(customPeerId);
   }
 
   addScopedListeners() {
@@ -23,11 +23,11 @@ class WebRtcPeer {
 
   // peer server connection listeners --------------------------------
 
-  initServerConnection() {
+  initServerConnection(customPeerId = null) {
     this.conn = null;
 
     // init connection to Peerjs server
-    this.peer = new Peer();
+    this.peer = new Peer(customPeerId);
     this.peer.on("open", this.callbackConnected);
     this.peer.on("disconnected", this.callbackConnected);
     this.peer.on("error", this.callbackError);
@@ -50,6 +50,7 @@ class WebRtcPeer {
 
   serverError(err) {
     console.log(err, err.type);
+    this.emit("connectionFailed", {});
   }
 
   checkServerConnection() {
@@ -144,13 +145,9 @@ class WebRtcPeer {
 //////////////////////////////
 
 class WebRtcKiosk extends WebRtcPeer {
-  constructor(
-    qrContainer = document.body,
-    maxClientConnectionTime = 60 * 1000 * 5
-  ) {
-    super();
+  constructor(maxClientConnectionTime = 60 * 1000 * 5, customPeerId = null) {
+    super(customPeerId);
     console.log("KIOSK");
-    this.qrContainer = qrContainer;
     this.maxClientConnectionTime = maxClientConnectionTime;
     this.connections = [];
     this.reconnectInterval = setInterval(() => {
@@ -203,7 +200,7 @@ class WebRtcKiosk extends WebRtcPeer {
   serverDisconnected() {
     super.serverDisconnected();
     // hide QR code if no connection to peer server
-    this.offerLink.innerHTML = "";
+    if (this.offerLink) this.offerLink.innerHTML = "";
   }
 
   clientConnected(conn) {
