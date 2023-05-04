@@ -1,6 +1,8 @@
 import * as PIXI from "../vendor/pixi/pixi.mjs";
 
 class PixiStage {
+  // https://pixijs.download/dev/docs/PIXI.IRendererOptions.html
+  // https://pixijs.download/dev/docs/PIXI.IApplicationOptions.html
   constructor(
     el = document.body,
     bgColor = 0x000000,
