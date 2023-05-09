@@ -19,6 +19,7 @@ class WebRtcPeer {
 
     // kiosk-only:
     this.callbackClientConnected = this.clientConnected.bind(this);
+    this.callbackClientCall = this.clientCalled.bind(this);
   }
 
   // peer server connection listeners --------------------------------
@@ -34,28 +35,31 @@ class WebRtcPeer {
 
     // kiosk-only:
     this.peer.on("connection", this.callbackClientConnected);
+    this.peer.on("call", this.callbackClientCall);
   }
 
   serverConnected(peerID) {
     this.peerID = peerID;
+    this.emit("serverConnected", {});
   }
 
   isServerConnected() {
-    return this.peer.disconnected === false;
+    return this.peer.open;
   }
 
   serverDisconnected() {
     console.log("Server disconnected!");
+    this.emit("serverDisconnected", {});
   }
 
   serverError(err) {
-    console.log(err, err.type);
-    this.emit("connectionFailed", {});
+    console.log("PeerJS server error", err, err.type);
+    this.emit("serverError", { err, type: err.type });
   }
 
   checkServerConnection() {
-    console.log("this.isServerConnected", this.isServerConnected());
     if (this.isServerConnected() == false) {
+      this.manageConnections();
       this.peer.reconnect();
     }
   }
@@ -79,9 +83,13 @@ class WebRtcPeer {
     conn.off("error", this.callbackPeerError);
   }
 
-  clientConnected(conn) {}
+  clientConnected(dataConnection) {}
 
-  peerConnected() {}
+  clientCalled(mediaConnection) {}
+
+  peerConnected(conn) {
+    this.emit("peerConnected", conn);
+  }
 
   peerClose() {
     console.log("peerClose");
@@ -89,7 +97,7 @@ class WebRtcPeer {
   }
 
   peerError(err) {
-    console.log("peerError" + err.type);
+    console.log("peerError", err, err.type);
   }
 
   // JSON communication on dataChannel --------------------------
@@ -136,6 +144,14 @@ class WebRtcPeer {
   // clean up --------------------------------------------
 
   dispose() {
+    this.peer.off("open", this.callbackConnected);
+    this.peer.off("disconnected", this.callbackConnected);
+    this.peer.off("error", this.callbackError);
+
+    // kiosk-only:
+    this.peer.off("connection", this.callbackClientConnected);
+    this.peer.off("call", this.callbackClientCall);
+
     this._events = null;
   }
 }
@@ -208,8 +224,8 @@ class WebRtcKiosk extends WebRtcPeer {
     let newConnId = conn.peer;
     this.addConnectionListeners(conn);
     this.connections.push(conn);
-    conn.connectTime = Date.now();
-    console.log("Client connected!", newConnId);
+    conn.connectTime = Date.now(); // add connection start time to object
+    this.emit("clientConnected", conn);
     setTimeout(() => this.manageConnections(), 1000);
   }
 

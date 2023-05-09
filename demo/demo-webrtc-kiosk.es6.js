@@ -18,49 +18,61 @@ class WebRtcKioskDemo extends DemoBase {
     URLUtil.reloadOnHashChange(); // helps w/pasting the offer link from kiosk tab
     this.addNotyf();
     let offer = URLUtil.getHashQueryVariable("offer");
-    let qrId = URLUtil.getHashQueryVariable("qrId");
     if (offer) {
-      this.client = new ClientCustom();
-      this.client.addListener("peerDataReceived", (data) => {
-        console.log("peerDataReceived", data);
-        if (data.cmd == "handshakeSuccess") {
-          console.log("Connection success! Show UI...");
-          this.showTextInput();
-        }
-      });
-      this.client.addListener("connectionFailed", (data) => {
-        _notyfError("connectionFailed!");
-      });
-      this.client.addListener("peerClose", (data) => {
-        _notyfError("peerClose!");
-      });
+      this.buildClient();
     } else {
-      this.client = new KioskCustom();
-      this.client.addListener("qrCode", (qrEl) => {
-        this.el.appendChild(qrEl);
-        _notyfSuccess("Kiosk connected to Peer server");
-        _notyfSuccess("Listening for clients...");
-      });
-      this.client.addListener("handshakeSuccess", (conn) => {
-        _notyfSuccess("Client handshake success!");
-      });
-      this.client.addListener("peerDataReceived", (data) => {
-        console.log("peerDataReceived", data);
-      });
-      this.client.addListener("connections", (connections) => {
-        let users = connections.map((c) => c.username).join(", ");
-        this.debugEl.innerHTML = `
+      this.buildKiosk();
+    }
+  }
+
+  buildKiosk() {
+    this.kiosk = new KioskCustom();
+    this.kiosk.addListener("serverConnected", (data) => {
+      _notyfSuccess("serverConnected!");
+    });
+    this.kiosk.addListener("serverDisconnected", (data) => {
+      _notyfError("serverDisconnected!");
+    });
+    this.kiosk.addListener("qrCode", (qrEl) => {
+      this.el.appendChild(qrEl);
+      _notyfSuccess("QR code generated");
+    });
+    this.kiosk.addListener("handshakeSuccess", (conn) => {
+      _notyfSuccess("Client handshake success!");
+    });
+    this.kiosk.addListener("peerDataReceived", (data) => {
+      console.log("peerDataReceived", data);
+    });
+    this.kiosk.addListener("connections", (connections) => {
+      let users = connections.map((c) => c.username).join(", ");
+      this.debugEl.innerHTML = `
           <div>Connections: ${connections.length}</div>
           <div>Users: ${users}</div>
-          <div>isServerConnected: ${this.client.isServerConnected()}</div>
+          <div>isServerConnected: ${this.kiosk.isServerConnected()}</div>
         `;
-      });
-      this.client.addListener("usernames", (usernamesArray) => {
-        this.debugEl.innerHTML += `
+    });
+    this.kiosk.addListener("usernames", (usernamesArray) => {
+      this.debugEl.innerHTML += `
           <div>Usernames: ${usernamesArray.join(", ")}</div>
         `;
-      });
-    }
+    });
+  }
+
+  buildClient() {
+    this.client = new ClientCustom();
+    this.client.addListener("peerDataReceived", (data) => {
+      console.log("peerDataReceived", data);
+      if (data.cmd == "handshakeSuccess") {
+        console.log("Connection success! Show UI...");
+        this.showTextInput();
+      }
+    });
+    this.client.addListener("serverDisconnected", (data) => {
+      _notyfError("serverDisconnected!");
+    });
+    this.client.addListener("peerClose", (data) => {
+      _notyfError("peerClose!");
+    });
   }
 
   showTextInput() {
