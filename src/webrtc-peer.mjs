@@ -17,6 +17,8 @@ class WebRtcPeer {
     this.callbackPeerClose = this.peerClose.bind(this);
     this.callbackPeerError = this.peerError.bind(this);
 
+    this.buildCallListeners();
+
     // kiosk-only:
     this.callbackClientConnected = this.clientConnected.bind(this);
     this.callbackClientCall = this.clientCalled.bind(this);
@@ -84,8 +86,7 @@ class WebRtcPeer {
   }
 
   clientConnected(dataConnection) {}
-
-  clientCalled(mediaConnection) {}
+  clientCalled(call) {}
 
   peerConnected(conn) {
     this.emit("peerConnected", conn);
@@ -113,6 +114,60 @@ class WebRtcPeer {
   peerDataReceived(data) {
     console.log("Received data:", data);
     this.emit("peerDataReceived", data);
+  }
+
+  // Video call helpers -------------------------------------------
+
+  buildCallListeners() {
+    this.callbackCallStreamStart = this.callStreamStart.bind(this);
+    this.callbackCallStreamClose = this.callStreamClose.bind(this);
+  }
+
+  callStreamStart() {}
+
+  callStreamClose() {}
+
+  addCallListeners(call) {
+    call.on("stream", this.callbackCallStreamStart);
+    call.on("close", this.callbackCallStreamClose);
+  }
+  removeCallListeners(call) {
+    call.off("stream", this.callbackCallStreamStart);
+    call.off("close", this.callbackCallStreamClose);
+  }
+
+  loadWebcam(streamAudio = true) {
+    navigator.getUserMedia(
+      { audio: false, video: true },
+      (stream) => {
+        this.localVideoStream = stream;
+        this.emit("webcamInitialized", stream);
+      },
+      (err) => {
+        alert("Cannot get access to your camera and video !");
+        console.error(err);
+      }
+    );
+  }
+
+  displayVideoStream(
+    container,
+    stream = this.localVideoStream,
+    videoEl = null
+  ) {
+    // Retrieve the video element according to the desired
+    // mute if video since it's our own
+    if (!videoEl) {
+      videoEl = document.createElement("video");
+      videoEl.defaultMuted = true;
+      videoEl.setAttribute("muted", "true");
+      videoEl.setAttribute("width", "100%");
+      videoEl.setAttribute("playsinline", "playsinline");
+      videoEl.setAttribute("autoplay", "autoplay");
+      container.appendChild(videoEl);
+    }
+    videoEl.srcObject = stream;
+    return videoEl;
   }
 
   // event listener system -------------------------------------------
@@ -244,9 +299,9 @@ class WebRtcKiosk extends WebRtcPeer {
     // remove any connections that have been closed
     let removedAny = false;
     this.connections.forEach((conn, i) => {
-      // console.log(conn);
       if (this.connectionIsGood(conn) == false) {
         this.removeConnectionListeners(conn);
+        if (conn.call) this.removeCallListeners(conn.call);
         conn.close();
         removedAny = true;
       }
@@ -263,6 +318,7 @@ class WebRtcKiosk extends WebRtcPeer {
   closeAllConnections() {
     this.connections.forEach((conn, i) => {
       this.removeConnectionListeners(conn);
+      if (conn.call) conn.call.close();
       conn.close();
     });
     this.connections = [];
@@ -272,6 +328,39 @@ class WebRtcKiosk extends WebRtcPeer {
     clearInterval(this.reconnectInterval);
     this.closeAllConnections();
     super.dispose();
+  }
+
+  // video call
+
+  clientCalled(call) {
+    // find connection and attach call to it
+    let callPeerId = call.peer;
+    let conn = this.connections.find((conn) => {
+      return conn.peer === callPeerId;
+    });
+    if (!conn) return;
+    conn.call = call;
+    // add call listeners
+    this.addCallListeners(call, callPeerId);
+    // send event - kiosk may want to answer the call with our own video/audio stream
+    this.emit("clientCalled", { conn, call, callPeerId });
+  }
+
+  callStreamStart(stream) {
+    // Find conn based on stream - can we find conn.stream to match them up
+    let conn = this.connections.find((conn) => {
+      return conn.call.remoteStream === stream;
+    });
+    this.emit("clientStreamStarted", { conn, stream });
+  }
+
+  callStreamClose(e) {
+    console.log("callStreamClose", e);
+    this.emit("clientStreamClosed", {});
+  }
+
+  replyToCall(call) {
+    call.answer(this.localVideoStream);
   }
 }
 
@@ -295,6 +384,29 @@ class WebRtcClient extends WebRtcPeer {
     console.log("Connecting to kiosk...", this.offer);
     this.conn = this.peer.connect(this.offer);
     this.addConnectionListeners(this.conn);
+  }
+
+  // video calls
+
+  callKiosk() {
+    this.call = this.peer.call(this.offer, this.localVideoStream);
+    this.addCallListeners(this.call, this.offer);
+  }
+
+  callStreamStart(stream) {
+    // TODO: Make sure we replace kiosk video stream if we get a new one!
+    console.log("kioskStreamStarted", stream);
+    this.emit("kioskStreamStarted", { stream });
+  }
+
+  callStreamClose(e) {
+    console.log("kioskStreamClosed", e);
+    this.emit("kioskStreamClosed", {});
+  }
+
+  dispose() {
+    super.dispose();
+    if (this.call) this.removeCallListeners(this.call);
   }
 }
 
