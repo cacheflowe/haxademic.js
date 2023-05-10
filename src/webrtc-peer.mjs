@@ -394,7 +394,6 @@ class WebRtcClient extends WebRtcPeer {
   }
 
   callStreamStart(stream) {
-    // TODO: Make sure we replace kiosk video stream if we get a new one!
     console.log("kioskStreamStarted", stream);
     this.emit("kioskStreamStarted", { stream });
   }
