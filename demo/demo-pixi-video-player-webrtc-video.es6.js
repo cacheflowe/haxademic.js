@@ -61,7 +61,7 @@ class WebRtcVideoStreamToPixi extends DemoBase {
       _notyfSuccess("webcamInitialized");
     });
     this.client.addListener("peerConnected", (data) => {
-      this.client.loadWebcam();
+      this.client.loadWebcam(false, true);
     });
     this.client.addListener("serverError", (data) => {
       this.debugEl.innerHTML = "Bad offer from kiosk";
