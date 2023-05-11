@@ -9,7 +9,7 @@ class VideoDownloadDemo extends DemoBase {
       [],
       "Video Download",
       "video-download-container",
-      "Save a video file directly to the camera roll on mobile via the Share API. Needs user interaction and https to work!"
+      "Save a video file directly to the camera roll on iOS via the Web Share API. Needs user interaction and https to work! Android and desktop browsers properly respect the <code>download</code> attribute and don't need the Web Share API."
     );
   }
 
@@ -26,6 +26,7 @@ class VideoDownloadDemo extends DemoBase {
     this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
     this.videoEl.style.setProperty("width", "320px");
     this.el.appendChild(this.videoEl);
+    this.el.appendChild(document.createElement("br"));
 
     // add link
     let linkEl = document.createElement("a");
@@ -33,6 +34,8 @@ class VideoDownloadDemo extends DemoBase {
     linkEl.setAttribute("href", videoPath);
     linkEl.setAttribute("download", "wash-your-hands.mp4");
     this.el.appendChild(linkEl);
+    this.el.appendChild(document.createElement("br"));
+    this.el.appendChild(document.createElement("br"));
 
     linkEl.addEventListener("click", (e) => {
       if (MobileUtil.isIOS()) {
@@ -51,6 +54,7 @@ class VideoDownloadDemo extends DemoBase {
     this.imageEl.setAttribute("src", imagePath);
     this.imageEl.style.setProperty("width", "320px");
     this.el.appendChild(this.imageEl);
+    this.el.appendChild(document.createElement("br"));
 
     // add link
     let linkEl = document.createElement("a");
@@ -86,7 +90,7 @@ class VideoDownloadDemo extends DemoBase {
     const response = await fetch(filePath);
     const blob = await response.blob();
     const filesArray = [
-      new File([blob], saveFile, {
+      new File([blob.slice()], saveFile, {
         type: type,
         // lastModified: new Date().getTime(), // doesn't work. video file will get saved with an old date in the photo roll
       }),
