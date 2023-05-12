@@ -2,6 +2,10 @@ import AppStore from "../src/app-store-.es6.js";
 import SolidSocket from "../src/solid-socket.es6.js";
 
 class AppStoreDistributed extends AppStore {
+  static CONNECTED = "AppStoreDistributed_CONNECTED";
+  static DISCONNECTED = "AppStoreDistributed_DISCONNECTED";
+  static CUSTOM_JSON = "CUSTOM_JSON";
+
   constructor(socketServerUrl) {
     super();
     // track whether messages are from this instance
@@ -85,9 +89,5 @@ class AppStoreDistributed extends AppStore {
     this.solidSocket.sendMessage(JSON.stringify(obj));
   }
 }
-
-AppStoreDistributed.CONNECTED = "AppStoreDistributed_CONNECTED";
-AppStoreDistributed.DISCONNECTED = "AppStoreDistributed_DISCONNECTED";
-AppStoreDistributed.CUSTOM_JSON = "CUSTOM_JSON";
 
 export default AppStoreDistributed;
