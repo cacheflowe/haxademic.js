@@ -52,6 +52,10 @@ class AppStore {
     return this.state[key];
   }
 
+  toString() {
+    return JSON.stringify(this.state, null, 2);
+  }
+
   log() {
     for (let key in _store.state) {
       console.log(key, _store.state[key]);
