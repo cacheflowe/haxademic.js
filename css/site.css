@@ -67,5 +67,12 @@ p:empty {
 .fullscreen h1,
 .fullscreen p {
   background-color: var(--text-bg);
-  padding: 1rem;
+  padding: var(--pico-spacing);
+}
+
+/* containers */
+
+.container-inner {
+  padding: var(--pico-spacing);
+  background-color: var(--pico-secondary-background);
 }

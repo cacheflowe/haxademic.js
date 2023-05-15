@@ -186,6 +186,15 @@ class DemoBase {
     this.el.appendChild(DOMUtil.stringToDomElement(html.trim()));
   }
 
+  buildContainer(id) {
+    id = !!id ? id : "container_" + Math.floor(Math.random() * 999999999);
+    let container = document.createElement("div");
+    container.setAttribute("id", id);
+    container.setAttribute("class", "container-inner");
+    this.el.appendChild(container);
+    return container;
+  }
+
   /////////////////////////////
   // RECORD
   /////////////////////////////
