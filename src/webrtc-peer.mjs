@@ -101,7 +101,7 @@ class WebRtcPeer {
     console.log("peerError", err, err.type);
   }
 
-  // JSON communication on dataChannel --------------------------
+  // JSON (or other data types) communication on dataChannel --------------------------
 
   sendJSON(data, conn = this.conn) {
     if (conn) {
@@ -114,6 +114,67 @@ class WebRtcPeer {
   peerDataReceived(data) {
     console.log("Received data:", data);
     this.emit("peerDataReceived", data);
+
+    // set incoming data on AppStore if initialized
+    // only do this if data is set from AppStore, via `.store` property
+    if (window._store && data.store) {
+      this.updateLocalAppStoreWithRemoteData(data);
+    }
+  }
+
+  // AppStore bridge - automatically sends AppStore updates to peer and receives broadcasted updates from peer
+
+  initAppStoreBridge(exclusions = []) {
+    this.appStoreExclusions = exclusions;
+    this.incomingRtcData = false; // add flag to make sure incoming data doesn't get re-emitted. maybe this causes issues if another AppStore event is emitted in the same frame? a rAf would solve for that.
+    if (window._store) {
+      window._store.addListener(this);
+    }
+  }
+
+  storeUpdated(key, value) {
+    // ignore select keys when set on AppStore - primarily to prevent outgoing data, like frameLoop
+    // but would also discard incoming keys
+    if (this.appStoreExclusions.indexOf(key) !== -1) return;
+    // get data type for java AppStore - borrowed from AppStoreDistributed
+    var type = "number";
+    if (typeof value === "boolean") type = "boolean";
+    if (typeof value === "string") type = "string";
+    // set json object for AppStore
+    let data = {
+      key: key,
+      value: value,
+      store: true,
+      type: type,
+    };
+    data.sender = this.peerID;
+    if (!this.incomingRtcData) this.sendJsonOnAppStoreUpdate(data);
+    this.incomingRtcData = false;
+  }
+
+  sendJsonOnAppStoreUpdate(data) {
+    // send AppStore-formatted data to peer...
+    // if multiple connections, send to all, which might not be what we want in all cases,
+    // so we could override this method in a subclass to send to a specific connection
+    if (this.connections) {
+      this.connections.forEach((conn) => {
+        this.sendJSON(data, conn);
+      });
+    } else {
+      this.sendJSON(data);
+    }
+  }
+
+  updateLocalAppStoreWithRemoteData(data) {
+    // make sure this isn't data being self-received from emitting our own AppStore update
+    if (data.sender == this.peerID) return;
+    this.incomingRtcData = true;
+    // if incoming data is AppStore-formatted, set it on AppStore
+    if (data["store"] && data["type"]) {
+      window._store.set(data["key"], data["value"]);
+    } else {
+      window._store.set("CUSTOM_DATA", data);
+    }
   }
 
   // Video call helpers -------------------------------------------
@@ -136,9 +197,11 @@ class WebRtcPeer {
     call.off("close", this.callbackCallStreamClose);
   }
 
-  loadWebcam(streamAudio = true) {
+  loadWebcam(streamAudio = false, mobileBackCamera = false) {
+    var videoOptions = true;
+    if (mobileBackCamera) videoOptions = { facingMode: "environment" };
     navigator.getUserMedia(
-      { audio: false, video: true },
+      { audio: streamAudio, video: videoOptions },
       (stream) => {
         this.localVideoStream = stream;
         this.emit("webcamInitialized", stream);
@@ -369,7 +432,7 @@ class WebRtcKiosk extends WebRtcPeer {
 //////////////////////////////
 
 class WebRtcClient extends WebRtcPeer {
-  constructor(offer) {
+  constructor(offer = null) {
     super();
     this.offer = offer;
   }
@@ -377,12 +440,12 @@ class WebRtcClient extends WebRtcPeer {
   serverConnected(peerID) {
     super.serverConnected(peerID);
     console.log("Client connected to Peer server");
-    this.connectToKiosk();
+    if (this.offer) this.connectToKiosk(this.offer);
   }
 
-  connectToKiosk() {
-    console.log("Connecting to kiosk...", this.offer);
-    this.conn = this.peer.connect(this.offer);
+  connectToKiosk(offer = this.offer) {
+    console.log("Connecting to kiosk...", offer);
+    this.conn = this.peer.connect(offer);
     this.addConnectionListeners(this.conn);
   }
 

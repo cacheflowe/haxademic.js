@@ -1,5 +1,8 @@
 import DemoBase from "./demo--base.es6.js";
 import URLUtil from "../src/url-util.es6.js";
+import AppStoreDebug from "../src/app-store-debug.es6.js";
+import AppStore from "../src/app-store-.es6.js";
+
 import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.mjs";
 import ShortUniqueId from "../vendor/short-unique-id.min.js";
 
@@ -15,6 +18,8 @@ class WebRtcKioskDemo extends DemoBase {
   }
 
   init() {
+    this.appStore = new AppStore();
+    this.appStore.addListener(this);
     URLUtil.reloadOnHashChange(); // helps w/pasting the offer link from kiosk tab
     this.addNotyf();
     let offer = URLUtil.getHashQueryVariable("offer");
@@ -27,6 +32,7 @@ class WebRtcKioskDemo extends DemoBase {
 
   buildKiosk() {
     this.kiosk = new KioskCustom();
+    this.kiosk.initAppStoreBridge();
     this.kiosk.addListener("serverConnected", (data) => {
       _notyfSuccess("serverConnected!");
     });
@@ -60,6 +66,7 @@ class WebRtcKioskDemo extends DemoBase {
 
   buildClient() {
     this.client = new ClientCustom();
+    this.client.initAppStoreBridge();
     this.client.addListener("peerDataReceived", (data) => {
       console.log("peerDataReceived", data);
       if (data.cmd == "handshakeSuccess") {
@@ -90,6 +97,18 @@ class WebRtcKioskDemo extends DemoBase {
       this.client.sendJSON({ cmd: "username", name: name });
       // this.close();
     });
+  }
+
+  // AppStore connection ------------------------------
+
+  keyDown(key) {
+    _store.set("key", key);
+  }
+
+  storeUpdated(key, value) {
+    if (!this.storeOutputEl) this.storeOutputEl = this.buildContainer();
+    console.log(this.storeOutputEl);
+    this.storeOutputEl.innerHTML = `Store data:<br><pre>${this.appStore.toString()}</pre>`;
   }
 }
 
