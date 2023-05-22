@@ -30,6 +30,12 @@ class DOMUtil {
     return doc.body.firstElementChild;
   }
 
+  static injectElement(elStr, parent) {
+    let el = DOMUtil.stringToElement(elStr);
+    parent.appendChild(el);
+    return el;
+  }
+
   static stringToDomElement(str) {
     let div = document.createElement("div");
     div.innerHTML = str;
