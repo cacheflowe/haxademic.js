@@ -2,9 +2,9 @@ import Peer from "../vendor/peerjs.min.js";
 import QRCode from "../vendor/qrcode_.min.js";
 
 class WebRtcPeer {
-  constructor(customPeerId = null) {
+  constructor(customPeerId = null, peerJsOptions = {}) {
     this.addScopedListeners();
-    this.initServerConnection(customPeerId);
+    this.initServerConnection(customPeerId, peerJsOptions);
   }
 
   addScopedListeners() {
@@ -26,11 +26,11 @@ class WebRtcPeer {
 
   // peer server connection listeners --------------------------------
 
-  initServerConnection(customPeerId = null) {
+  initServerConnection(customPeerId = null, peerJsOptions = {}) {
     this.conn = null;
 
     // init connection to Peerjs server
-    this.peer = new Peer(customPeerId);
+    this.peer = new Peer(customPeerId, peerJsOptions);
     this.peer.on("open", this.callbackConnected);
     this.peer.on("disconnected", this.callbackConnected);
     this.peer.on("error", this.callbackError);
@@ -279,8 +279,12 @@ class WebRtcPeer {
 //////////////////////////////
 
 class WebRtcKiosk extends WebRtcPeer {
-  constructor(maxClientConnectionTime = 60 * 1000 * 5, customPeerId = null) {
-    super(customPeerId);
+  constructor(
+    maxClientConnectionTime = 60 * 1000 * 5,
+    customPeerId = null,
+    peerJsOptions = {}
+  ) {
+    super(customPeerId, peerJsOptions);
     console.log("KIOSK");
     this.maxClientConnectionTime = maxClientConnectionTime;
     this.connections = [];
@@ -432,8 +436,8 @@ class WebRtcKiosk extends WebRtcPeer {
 //////////////////////////////
 
 class WebRtcClient extends WebRtcPeer {
-  constructor(offer = null) {
-    super();
+  constructor(offer = null, peerJsOptions = {}) {
+    super(null, peerJsOptions);
     this.offer = offer;
   }
 
