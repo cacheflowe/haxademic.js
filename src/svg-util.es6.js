@@ -1,5 +1,4 @@
 class SVGUtil {
-
   static rasterizeSVG(svgEl, renderedCallback, jpgQuality) {
     // WARNING! Inline <image> tags must have a base64-encoded image as their source. Linked image files will not work.
     // transform svg into base64 image
@@ -8,29 +7,39 @@ class SVGUtil {
 
     // load svg image into canvas
     const image = new Image();
-    image.onload = function() {
-      if(jpgQuality) {
+    image.onload = function () {
+      if (jpgQuality) {
         const canvas = SVGUtil.drawImageToNewCanvas(image, true);
-        renderedCallback(canvas.toDataURL('image/jpeg', jpgQuality));
+        renderedCallback(canvas.toDataURL("image/jpeg", jpgQuality));
       } else {
         const canvas = SVGUtil.drawImageToNewCanvas(image);
-        renderedCallback(canvas.toDataURL('image/png'));
+        renderedCallback(canvas.toDataURL("image/png"));
       }
-    }
+    };
     image.src = uri;
   }
 
   static drawImageToNewCanvas(image, drawBackground) {
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = image.width;
     canvas.height = image.height;
-    const context = canvas.getContext('2d');
-    if(drawBackground) { // set white background before rendering
-      context.fillStyle = '#fff';
+    const context = canvas.getContext("2d");
+    if (drawBackground) {
+      // set white background before rendering
+      context.fillStyle = "#fff";
       context.fillRect(0, 0, canvas.width, canvas.height);
     }
     context.drawImage(image, 0, 0);
     return canvas;
+  }
+
+  static async injectSvgFromFile(url, parent) {
+    const response = await fetch(url);
+    const text = await response.text();
+    let doc = new DOMParser().parseFromString(text, "text/html"); // from DOMUtil
+    let el = doc.body.firstElementChild;
+    parent.append(el);
+    return el;
   }
 
   static elementToString(el) {
@@ -43,7 +52,7 @@ class SVGUtil {
   }
 
   static svgStrToBase64(svgStr) {
-    return 'data:image/svg+xml;base64,' + btoa(svgStr);
+    return "data:image/svg+xml;base64," + btoa(svgStr);
   }
 
   static svgElToBase64(el, callback) {
@@ -51,26 +60,31 @@ class SVGUtil {
   }
 
   static polygonsToPaths(el) {
-    var polys = el.querySelectorAll('polygon,polyline');
-    [].forEach.call(polys,convertPolyToPath);
+    var polys = el.querySelectorAll("polygon,polyline");
+    [].forEach.call(polys, convertPolyToPath);
 
-    function convertPolyToPath(poly){
+    function convertPolyToPath(poly) {
       var svgNS = poly.ownerSVGElement.namespaceURI;
-      var path = document.createElementNS(svgNS,'path');
-      var pathdata = 'M '+poly.getAttribute('points');
-      if (poly.tagName=='polygon') pathdata+='z';
-      if(poly.getAttribute('id')) path.setAttribute('id', poly.getAttribute('id'));
-      if(poly.getAttribute('fill')) path.setAttribute('fill', poly.getAttribute('fill'));
-      if(poly.getAttribute('stroke')) path.setAttribute('stroke', poly.getAttribute('stroke'));
-      path.setAttribute('d',pathdata);
-      poly.parentNode.replaceChild(path,poly);
+      var path = document.createElementNS(svgNS, "path");
+      var pathdata = "M " + poly.getAttribute("points");
+      if (poly.tagName == "polygon") pathdata += "z";
+      if (poly.getAttribute("id"))
+        path.setAttribute("id", poly.getAttribute("id"));
+      if (poly.getAttribute("fill"))
+        path.setAttribute("fill", poly.getAttribute("fill"));
+      if (poly.getAttribute("stroke"))
+        path.setAttribute("stroke", poly.getAttribute("stroke"));
+      path.setAttribute("d", pathdata);
+      poly.parentNode.replaceChild(path, poly);
     }
   }
 }
 
-SVGUtil.clearColor = 'rgba(0,0,0,0)';
-SVGUtil.dataImgPrefix = 'data:image/svg+xml;base64,';
-SVGUtil.testSVG = '<svg xmlns="http://www.w3.org/2000/svg" height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"/></svg>';
-SVGUtil.testSVG2 = '<svg xmlns="http://www.w3.org/2000/svg" height="100" width="100"><rect x="10" y="10" width="80" height="80" stroke="black" stroke-width="3" fill="red"/></svg>';
+SVGUtil.clearColor = "rgba(0,0,0,0)";
+SVGUtil.dataImgPrefix = "data:image/svg+xml;base64,";
+SVGUtil.testSVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" height="100" width="100"><circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"/></svg>';
+SVGUtil.testSVG2 =
+  '<svg xmlns="http://www.w3.org/2000/svg" height="100" width="100"><rect x="10" y="10" width="80" height="80" stroke="black" stroke-width="3" fill="red"/></svg>';
 
 export default SVGUtil;
