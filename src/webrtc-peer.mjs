@@ -416,7 +416,7 @@ class WebRtcKiosk extends WebRtcPeer {
   callStreamStart(stream) {
     // Find conn based on stream - can we find conn.stream to match them up
     let conn = this.connections.find((conn) => {
-      return conn.call.remoteStream === stream;
+      return conn?.call?.remoteStream === stream;
     });
     this.emit("clientStreamStarted", { conn, stream });
   }
