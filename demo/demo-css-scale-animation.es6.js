@@ -24,7 +24,7 @@ class DateUtilDemo extends DemoBase {
         background-image: url("../data/images/bb.jpg");
         background-size: 100%;
         background-position: center;
-        animation: scale 6s ease-in-out infinite alternate;
+        animation: scale 4s ease-in-out infinite alternate;
       }
       @keyframes scale {
         from {
