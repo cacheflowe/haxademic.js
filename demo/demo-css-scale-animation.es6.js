@@ -38,13 +38,9 @@ class DateUtilDemo extends DemoBase {
     this.el.innerHTML = new Array(16)
       .fill(0)
       .map(() => {
-        return `<div style="animation-delay: ${this.randomOffset()}s;"></div>`;
+        return `<div style="animation-delay: ${Math.random() * 6}s;"></div>`;
       })
       .join("");
-  }
-
-  randomOffset() {
-    return Math.random() * 6;
   }
 }
 
