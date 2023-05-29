@@ -46,7 +46,7 @@ class WebRtcPeer {
   }
 
   isServerConnected() {
-    return this.peer.open;
+    return this.peer && this.peer.open && !this.peer.destroyed;
   }
 
   serverDisconnected() {
@@ -61,8 +61,11 @@ class WebRtcPeer {
 
   checkServerConnection() {
     if (this.isServerConnected() == false) {
+      // console.log("❌❌❌ IT'S BAD! RECONNECTING", this.peer);
       this.manageConnections();
       this.peer.reconnect();
+    } else {
+      // console.log("this.peer looks good: ", this.peer);
     }
   }
 
@@ -107,12 +110,12 @@ class WebRtcPeer {
     if (conn) {
       data.sender = this.peerID;
       conn.send(data);
-      console.log("sent data:", data);
+      // console.log("sent data:", data);
     } else console.log("No connection, can't send data");
   }
 
   peerDataReceived(data) {
-    console.log("Received data:", data);
+    // console.log("Received data:", data);
     this.emit("peerDataReceived", data);
 
     // set incoming data on AppStore if initialized
@@ -136,6 +139,7 @@ class WebRtcPeer {
     // ignore select keys when set on AppStore - primarily to prevent outgoing data, like frameLoop
     // but would also discard incoming keys
     if (this.appStoreExclusions.indexOf(key) !== -1) return;
+
     // get data type for java AppStore - borrowed from AppStoreDistributed
     var type = "number";
     if (typeof value === "boolean") type = "boolean";
@@ -159,6 +163,7 @@ class WebRtcPeer {
     if (this.connections) {
       this.connections.forEach((conn) => {
         this.sendJSON(data, conn);
+        // console.log("sending", data, conn);
       });
     } else {
       this.sendJSON(data);
