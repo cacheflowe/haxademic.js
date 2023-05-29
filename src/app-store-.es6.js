@@ -62,9 +62,9 @@ class AppStore {
     }
   }
 
-  initLocalStorage(keyTriggerExlusions = []) {
+  initLocalStorage(keyTriggerExclusions = []) {
     this.persistData = true;
-    this.keyTriggerExlusions = keyTriggerExlusions; // these keys will not trigger a save to localStorage
+    this.keyTriggerExclusions = keyTriggerExclusions; // these keys will not trigger a save to localStorage
     const savedState = window.localStorage.getItem(AppStore.LOCALSTORAGE_KEY);
     if (savedState) {
       this.state = JSON.parse(savedState);
@@ -72,7 +72,7 @@ class AppStore {
   }
 
   saveToLocalStorage(key) {
-    if (this.keyTriggerExlusions.includes(key)) return;
+    if (this.keyTriggerExclusions.includes(key)) return;
     let storeData = JSON.stringify(this.state);
     window.localStorage.setItem(AppStore.LOCALSTORAGE_KEY, storeData);
   }
