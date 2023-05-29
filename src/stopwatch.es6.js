@@ -11,6 +11,10 @@ export default class Stopwatch {
     return new Date().getTime();
   }
 
+  setTime(curMs) {
+    return (this.totalMs = curMs);
+  }
+
   reset() {
     this.totalMs = 0;
     this.startTime = this.curTime();
