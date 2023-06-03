@@ -371,12 +371,12 @@ class WebRtcKiosk extends WebRtcPeer {
     // remove any connections that have been closed
     let removedAny = false;
     this.connections.forEach((conn, i) => {
-      if (this.connectionIsGood(conn) == false) {
-        this.removeConnectionListeners(conn);
-        if (conn.call) this.removeCallListeners(conn.call);
-        conn.close();
-        removedAny = true;
-      }
+      // if (this.connectionIsGood(conn) == false) {
+      //   this.removeConnectionListeners(conn);
+      //   if (conn.call) this.removeCallListeners(conn.call);
+      //   conn.close();
+      //   removedAny = true;
+      // }
     });
     // filter old connections from array
     if (removedAny) {
@@ -455,6 +455,7 @@ class WebRtcClient extends WebRtcPeer {
   connectToKiosk(offer = this.offer) {
     console.log("Connecting to kiosk...", offer);
     this.conn = this.peer.connect(offer);
+    console.log("this.conn", this.conn);
     this.addConnectionListeners(this.conn);
   }
 
