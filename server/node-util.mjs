@@ -13,22 +13,22 @@ export function argExists(argKey) {
 
 // files util -------------------------
 
-export function fileOrDirExists(path) {
-  return fs.existsSync(path);
+export async function fileOrDirExists(path) {
+  return await fs.existsSync(path);
 }
 
 export async function createDir(dirPath) {
-  if (!fileOrDirExists(dirPath)) {
-    fs.mkdirSync(dirPath);
+  if (!(await fileOrDirExists(dirPath))) {
+    await fs.mkdirSync(dirPath);
   }
 }
 
-export function deleteDir(dirPath) {
-  fs.rmdirSync(dirPath, { recursive: true });
+export async function deleteDir(dirPath) {
+  await fs.rmdirSync(dirPath, { recursive: true });
 }
 
-export function filesInDir(dirPath) {
-  return fs.readdirSync(dirPath);
+export async function filesInDir(dirPath) {
+  return await fs.readdirSync(dirPath);
 }
 
 export async function fileSizeBytes(filePath) {
@@ -49,6 +49,51 @@ export async function writeStringToFile(filePath, contentStr) {
   return await fs.writeFileSync(filePath, contentStr);
 }
 
+export async function loadTextFileLines(filePath) {
+  const fileContents = await fs.readFileSync(filePath, "utf-8");
+  return fileContents.split(/\r?\n/);
+}
+
+export async function loadJsonFromFile(filePath) {
+  return JSON.parse(await fs.readFileSync(filePath, "utf8"));
+}
+
+export async function writeJsonToFile(filePath, jsonObj) {
+  return await fs.writeFileSync(filePath, JSON.stringify(jsonObj, null, 2));
+}
+
+export function listFilesInDir(dir) {
+  fs.readdir(dir, function (err, files) {
+    if (err) {
+      return console.log("Unable to scan directory: " + err);
+    } else {
+      console.log("Listing files in", tmpDir, files.length);
+      if (files && files.length) {
+        files.forEach((file) => console.log("-", file));
+      } else {
+        console.log("No files found");
+      }
+    }
+  });
+}
+
+// net -------------------------------
+
+async function downloadImage(url, filepath) {
+  // TODO: rewrite with fetch()
+  const response = await axios({
+    url,
+    method: "GET",
+    responseType: "stream",
+  });
+  return new Promise((resolve, reject) => {
+    response.data
+      .pipe(fs.createWriteStream(filepath))
+      .on("error", reject)
+      .once("close", () => resolve(filepath));
+  });
+}
+
 // logging ----------------------------
 
 export function bigLog(msg) {
@@ -66,5 +111,10 @@ export default {
   filesInDir,
   fileSizeBytes,
   fileSizeMb,
+  loadTextFileLines,
+  loadJsonFromFile,
+  writeJsonToFile,
+  listFilesInDir,
+  downloadImage,
   bigLog,
 };
