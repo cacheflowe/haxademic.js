@@ -115,7 +115,19 @@ class DateUtilDemo extends DemoBase {
   }
 }
 
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
+///////////////////////////////////
 // create custom p5 sketch subclass
+///////////////////////////////////
 class CustomSketch extends P5App {
   constructor(el, positionsGrid, positionsRandom) {
     // always should just pass the container element to P5App constructor
@@ -180,12 +192,15 @@ class CustomSketch extends P5App {
     let particleSize = 20;
     let curData =
       this.mouseY > this.height / 2 ? this.positionsGrid : this.positionsRandom;
-    curData.forEach((pos) => {
+    curData.forEach((pos, i) => {
       let w = this.width;
       let h = this.height;
       let x = pos[0] * w; // normalized coords from center, between -0.5 - 0.5
       let y = pos[1] * h;
-      let z = this.noise(x, y) * -30;
+      let z = 0;
+      // x += this.noise(x, y, this.frameCount / 100) * 10;
+      // y += this.noise(x, y, this.frameCount / 300) * 10;
+      // let z = this.sin(i + this.frameCount / 50) * -20;
       this.push();
       this.translate(x, y, z);
       this.image(this.particleImg, 0, 0, particleSize, particleSize);
