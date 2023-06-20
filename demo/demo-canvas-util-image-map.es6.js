@@ -17,7 +17,7 @@ class DateUtilDemo extends DemoBase {
       [],
       "CanvasUtil | Image map",
       "image-map-container",
-      "Use a black & white image as a map, and use CanvasUtil to process it."
+      "Sample a black & white image as a map of points"
     );
   }
 
