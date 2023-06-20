@@ -315,7 +315,9 @@ class ThreeSceneDemo extends DemoBase {
 
     this.particleMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        map: { value: new THREE.TextureLoader().load("../data/particle.png") },
+        map: {
+          value: new THREE.TextureLoader().load("../data/images/particle.png"),
+        },
         colorMap: { value: this.gradientFBO.getTexture() },
         positionsMap: { value: null },
         time: { value: 0.0 },

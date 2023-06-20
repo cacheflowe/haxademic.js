@@ -15,6 +15,13 @@ class ImageUtil {
     });
   }
 
+  static async loadImageSync(imagePath) {
+    const img = new Image();
+    img.src = imagePath;
+    await img.decode(); // wait for image to load: https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/decode
+    return img;
+  }
+
   static getOffsetAndSizeToCrop(
     containerW,
     containerH,

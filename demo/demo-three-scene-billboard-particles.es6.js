@@ -185,8 +185,10 @@ class ThreeSceneDemo extends DemoBase {
 
     this.material = new THREE.RawShaderMaterial({
       uniforms: {
-        map: { value: new THREE.TextureLoader().load("../data/particle.png") },
-        // "map": { value: new THREE.TextureLoader().load('../data/particle-circle-no-alpha.png')},
+        map: {
+          value: new THREE.TextureLoader().load("../data/images/particle.png"),
+        },
+        // "map": { value: new THREE.TextureLoader().load('../data/images/particle-circle-no-alpha.png')},
         time: { value: 0.0 },
         // "modelViewMatrixInverse": { value: this.mat4 }   // https://gist.github.com/spite/9110247
       },
