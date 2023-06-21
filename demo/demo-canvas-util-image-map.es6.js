@@ -2,6 +2,7 @@ import DemoBase from "./demo--base.es6.js";
 import DomUtil from "../src/dom-util.es6.js";
 import ImageUtil from "../src/image-util.es6.js";
 import CanvasUtil from "../src/canvas-util.es6.js";
+import MathUtil from "../src/math-util.es6.js";
 
 // synchronously load non-module p5js.
 await DomUtil.injectScriptSync("../vendor/p5/p5.js");
@@ -43,14 +44,22 @@ class DateUtilDemo extends DemoBase {
 
     // get map positions
     let positionsGrid = this.scanGrid(ctx, pixelData, 4);
-    let positionsRandom = this.scanStochastic(ctx, pixelData, 800);
+    let positionsRandom = this.scanStochastic(ctx, pixelData, 600);
+    let positionsRandomDist = this.scanStochasticDistanceCheck(
+      ctx,
+      pixelData,
+      600,
+      3
+    );
 
     // draw map points
     this.injectHTML(`<h3>Grid sampling</h3>`);
     this.drawPoints(CanvasUtil.cloneCanvas(ctx.canvas), positionsGrid);
     this.injectHTML(`<hr>`);
-    this.injectHTML(`<h3>Stochastic sampling</h3>`);
+    this.injectHTML(`<h3>Random sampling</h3>`);
     this.drawPoints(CanvasUtil.cloneCanvas(ctx.canvas), positionsRandom);
+    this.injectHTML(`<h3>Random sampling w/distance check</h3>`);
+    this.drawPoints(CanvasUtil.cloneCanvas(ctx.canvas), positionsRandomDist);
 
     // build sketch that uses data
     this.injectHTML(`<hr>`);
@@ -60,7 +69,8 @@ class DateUtilDemo extends DemoBase {
     this.p5Sketch = new CustomSketch(
       p5Container,
       positionsGrid,
-      positionsRandom
+      // positionsRandom,
+      positionsRandomDist
     );
   }
 
@@ -72,6 +82,7 @@ class DateUtilDemo extends DemoBase {
     for (var y = 0; y <= h; y += spacing) {
       for (var x = 0; x <= w; x += spacing) {
         if (CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y) > 10) {
+          // if white pixel
           normalizedPixelData.push([x / w - 0.5, y / h - 0.5]); // collect normalized, centered pixels that are turned on
         }
         numAttempts++;
@@ -92,8 +103,46 @@ class DateUtilDemo extends DemoBase {
       let y = Math.floor(Math.random() * h);
       let pixel = CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y);
       if (pixel > 10) {
-        // collect normalized, centered pixels that are turned on
-        normalizedPixelData.push([x / w - 0.5, y / h - 0.5]);
+        // if white pixel
+        normalizedPixelData.push([x / w - 0.5, y / h - 0.5]); // collect normalized, centered pixels that are turned on
+      }
+      numAttempts++;
+    }
+    this.debugEl.innerHTML += `<p>Collected <code>${normalizedPixelData.length}</code> pixels with a random sampling after <code>${numAttempts}</code> attempts</p>`;
+    return normalizedPixelData;
+  }
+
+  scanStochasticDistanceCheck(
+    ctx,
+    pixelData,
+    maxSamples = 400,
+    distThresh = 5
+  ) {
+    let w = ctx.canvas.width;
+    let h = ctx.canvas.height;
+    let normalizedPixelData = [];
+    let numChecks = maxSamples * 30; // more attempts needed for distance check
+    let numAttempts = 0;
+    while (numAttempts < numChecks && normalizedPixelData.length < maxSamples) {
+      let x = Math.floor(Math.random() * w);
+      let y = Math.floor(Math.random() * h);
+      let pixel = CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y);
+      if (pixel > 10) {
+        // if white pixel
+        // check for distance from other points, within a threshold
+        var minDist = Number.POSITIVE_INFINITY;
+        normalizedPixelData.forEach((el, i) => {
+          let xCheckGrid = el[0] * w + w * 0.5; // convert normalized to grid coords for distance check in pixels
+          let yCheckGrid = el[1] * h + h * 0.5;
+          let distCheck = MathUtil.getDistance(xCheckGrid, yCheckGrid, x, y);
+          minDist = Math.min(distCheck, minDist);
+        });
+        console.log("minDist", minDist);
+        if (minDist > distThresh) {
+          // if the point is far enough away,
+          // collect normalized, centered pixels that are turned on
+          normalizedPixelData.push([x / w - 0.5, y / h - 0.5]);
+        }
       }
       numAttempts++;
     }
@@ -189,7 +238,7 @@ class CustomSketch extends P5App {
   }
 
   drawParticles() {
-    let particleSize = 20;
+    let particleSize = this.height * 0.03;
     let curData =
       this.mouseY > this.height / 2 ? this.positionsGrid : this.positionsRandom;
     curData.forEach((pos, i) => {
