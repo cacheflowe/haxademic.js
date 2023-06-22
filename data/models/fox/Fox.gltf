@@ -1297,7 +1297,7 @@
     ],
     "images": [
         {
-            "uri": "Texture.png",
+            "uri": "./Texture.png",
             "mimeType": "image/png"
         }
     ],

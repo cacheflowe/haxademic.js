@@ -30,7 +30,11 @@ class DateUtilDemo extends DemoBase {
     this.debugEl.innerHTML += `<hr><p><b>Image Sampling stats:</b></p>`;
 
     // load image
-    const img = await ImageUtil.loadImageSync("../data/images/bird-map.png");
+    // const img = await ImageUtil.loadImageSync("../data/images/bird-map.png");
+    const img = await ImageUtil.loadImageSync("../data/images/birb-color.png");
+    // const img = await ImageUtil.loadImageSync("../data/images/maple-leaf.png");
+    // const img = await ImageUtil.loadImageSync("../data/images/bauhaus.png");
+    // const img = await ImageUtil.loadImageSync("../data/images/swoosh.png");
     this.injectHTML(`<h3>Original image</h3>`);
     this.el.appendChild(img);
     this.injectHTML(`<hr>`);
@@ -43,13 +47,13 @@ class DateUtilDemo extends DemoBase {
     console.log(pixelData);
 
     // get map positions
-    let positionsGrid = this.scanGrid(ctx, pixelData, 4);
-    let positionsRandom = this.scanStochastic(ctx, pixelData, 600);
-    let positionsRandomDist = this.scanStochasticDistanceCheck(
+    let positionsGrid = this.sampleGrid(ctx, pixelData, 5);
+    let positionsRandom = this.sampleStochastic(ctx, pixelData, 600);
+    let positionsRandomDist = this.sampleStochasticDistanceCheck(
       ctx,
       pixelData,
-      600,
-      3
+      1200,
+      3.5
     );
 
     // draw map points
@@ -74,16 +78,20 @@ class DateUtilDemo extends DemoBase {
     );
   }
 
-  scanGrid(ctx, pixelData, spacing = 4) {
+  sampleGrid(ctx, pixelData, spacing = 4) {
     let normalizedPixelData = [];
     let w = ctx.canvas.width;
     let h = ctx.canvas.height;
     let numAttempts = 0;
     for (var y = 0; y <= h; y += spacing) {
       for (var x = 0; x <= w; x += spacing) {
-        if (CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y) > 10) {
+        if (CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y) > 2) {
           // if white pixel
-          normalizedPixelData.push([x / w - 0.5, y / h - 0.5]); // collect normalized, centered pixels that are turned on
+          normalizedPixelData.push([
+            x / w - 0.5,
+            y / h - 0.5,
+            CanvasUtil.getPixelFromImageData(pixelData, w, x, y),
+          ]); // collect normalized, centered pixels that are turned on
         }
         numAttempts++;
       }
@@ -92,7 +100,7 @@ class DateUtilDemo extends DemoBase {
     return normalizedPixelData;
   }
 
-  scanStochastic(ctx, pixelData, maxSamples = 400) {
+  sampleStochastic(ctx, pixelData, maxSamples = 400) {
     let w = ctx.canvas.width;
     let h = ctx.canvas.height;
     let normalizedPixelData = [];
@@ -102,9 +110,13 @@ class DateUtilDemo extends DemoBase {
       let x = Math.floor(Math.random() * w);
       let y = Math.floor(Math.random() * h);
       let pixel = CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y);
-      if (pixel > 10) {
+      if (pixel > 2) {
         // if white pixel
-        normalizedPixelData.push([x / w - 0.5, y / h - 0.5]); // collect normalized, centered pixels that are turned on
+        normalizedPixelData.push([
+          x / w - 0.5,
+          y / h - 0.5,
+          CanvasUtil.getPixelFromImageData(pixelData, w, x, y),
+        ]); // collect normalized, centered pixels that are turned on
       }
       numAttempts++;
     }
@@ -112,7 +124,7 @@ class DateUtilDemo extends DemoBase {
     return normalizedPixelData;
   }
 
-  scanStochasticDistanceCheck(
+  sampleStochasticDistanceCheck(
     ctx,
     pixelData,
     maxSamples = 400,
@@ -127,7 +139,7 @@ class DateUtilDemo extends DemoBase {
       let x = Math.floor(Math.random() * w);
       let y = Math.floor(Math.random() * h);
       let pixel = CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y);
-      if (pixel > 10) {
+      if (pixel > 2) {
         // if white pixel
         // check for distance from other points, within a threshold
         var minDist = Number.POSITIVE_INFINITY;
@@ -137,11 +149,14 @@ class DateUtilDemo extends DemoBase {
           let distCheck = MathUtil.getDistance(xCheckGrid, yCheckGrid, x, y);
           minDist = Math.min(distCheck, minDist);
         });
-        console.log("minDist", minDist);
         if (minDist > distThresh) {
           // if the point is far enough away,
           // collect normalized, centered pixels that are turned on
-          normalizedPixelData.push([x / w - 0.5, y / h - 0.5]);
+          normalizedPixelData.push([
+            x / w - 0.5,
+            y / h - 0.5,
+            CanvasUtil.getPixelFromImageData(pixelData, w, x, y),
+          ]);
         }
       }
       numAttempts++;
@@ -232,9 +247,11 @@ class CustomSketch extends P5App {
     // this.translate(this.width / 2, this.height / 2);
 
     // camera
-    let cameraAmp = 0.3;
-    this.rotateX(this.map(this.mouseY, 0, this.height, cameraAmp, -cameraAmp));
-    this.rotateY(this.map(this.mouseX, 0, this.width, -cameraAmp, cameraAmp));
+    let cameraAmp = 0.6;
+    this.camRotX = this.map(this.mouseY, 0, this.height, cameraAmp, -cameraAmp);
+    this.camRotY = this.map(this.mouseX, 0, this.width, cameraAmp, -cameraAmp);
+    this.rotateX(this.camRotX);
+    this.rotateY(this.camRotY);
   }
 
   drawParticles() {
@@ -252,6 +269,9 @@ class CustomSketch extends P5App {
       // let z = this.sin(i + this.frameCount / 50) * -20;
       this.push();
       this.translate(x, y, z);
+      this.rotateX(-this.camRotX); // billboard particles
+      this.rotateY(-this.camRotY);
+      if (pos.length > 2) this.tint(pos[2][0], pos[2][1], pos[2][2]);
       this.image(this.particleImg, 0, 0, particleSize, particleSize);
       this.pop();
     });
