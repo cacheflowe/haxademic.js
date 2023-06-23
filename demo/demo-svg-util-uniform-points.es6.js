@@ -6,10 +6,9 @@ import CanvasUtil from "../src/canvas-util.es6.js";
 import MathUtil from "../src/math-util.es6.js";
 
 // synchronously load non-module p5js.
-await DomUtil.injectScriptSync("../vendor/p5/p5.js");
-
 // then import P5App in a way that uses the injected non-module library
 // import P5App from '../src/p5-app.es6.js';
+await DomUtil.injectScriptSync("../vendor/p5/p5.js");
 const P5App = (await import("../src/p5-app.es6.js")).default;
 
 class SvgPathParseDemo extends DemoBase {
@@ -31,81 +30,20 @@ class SvgPathParseDemo extends DemoBase {
   }
 
   async loadSvgData() {
-    let svg = await SVGUtil.loadSvgFile(
-      "../data/images/cacheflowe-logo-999.svg"
-    );
-
-    console.log(svg);
-    let shapePoints = SVGUtil.svgToUniformPoints(svg, 5);
-
-    /*
-    // helper for adding groups of points from discrete paths
-    let inversion = new THREE.Vector3(1, -1, 1);
-    function setSegments(points) {
-      for (let i = 0; i < points.length; i++) {
-        let point = points[i].multiply(inversion);
-        // shapePoints.push([point.x, point.y]);
-      }
-    }
-
-    // get points from all paths
-    paths.forEach((p, pIdx) => {
-      let shapes = SVGLoader.createShapes(p);
-      shapes.forEach((s, sIdx) => {
-        console.log(s);
-        setSegments(s.getPoints()); // contour
-        s.holes.forEach((h) => {
-          setSegments(h.getPoints()); // holes
-        });
-      });
-    });
-    */
-
-    // test getting uniform points
-
-    // normalize (& center?) points
-    const xArr = shapePoints.map((c) => c[0]);
-    const yArr = shapePoints.map((c) => c[1]);
-    const l = Math.min(...xArr);
-    const r = Math.max(...xArr);
-    const b = Math.min(...yArr);
-    const t = Math.max(...yArr);
-    const width = r - l;
-    const height = t - b;
-
-    const offsetX = (r - l) / 2;
-    const offsetY = (t - b) / 2;
-    const scale = 1 / Math.max(width, height);
-    console.log(l, r, b, t);
-    console.log("offset", offsetX, offsetY);
-    console.log("shape size", width, height);
-    let shapePointsNorm = shapePoints.map((s) => {
-      let x = (s[0] - offsetX) * scale;
-      let y = (s[1] - offsetY) * scale;
-      return [x, y];
-    });
+    // load svg and generate points
+    let svg = await SVGUtil.loadSvgFile("../data/images/cacheflowe-logo.svg");
+    var shapePoints = SVGUtil.svgToUniformPoints(svg, 5);
+    let shapePointsNorm = SVGUtil.normalizeAndCenterPoints(shapePoints);
 
     // show debug
-    // shapePointsNorm.push([0, 0]);
-    console.log(shapePointsNorm);
     this.injectHTML(`<h3>Original svg</h3>`);
     this.el.appendChild(svg);
     this.injectHTML(`<hr>`);
 
-    // build particles
-    this.buildPoints(shapePointsNorm);
-  }
-
-  async buildPoints(shapePoints) {
-    // this.debugEl.innerHTML += `<hr><p><b>Image Sampling stats:</b></p>`;
-
-    // load image
-
     // build sketch that uses data
-    this.injectHTML(`<hr>`);
     this.injectHTML(`<h3>SVG as particles</h3>`);
     let p5Container = this.buildContainer("p5-container");
-    this.p5Sketch = new CustomSketch(p5Container, shapePoints);
+    this.p5Sketch = new CustomSketch(p5Container, shapePointsNorm);
   }
 }
 
@@ -123,11 +61,11 @@ class SvgPathParseDemo extends DemoBase {
 // create custom p5 sketch subclass
 ///////////////////////////////////
 class CustomSketch extends P5App {
-  constructor(el, positionsGrid) {
+  constructor(el, points) {
     // always should just pass the container element to P5App constructor
     super(el);
     // then store any custom props passed into our subclass constructor
-    this.positionsGrid = positionsGrid;
+    this.points = points;
   }
 
   ///////////////////
@@ -185,7 +123,7 @@ class CustomSketch extends P5App {
 
   drawParticles() {
     let particleSize = this.height * 0.03;
-    this.positionsGrid.forEach((pos, i) => {
+    this.points.forEach((pos, i) => {
       let w = this.width;
       let h = this.height;
       let x = pos[0] * w; // normalized coords from center, between -0.5 - 0.5
