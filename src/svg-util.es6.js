@@ -14,6 +14,32 @@ class SVGUtil {
     return points;
   }
 
+  static normalizeAndCenterPoints(points) {
+    const xArr = points.map((c) => c[0]);
+    const yArr = points.map((c) => c[1]);
+    const l = Math.min(...xArr);
+    const r = Math.max(...xArr);
+    const b = Math.min(...yArr);
+    const t = Math.max(...yArr);
+    const width = r - l;
+    const height = t - b;
+
+    const offsetX = (r - l) / 2;
+    const offsetY = (t - b) / 2;
+    const scale = 1 / Math.max(width, height);
+
+    // console.log(l, r, b, t);
+    // console.log("offset", offsetX, offsetY);
+    // console.log("shape size", width, height);
+
+    let pointsNorm = points.map((s) => {
+      let x = (s[0] - offsetX) * scale;
+      let y = (s[1] - offsetY) * scale;
+      return [x, y];
+    });
+    return pointsNorm;
+  }
+
   static rasterizeSVG(svgEl, renderedCallback, jpgQuality) {
     // WARNING! Inline <image> tags must have a base64-encoded image as their source. Linked image files will not work.
     // transform svg into base64 image
