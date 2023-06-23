@@ -11,7 +11,7 @@ await DomUtil.injectScriptSync("../vendor/p5/p5.js");
 // import P5App from '../src/p5-app.es6.js';
 const P5App = (await import("../src/p5-app.es6.js")).default;
 
-class DateUtilDemo extends DemoBase {
+class CanvasUtilImageMapDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
@@ -278,4 +278,5 @@ class CustomSketch extends P5App {
   }
 }
 
-if (window.autoInitDemo) window.demo = new DateUtilDemo(document.body);
+if (window.autoInitDemo)
+  window.demo = new CanvasUtilImageMapDemo(document.body);
