@@ -1,4 +1,19 @@
 class SVGUtil {
+  static svgToUniformPoints(svg, pointSpacing = 5) {
+    let points = [];
+    let paths = svg.querySelectorAll("path");
+    paths.forEach((path) => {
+      let svgLength = path.getTotalLength();
+      let numPointsPerPath = Math.floor(svgLength / pointSpacing);
+      let distPerPoint = svgLength / numPointsPerPath;
+      for (let i = 0; i < numPointsPerPath; i++) {
+        let point = path.getPointAtLength(i * distPerPoint);
+        points.push([point.x, point.y]);
+      }
+    });
+    return points;
+  }
+
   static rasterizeSVG(svgEl, renderedCallback, jpgQuality) {
     // WARNING! Inline <image> tags must have a base64-encoded image as their source. Linked image files will not work.
     // transform svg into base64 image
@@ -40,6 +55,13 @@ class SVGUtil {
     let el = doc.body.firstElementChild;
     parent.append(el);
     return el;
+  }
+
+  static async loadSvgFile(url) {
+    const response = await fetch(url);
+    const text = await response.text();
+    let doc = new DOMParser().parseFromString(text, "text/html"); // from DOMUtil
+    return doc.body.firstElementChild;
   }
 
   static elementToString(el) {
