@@ -1,7 +1,9 @@
 import DemoBase from "./demo--base.es6.js";
 import DomUtil from "../src/dom-util.es6.js";
-import ImageUtil from "../src/image-util.es6.js";
+import URLUtil from "../src/url-util.es6.js";
 import CanvasUtil from "../src/canvas-util.es6.js";
+import DragDropUtil from "../src/drag-drop-util.es6.js";
+import ImageUtil from "../src/image-util.es6.js";
 import MathUtil from "../src/math-util.es6.js";
 
 // synchronously load non-module p5js.
@@ -23,15 +25,28 @@ class CanvasUtilImageMapDemo extends DemoBase {
   }
 
   async init() {
-    await this.loadImageData();
+    this.setupDragDrop();
+    this.addDropOverCSS();
+    await this.loadImageData("../data/images/birb-color.png");
   }
 
-  async loadImageData() {
-    this.debugEl.innerHTML += `<hr><p><b>Image Sampling stats:</b></p>`;
+  setupDragDrop() {
+    DragDropUtil.dropFile(this.el, (fileResult) => {
+      if (!!fileResult.match(/image/)) {
+        this.loadImageData(fileResult); // fileResult is base64-encoded image
+      }
+    });
+  }
+
+  async loadImageData(imgFile) {
+    this.debugEl.innerHTML = `<hr><p><b>Image Sampling stats:</b></p>`;
+    this.el.innerHTML = "";
+    let targetPointCount =
+      URLUtil.getHashQueryParam("targetPointCount") || 1600;
 
     // load image
     // const img = await ImageUtil.loadImageSync("../data/images/bird-map.png");
-    const img = await ImageUtil.loadImageSync("../data/images/birb-color.png");
+    const img = await ImageUtil.loadImageSync(imgFile);
     // const img = await ImageUtil.loadImageSync("../data/images/maple-leaf.png");
     // const img = await ImageUtil.loadImageSync("../data/images/bauhaus.png");
     // const img = await ImageUtil.loadImageSync("../data/images/swoosh.png");
@@ -47,35 +62,51 @@ class CanvasUtilImageMapDemo extends DemoBase {
     console.log(pixelData);
 
     // get map positions
-    let positionsGrid = this.sampleGrid(ctx, pixelData, 5);
+    let positionsGrid = this.sampleGrid(ctx, pixelData, 2);
     let positionsRandom = this.sampleStochastic(ctx, pixelData, 600);
     let positionsRandomDist = this.sampleStochasticDistanceCheck(
       ctx,
       pixelData,
-      1200,
+      targetPointCount, // 1600 for complex shapes, 800 for simple (swoosh)
       3.5
     );
 
     // draw map points
     this.injectHTML(`<h3>Grid sampling</h3>`);
     this.drawPoints(CanvasUtil.cloneCanvas(ctx.canvas), positionsGrid);
+    let outputDataGrid = positionsGrid.map((el) => [
+      parseFloat(el[0].toFixed(3)),
+      parseFloat(el[1].toFixed(3)),
+    ]);
+    this.injectHTML(`<textarea>${JSON.stringify(outputDataGrid)}</textarea>`);
     this.injectHTML(`<hr>`);
     this.injectHTML(`<h3>Random sampling</h3>`);
     this.drawPoints(CanvasUtil.cloneCanvas(ctx.canvas), positionsRandom);
     this.injectHTML(`<h3>Random sampling w/distance check</h3>`);
     this.drawPoints(CanvasUtil.cloneCanvas(ctx.canvas), positionsRandomDist);
+    let outputDataRandom = positionsRandomDist.map((el) => [
+      parseFloat(el[0].toFixed(3)),
+      parseFloat(el[1].toFixed(3)),
+    ]);
+    this.injectHTML(`<textarea>${JSON.stringify(outputDataRandom)}</textarea>`);
 
     // build sketch that uses data
     this.injectHTML(`<hr>`);
     this.injectHTML(`<h3>Samples as particles</h3>`);
     this.injectHTML(`<p>Mouse y-position will change data sets</p>`);
-    let p5Container = this.buildContainer("p5-container");
-    this.p5Sketch = new CustomSketch(
-      p5Container,
-      positionsGrid,
-      // positionsRandom,
-      positionsRandomDist
-    );
+
+    // build or re-add p5 sketch node
+    if (this.p5Container) {
+      this.el.appendChild(this.p5Container);
+      this.p5Sketch.setPoints(positionsGrid, outputDataRandom);
+    } else {
+      this.p5Container = this.buildContainer("p5-container");
+      this.p5Sketch = new CustomSketch(
+        this.p5Container,
+        positionsGrid,
+        positionsRandomDist
+      );
+    }
   }
 
   sampleGrid(ctx, pixelData, spacing = 4) {
@@ -85,7 +116,7 @@ class CanvasUtilImageMapDemo extends DemoBase {
     let numAttempts = 0;
     for (var y = 0; y <= h; y += spacing) {
       for (var x = 0; x <= w; x += spacing) {
-        if (CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y) > 2) {
+        if (CanvasUtil.getPixelRedFromImageData(pixelData, w, x, y) > 0) {
           // if white pixel
           normalizedPixelData.push([
             x / w - 0.5,
@@ -204,6 +235,11 @@ class CustomSketch extends P5App {
   ///////////////////
   // p5js overrides
   ///////////////////
+
+  setPoints(positionsGrid, positionsRandom) {
+    this.positionsGrid = positionsGrid;
+    this.positionsRandom = positionsRandom;
+  }
 
   preload() {
     this.particleImg = this.loadImage("../data/images/particle.png");
