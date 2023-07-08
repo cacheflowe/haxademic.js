@@ -5,7 +5,7 @@ var cssString = `
     color: #444;
     filter: invert(1) hue-rotate(180deg);
   }
-  img, picture, video {
+  img, video {
     filter: invert(1) hue-rotate(180deg)
   }
 `;
