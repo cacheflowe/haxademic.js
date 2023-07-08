@@ -43,6 +43,7 @@ class CanvasUtilImageMapDemo extends DemoBase {
     this.el.innerHTML = "";
     let targetPointCount =
       URLUtil.getHashQueryParam("targetPointCount") || 1600;
+    let distanceThresh = URLUtil.getHashQueryParam("distanceThresh") || 3.5;
 
     // load image
     // const img = await ImageUtil.loadImageSync("../data/images/bird-map.png");
@@ -62,13 +63,13 @@ class CanvasUtilImageMapDemo extends DemoBase {
     console.log(pixelData);
 
     // get map positions
-    let positionsGrid = this.sampleGrid(ctx, pixelData, 2);
+    let positionsGrid = this.sampleGrid(ctx, pixelData, 4);
     let positionsRandom = this.sampleStochastic(ctx, pixelData, 600);
     let positionsRandomDist = this.sampleStochasticDistanceCheck(
       ctx,
       pixelData,
       targetPointCount, // 1600 for complex shapes, 800 for simple (swoosh)
-      3.5
+      distanceThresh
     );
 
     // draw map points
