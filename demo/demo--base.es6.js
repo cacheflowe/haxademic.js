@@ -183,14 +183,16 @@ class DemoBase {
   }
 
   injectHTML(html) {
-    this.el.appendChild(DOMUtil.stringToDomElement(html.trim()));
+    let newEl = DOMUtil.stringToDomElement(html.trim());
+    this.el.appendChild(newEl);
+    return newEl;
   }
 
-  buildContainer(id) {
+  buildContainer(id, border = true) {
     id = !!id ? id : "container_" + Math.floor(Math.random() * 999999999);
     let container = document.createElement("div");
     container.setAttribute("id", id);
-    container.setAttribute("class", "container-inner");
+    if (border) container.setAttribute("class", "container-inner");
     this.el.appendChild(container);
     return container;
   }
