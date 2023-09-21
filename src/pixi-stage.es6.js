@@ -46,6 +46,14 @@ class PixiStage {
     this.app.ticker.remove(fn);
   }
 
+  stopTicker() {
+    this.app.stop();
+  }
+
+  startTicker() {
+    this.app.start();
+  }
+
   application() {
     return this.app;
   }
