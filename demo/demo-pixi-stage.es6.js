@@ -34,6 +34,16 @@ class PixiStageDemo extends DemoBase {
     // start PIXI frame loop
     this.frameCount = 0;
     this.pixiStage.addFrameListener(() => this.draw());
+
+    // test stop/start
+    /*
+    setTimeout(() => {
+      this.pixiStage.stopTicker();
+    }, 2000);
+    setTimeout(() => {
+      this.pixiStage.startTicker();
+    }, 4000);
+    */
   }
 
   loadImageAlt() {
