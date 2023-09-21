@@ -1,12 +1,5 @@
-//     facingMode: {
-//       exact: "environment",
-//     },
-
 class Webcam {
-  constructor(callback, errorCallback, mobileBackCamera = false) {
-    const videoOptions = mobileBackCamera
-      ? { facingMode: "environment" }
-      : true;
+  constructor(callback, errorCallback, videoOptions = true) {
     navigator.mediaDevices
       .getUserMedia({ video: videoOptions })
       .then((stream) => {
@@ -25,6 +18,35 @@ class Webcam {
 
   static flipH(videoEl) {
     videoEl.style.transform = "rotateY(180deg)";
+  }
+
+  static getVideoDeviceList() {
+    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+      for (var i = 0; i !== devices.length; ++i) {
+        if (devices[i].kind === "videoinput") {
+          console.log(
+            "Camera found: ",
+            devices[i].label || "label not found",
+            devices[i].deviceId || "id not found",
+            devices[i].getCapabilities()
+          );
+        }
+      }
+    });
+  }
+
+  static backFacingOptions() {
+    return {
+      facingMode: "environment",
+    };
+  }
+
+  static hdOptions() {
+    return {
+      facingMode: "user",
+      width: 1920,
+      height: 1080,
+    };
   }
 }
 
