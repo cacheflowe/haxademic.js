@@ -130,25 +130,27 @@ class WebcamMediaPipeObjectDetectionDemo extends DemoBase {
     // Iterate through predictions and draw them to the live view
     for (let detection of result.detections) {
       const score = detection.categories[0].score;
-      const confidence = Math.round(parseFloat(score) * 100);
-      const p = document.createElement("p");
-      p.innerText = ` ${detection.categories[0].categoryName}  - with ${confidence}% confidence`;
+      if (score > 0.5) {
+        const confidence = Math.round(parseFloat(score) * 100);
+        const p = document.createElement("p");
+        p.innerText = ` ${detection.categories[0].categoryName}  - with ${confidence}% confidence`;
 
-      let w = detection.boundingBox.width - 10;
-      let h = detection.boundingBox.height;
-      let x = detection.boundingBox.originX;
-      let y = detection.boundingBox.originY;
-      if (this.mirrored) {
-        x = this.videoEl.offsetWidth - detection.boundingBox.width - x;
+        let w = detection.boundingBox.width - 10;
+        let h = detection.boundingBox.height;
+        let x = detection.boundingBox.originX;
+        let y = detection.boundingBox.originY;
+        if (this.mirrored) {
+          x = this.videoEl.offsetWidth - detection.boundingBox.width - x;
+        }
+        p.style = `left: ${x}px; top: ${y}px; width: ${w}px;`;
+
+        const highlighter = document.createElement("div");
+        highlighter.setAttribute("class", "highlighter");
+        highlighter.style = `left: ${x}px; top: ${y}px; width: ${w}px; height: ${h}px;`;
+
+        this.boundingBoxes.appendChild(highlighter);
+        this.boundingBoxes.appendChild(p);
       }
-      p.style = `left: ${x}px; top: ${y}px; width: ${w}px;`;
-
-      const highlighter = document.createElement("div");
-      highlighter.setAttribute("class", "highlighter");
-      highlighter.style = `left: ${x}px; top: ${y}px; width: ${w}px; height: ${h}px;`;
-
-      this.boundingBoxes.appendChild(highlighter);
-      this.boundingBoxes.appendChild(p);
     }
   }
 }
