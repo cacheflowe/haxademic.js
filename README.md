@@ -14,7 +14,8 @@ Install Vite for HMR during dev:
 * `npm install -D @vitejs/plugin-basic-ssl`
   * [Info](https://stackoverflow.com/a/72998216)
 * Upgrade Vitejs when there's a new release: 
-  * `npm upgrade vite`
+  * `npm upgrade vite` or
+  * `npx vite upgrade`
 
 Host it on Vercel
 
