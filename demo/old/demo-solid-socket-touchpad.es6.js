@@ -1,12 +1,14 @@
 class SolidSocketTouchpadDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [
-      "../src/event-log.es6.js",
-      "../src/mobile-util.es6.js",
-      "../src/pointer-pos.es6.js",
-      "../src/solid-socket.es6.js",
-    ], `
+    super(
+      parentEl,
+      [
+        "../src/event-log.js",
+        "../src/mobile-util.js",
+        "../src/pointer-pos.js",
+        "../src/solid-socket.js",
+      ],
+      `
     <div class="container">
       <style>
         div.container {
@@ -90,11 +92,12 @@ class SolidSocketTouchpadDemo extends DemoBase {
       <div id="session-closed" class="fade-anim">
         <div id="session-closed-message">Your Session<br>Has Ended</div>
       </div>
-    </div>`);
+    </div>`
+    );
   }
 
   init() {
-    this.el = document.querySelector('.container');
+    this.el = document.querySelector(".container");
     MobileUtil.setDeviceInputClass();
     MobileUtil.enablePseudoStyles();
     MobileUtil.addFullscreenListener();
@@ -107,45 +110,53 @@ class SolidSocketTouchpadDemo extends DemoBase {
     this.addClicks();
     this.addTextInput();
 
-    this.log = new EventLog(document.getElementById('results'));
+    this.log = new EventLog(document.getElementById("results"));
   }
 
   addClicks() {
-    this.el.addEventListener('click', (e) => {
-      if(e.target.id == "click-button" || e.target.id == "touchpad") {
-        if(this.pointerPos.xDeltaTotal() < 8 && this.pointerPos.yDeltaTotal() < 8) {
-          this.solidSocket.sendJSON({'click':true});
+    this.el.addEventListener("click", (e) => {
+      if (e.target.id == "click-button" || e.target.id == "touchpad") {
+        if (
+          this.pointerPos.xDeltaTotal() < 8 &&
+          this.pointerPos.yDeltaTotal() < 8
+        ) {
+          this.solidSocket.sendJSON({ click: true });
         }
       }
     });
   }
 
   addTextInput() {
-    this.textInputEl = document.getElementById('text-input');
-    this.textInputEl.addEventListener('keydown', (e) => {
-      setTimeout(() => { // can't use `input` event because it doesn't register keyCode, so we have to debounce to have the updated textfield length
+    this.textInputEl = document.getElementById("text-input");
+    this.textInputEl.addEventListener("keydown", (e) => {
+      setTimeout(() => {
+        // can't use `input` event because it doesn't register keyCode, so we have to debounce to have the updated textfield length
         var key = e.keyCode ? e.keyCode : e.which;
-        let character = (key != 8) ? this.textInputEl.value.substring(this.textInputEl.value.length - 1) : "";
+        let character =
+          key != 8
+            ? this.textInputEl.value.substring(
+                this.textInputEl.value.length - 1
+              )
+            : "";
         let jsonOut = {
-          'keyCode': key, 
-          // 'shift': e.shift, 
-          'character': character,
+          keyCode: key,
+          // 'shift': e.shift,
+          character: character,
         };
         this.solidSocket.sendJSON(jsonOut);
         this.log.log(JSON.stringify(jsonOut));
       }, 50);
     });
-
   }
 
   inputFocused(remoteTextVal) {
-    this.el.classList.add('text-input-waiting');
+    this.el.classList.add("text-input-waiting");
     this.textInputEl.focus();
     this.textInputEl.value = remoteTextVal;
   }
 
   inputBlur() {
-    this.el.classList.remove('text-input-waiting');
+    this.el.classList.remove("text-input-waiting");
     this.textInputEl.blur();
     MobileUtil.hideSoftKeyboard();
   }
@@ -154,8 +165,12 @@ class SolidSocketTouchpadDemo extends DemoBase {
 
   initTouchpad() {
     MobileUtil.lockTouchScreen(true);
-    this.pointerPos = new PointerPos(this.pointerMoved.bind(this), this.pointerStart.bind(this), this.pointerEnd.bind(this));
-    this.touchpadEl = document.getElementById('touchpad');
+    this.pointerPos = new PointerPos(
+      this.pointerMoved.bind(this),
+      this.pointerStart.bind(this),
+      this.pointerEnd.bind(this)
+    );
+    this.touchpadEl = document.getElementById("touchpad");
   }
 
   pointerMoved(x, y, deltaX, deltaY) {
@@ -164,27 +179,27 @@ class SolidSocketTouchpadDemo extends DemoBase {
   }
 
   pointerStart() {
-    this.log.log('pointerStart(): '+this.pointerInsideTouchpad());
-    if(this.pointerInsideTouchpad() == false) return;
+    this.log.log("pointerStart(): " + this.pointerInsideTouchpad());
+    if (this.pointerInsideTouchpad() == false) return;
     MobileUtil.hideSoftKeyboard();
     this.solidSocket.sendJSON({
-      'pointerStateStart': true,
+      pointerStateStart: true,
     });
   }
 
   pointerEnd() {
     this.solidSocket.sendJSON({
-      'pointerStateEnd': true,
+      pointerStateEnd: true,
     });
   }
 
   sendPointerNormalized() {
     let xNorm = this.pointerPos.xNorm(this.touchpadEl);
     let yNorm = this.pointerPos.yNorm(this.touchpadEl);
-    if(xNorm >= 0 && xNorm <= 1 && yNorm >= 0 && yNorm <= 1) {
+    if (xNorm >= 0 && xNorm <= 1 && yNorm >= 0 && yNorm <= 1) {
       this.solidSocket.sendJSON({
-        'pointerXNorm': xNorm,
-        'pointerYNorm': yNorm,
+        pointerXNorm: xNorm,
+        pointerYNorm: yNorm,
       });
     }
   }
@@ -192,15 +207,19 @@ class SolidSocketTouchpadDemo extends DemoBase {
   pointerInsideTouchpad() {
     let xNorm = this.pointerPos.xNorm(this.touchpadEl);
     let yNorm = this.pointerPos.yNorm(this.touchpadEl);
-    return (xNorm >= 0 && xNorm <= 1 && yNorm >= 0 && yNorm <= 1);
+    return xNorm >= 0 && xNorm <= 1 && yNorm >= 0 && yNorm <= 1;
   }
 
   sendPointerDelta(deltaX, deltaY) {
-    if(this.pointerInsideTouchpad() == false) return;
-    if(this.pointerPos.xDeltaTotal() > 8 || this.pointerPos.yDeltaTotal() > 8) {  // minimum movement before sending touch. this allows clicks to be less wiggly
+    if (this.pointerInsideTouchpad() == false) return;
+    if (
+      this.pointerPos.xDeltaTotal() > 8 ||
+      this.pointerPos.yDeltaTotal() > 8
+    ) {
+      // minimum movement before sending touch. this allows clicks to be less wiggly
       this.solidSocket.sendJSON({
-        'pointerXDelta': deltaX,
-        'pointerYDelta': deltaY,
+        pointerXDelta: deltaX,
+        pointerYDelta: deltaY,
       });
     }
   }
@@ -208,7 +227,9 @@ class SolidSocketTouchpadDemo extends DemoBase {
   // SOCKET
 
   initSocket() {
-    this.solidSocket = new SolidSocket('ws://192.168.1.3:3001?roomId=987654321&clientType=touchpad');
+    this.solidSocket = new SolidSocket(
+      "ws://192.168.1.3:3001?roomId=987654321&clientType=touchpad"
+    );
     // this.solidSocket = new SolidSocket('ws://localhost:3001?roomId=987654321&clientType=touchpad');
     this.solidSocket.setOpenCallback(this.socketOpen.bind(this));
     this.solidSocket.setMessageCallback(this.onMessage.bind(this));
@@ -218,10 +239,10 @@ class SolidSocketTouchpadDemo extends DemoBase {
   }
 
   socketOpen(e) {
-    this.log.log('socketOpen!');
+    this.log.log("socketOpen!");
     this.solidSocket.sendJSON({
-      'role': 'touchpad',
-      'pointerStateConnected': true,
+      role: "touchpad",
+      pointerStateConnected: true,
     });
   }
 
@@ -229,40 +250,42 @@ class SolidSocketTouchpadDemo extends DemoBase {
     // this probably won't do anything.. disconnected needs to come from ws:// server
     // only gets triggered if the websocket server disappears. can this be the mechanism to kick people off and say session is over?
     this.showSessionEnded();
-    this.log.log('socketClose!');
+    this.log.log("socketClose!");
     this.solidSocket.sendJSON({
-      'pointerStateDisconnected': true,
+      pointerStateDisconnected: true,
     });
   }
 
   socketError(e) {
-    this.log.log('socketError(e)');
+    this.log.log("socketError(e)");
   }
 
   onMessage(msg) {
     let jsonData = JSON.parse(msg.data);
     // receive data from the kiosk
-    if(typeof jsonData.kioskInputFocus == "string") this.inputFocused(jsonData.kioskInputFocus);
-    if(typeof jsonData.kioskInputBlur == "string") this.inputBlur(jsonData.kioskInputBlur);
+    if (typeof jsonData.kioskInputFocus == "string")
+      this.inputFocused(jsonData.kioskInputFocus);
+    if (typeof jsonData.kioskInputBlur == "string")
+      this.inputBlur(jsonData.kioskInputBlur);
     this.log.log(JSON.stringify(msg.data));
   }
 
   socketIsActive(isActive) {
-    if(isActive == false) this.showSessionEnded();
+    if (isActive == false) this.showSessionEnded();
   }
 
   showSessionEnded() {
-    this.sessionEndEl.classList.add('show');
+    this.sessionEndEl.classList.add("show");
     this.solidSocket.dispose();
     MobileUtil.hideSoftKeyboard();
   }
 
-  // SESSION 
+  // SESSION
 
   addSessionCloseMessage() {
-    this.sessionEndEl = this.el.querySelector('#session-closed');
+    this.sessionEndEl = this.el.querySelector("#session-closed");
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new SolidSocketTouchpadDemo(document.body);
+if (window.autoInitDemo)
+  window.demo = new SolidSocketTouchpadDemo(document.body);

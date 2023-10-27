@@ -5,36 +5,23 @@ import FrameLoop from "../src/frame-loop.js";
 import MobileUtil from "../src/mobile-util.js";
 import PointerPos from "../src/pointer-pos.js";
 import ThreeScene from "../src/three-scene-.js";
-import ThreeSceneFBO from "../src/three-scene-fbo.js";
-import ThreeChromaShader from "../src/three-chroma-shader.js";
 import UIControlPanel from "../src/ui-control-panel.js";
+import VideoUtil from "../src/video-util.js";
 
-class ThreeSceneVideoTextureDemo extends DemoBase {
+class ThreeSceneVideoDisplaceTextureDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      [
-        "!../vendor/guify.min.js",
-        "!../vendor/three/three.min.js",
-        "!../vendor/three/shaders/CopyShader.js",
-        "!../vendor/three/shaders/HorizontalBlurShader.js",
-        "!../vendor/three/shaders/VerticalBlurShader.js",
-        "!../vendor/three/postprocessing/EffectComposer.js",
-        "!../vendor/three/postprocessing/RenderPass.js",
-        "!../vendor/three/postprocessing/MaskPass.js",
-        "!../vendor/three/postprocessing/ShaderPass.js",
-      ],
-      `
-      <div class="container">
-        <h1>ThreeScene | Video Texture Chroma</h1>
-        <div id="three-scene" style="width: 100%; height: 0; padding-bottom: 100%;"></div>
-        <div id="video-debug"></div>
-      </div>
-    `
+      ["!../vendor/guify.min.js"],
+      "ThreeScene | Video Texture Displacement",
+      "three-scene-video-texture",
+      "Video texture in an FBO for post-processing effects"
     );
   }
 
   init() {
+    this.el.setAttribute("style", "height: 600px;");
+    this.addDropOverCSS();
     this.setupScene();
     this.addLights();
     this.buildVideoMesh();
@@ -46,7 +33,6 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
   }
 
   setupScene() {
-    this.el = document.getElementById("three-scene");
     this.threeScene = new ThreeScene(this.el, 0x111111);
     this.scene = this.threeScene.getScene();
   }
@@ -106,25 +92,16 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
     this.videoDebugEl = document.getElementById("video-debug");
 
     // add video element
-    this.videoEl = document.createElement("video");
-    this.videoEl.src = "../data/videos/wash-your-hands-512.mp4";
+    let videoPath = "../data/videos/wash-your-hands.mp4";
+    this.videoEl = VideoUtil.buildVideoEl(videoPath, true);
     this.videoEl.style.setProperty("width", "320px");
-    this.videoEl.setAttribute("loop", "true");
-    this.videoEl.setAttribute("muted", "true");
-    this.videoEl.setAttribute("playsinline", "true");
-    this.videoEl.setAttribute("preload", "auto");
-    this.videoEl.setAttribute("crossOrigin", "anonymous");
-    this.videoEl.defaultMuted = true;
-    this.videoEl.muted = true;
-    this.videoEl.play();
-    this.videoDebugEl.appendChild(this.videoEl);
-    // this.videoEl.volume = 0;
+    this.debugEl.appendChild(this.videoEl);
 
     // add THREE video texture
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
     this.videoTexture.minFilter = THREE.LinearFilter;
     this.videoTexture.magFilter = THREE.LinearFilter;
-    this.videoTexture.format = THREE.RGBFormat;
+    this.videoTexture.format = THREE.RGBAFormat;
 
     // build shape
     let planeResolution = 200;
@@ -135,7 +112,7 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
       planeResolution
     );
     this.planeMaterial = new THREE.MeshPhongMaterial({
-      color: 0x555555,
+      color: 0xffffff,
       side: THREE.DoubleSide,
       wireframe: false,
       emissive: 0x222222, // 0x000000
@@ -174,4 +151,4 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
 }
 
 if (window.autoInitDemo)
-  window.demo = new ThreeSceneVideoTextureDemo(document.body);
+  window.demo = new ThreeSceneVideoDisplaceTextureDemo(document.body);

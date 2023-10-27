@@ -5,13 +5,13 @@ class ThreeSceneVideoTextureDemo extends DemoBase {
       [
         "../vendor/guify.min.js",
         "../vendor/three/three.min.js",
-        "../src/drag-drop-util.es6.js",
-        "../src/frame-loop.es6.js",
-        // "../src/math-util.es6.js",
-        "../src/mobile-util.es6.js",
-        "../src/pointer-pos.es6.js",
-        "../src/three-scene-.es6.js",
-        "../src/ui-control-panel.es6.js",
+        "../src/drag-drop-util.js",
+        "../src/frame-loop.js",
+        // "../src/math-util.js",
+        "../src/mobile-util.js",
+        "../src/pointer-pos.js",
+        "../src/three-scene-.js",
+        "../src/ui-control-panel.js",
       ],
       `
       <div class="container">
