@@ -35,7 +35,10 @@ class ThreeSceneConvexHullDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0xffffff);
+    this.threeScene = new ThreeScene({
+      el: this.el,
+      bgColor: 0xffffff,
+    });
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
   }
@@ -94,7 +97,7 @@ class ThreeSceneConvexHullDemo extends DemoBase {
     // add shadow plane
     var planeSize = 1000;
     var plane = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(planeSize, planeSize),
+      new THREE.PlaneGeometry(planeSize, planeSize),
       new THREE.ShadowMaterial({ opacity: 0.5 })
     );
     plane.rotation.x = -Math.PI / 2;
@@ -113,7 +116,7 @@ class ThreeSceneConvexHullDemo extends DemoBase {
     // this.spotlight.shadow.camera.far = 4000;
     // this.spotlight.shadow.camera.fov = 30;
     this.spotlight.penumbra = 0.1;
-    this.spotlight.decay = 2;
+    this.spotlight.decay = 0;
     this.spotlight.angle = 1;
     this.spotlight.distance = 1000;
     this.scene.add(this.spotlight);

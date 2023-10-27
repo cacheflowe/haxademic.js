@@ -25,7 +25,6 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
     // setup
     this.setupInput();
     this.setupScene();
-    this.addLighting();
     this.buildCube();
     // this.buildBackground();
     this.buildBackgroundFbo();
@@ -39,21 +38,14 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0xffffff);
+    this.threeScene = new ThreeScene(this.el);
+    this.threeScene.buildLights();
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
 
     // DO WE NEED THIS?
     // console.warn('Check background! autoClearColor???');
     // this.threeScene.getRenderer().autoClearColor = false;
-  }
-
-  addLighting() {
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    this.scene.add(ambientLight);
-    var pointLight = new THREE.PointLight(0x444444, 1, 0);
-    pointLight.position.set(-100, 100, 50);
-    this.scene.add(pointLight);
   }
 
   startAnimation() {
@@ -76,7 +68,7 @@ class ThreeSceneFboBackgroundDemo extends DemoBase {
     });
 
     this.cubeMesh = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
+      new THREE.BoxGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
       this.materialCube
     );
     // this.cubeMesh.castShadow = true;

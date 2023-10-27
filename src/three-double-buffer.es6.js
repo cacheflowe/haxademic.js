@@ -1,8 +1,14 @@
-import * as THREE from '../vendor/three/three.module.js';
+import * as THREE from "../vendor/three/three.module.js";
 
 class ThreeDoubleBuffer {
-
-  constructor(width, height, bufferMaterial, isData=false, bgColor=0xff0000, transparent=false) {
+  constructor(
+    width,
+    height,
+    bufferMaterial,
+    isData = false,
+    bgColor = 0xff0000,
+    transparent = false
+  ) {
     this.width = width;
     this.height = height;
     this.bufferMaterial = bufferMaterial;
@@ -11,7 +17,6 @@ class ThreeDoubleBuffer {
     this.devicePixelRatio = window.devicePixelRatio || 1;
     this.buildBuffers(isData);
   }
-
 
   getOptions() {
     return {
@@ -43,26 +48,38 @@ class ThreeDoubleBuffer {
   buildBuffers(isData) {
     // FBO scene & camera
     this.bufferScene = new THREE.Scene();
-    this.bufferCamera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0, 1);
+    this.bufferCamera = new THREE.OrthographicCamera(
+      -0.5,
+      0.5,
+      0.5,
+      -0.5,
+      0,
+      1
+    );
 
     // build render targets
-    let options = (isData) ? this.getOptionsDataTexture() : this.getOptions();
-    this.textureOld = new THREE.WebGLRenderTarget(this.width, this.height, options);
-    this.textureCur = new THREE.WebGLRenderTarget(this.width, this.height, options);
+    let options = isData ? this.getOptionsDataTexture() : this.getOptions();
+    this.textureOld = new THREE.WebGLRenderTarget(
+      this.width,
+      this.height,
+      options
+    );
+    this.textureCur = new THREE.WebGLRenderTarget(
+      this.width,
+      this.height,
+      options
+    );
 
     // camera-filling plane
-    this.planeGeom = new THREE.PlaneBufferGeometry(this.width, this.height, 1);
-    this.plane = new THREE.Mesh(
-      this.planeGeom,
-      this.bufferMaterial
-    );
+    this.planeGeom = new THREE.PlaneGeometry(this.width, this.height, 1);
+    this.plane = new THREE.Mesh(this.planeGeom, this.bufferMaterial);
     this.plane.position.set(0, 0, 0);
     this.bufferScene.add(this.plane);
 
     // add mesh to show on screen if we'd like.
     // this would get attached outside of this object
-    let finalMaterial = new THREE.MeshBasicMaterial({map: this.textureCur})
-    this.displayMesh = new THREE.Mesh( this.planeGeom, finalMaterial );
+    let finalMaterial = new THREE.MeshBasicMaterial({ map: this.textureCur });
+    this.displayMesh = new THREE.Mesh(this.planeGeom, finalMaterial);
   }
 
   setUniform(key, val) {
@@ -101,7 +118,7 @@ class ThreeDoubleBuffer {
     return this.textureOld.texture;
   }
 
-  render(renderer, debugRenderer=null) {
+  render(renderer, debugRenderer = null) {
     // render!
     renderer.setRenderTarget(this.textureCur);
     renderer.render(this.bufferScene, this.bufferCamera);
@@ -109,7 +126,7 @@ class ThreeDoubleBuffer {
 
     // render in time if we pass one in
     // this isn't working...
-    if(debugRenderer) {
+    if (debugRenderer) {
       debugRenderer.render(this.bufferScene, this.bufferCamera);
     }
 
@@ -122,7 +139,6 @@ class ThreeDoubleBuffer {
     this.bufferMaterial.uniforms.lastFrame.value = this.textureOld.texture;
     this.displayMesh.material.map = this.textureCur.texture;
   }
-
 }
 
 export default ThreeDoubleBuffer;

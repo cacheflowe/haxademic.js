@@ -248,7 +248,7 @@ class ThreeSceneDemo extends DemoBase {
   buildParticles() {
     // build geometry for particles
     // const buffGeom = new THREE.CircleBufferGeometry( 1, 8 );
-    const buffGeom = new THREE.PlaneBufferGeometry(1, 1, 1);
+    const buffGeom = new THREE.PlaneGeometry(1, 1, 1);
     let geometry = new THREE.InstancedBufferGeometry();
     geometry.index = buffGeom.index;
     geometry.attributes = buffGeom.attributes;

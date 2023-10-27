@@ -101,7 +101,7 @@ class ThreeSceneVideoDisplaceTextureDemo extends DemoBase {
     this.videoTexture = new THREE.VideoTexture(this.videoEl);
     this.videoTexture.minFilter = THREE.LinearFilter;
     this.videoTexture.magFilter = THREE.LinearFilter;
-    this.videoTexture.format = THREE.RGBFormat;
+    this.videoTexture.format = THREE.RGBAFormat;
 
     // build shape
     let planeResolution = 200;
@@ -112,7 +112,7 @@ class ThreeSceneVideoDisplaceTextureDemo extends DemoBase {
       planeResolution
     );
     this.planeMaterial = new THREE.MeshPhongMaterial({
-      color: 0x555555,
+      color: 0xffffff,
       side: THREE.DoubleSide,
       wireframe: false,
       emissive: 0x222222, // 0x000000

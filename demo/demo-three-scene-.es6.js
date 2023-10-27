@@ -31,13 +31,12 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0xeeeeee, false);
+    this.threeScene = new ThreeScene(this.el, 0xeeeeee);
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
-    this.threeScene.buildRaycaster(
-      this.pointerPos,
-      MobileUtil.isMobileBrowser(),
-      (mesh) => this.raycastHoverChanged(mesh)
+    // this.threeScene.buildLights();
+    this.threeScene.buildRaycaster(this.pointerPos, (mesh) =>
+      this.raycastHoverChanged(mesh)
     );
     document.addEventListener(
       MobileUtil.isMobileBrowser() ? "touchend" : "click",
@@ -58,17 +57,23 @@ class ThreeSceneDemo extends DemoBase {
     let cubeSize = 150;
     this.materialCube = new THREE.MeshPhongMaterial({
       color: 0x00ffbb, // 0x00ffbb
-      emissive: 0x000000, // 0x000000
+      emissive: 0x444444, // 0x000000
       specular: 0x666666,
-      shininess: 10,
+      shininess: 25,
       flatShading: false,
+      // color: 0x9c6e49,
+      // specular: 0x666666,
+      // shininess: 25,
+      // bumpMap: mapHeight,
+      // bumpScale: 10,
     });
 
     this.cubeMesh = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
+      new THREE.BoxGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
       this.materialCube
     );
     this.cubeMesh.castShadow = true;
+    this.cubeMesh.receiveShadow = true;
     this.cubeMesh.position.set(0, 30, 0);
     this.scene.add(this.cubeMesh);
   }
@@ -83,7 +88,7 @@ class ThreeSceneDemo extends DemoBase {
     // add shadow plane
     var planeSize = 1000;
     var plane = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(planeSize, planeSize),
+      new THREE.PlaneGeometry(planeSize, planeSize),
       new THREE.ShadowMaterial({ opacity: 0.5 })
     );
     plane.rotation.x = -Math.PI / 2;
@@ -102,13 +107,13 @@ class ThreeSceneDemo extends DemoBase {
     // this.spotlight.shadow.camera.far = 4000;
     // this.spotlight.shadow.camera.fov = 30;
     this.spotlight.penumbra = 0.1;
-    this.spotlight.decay = 2;
+    this.spotlight.decay = 0;
     this.spotlight.angle = 1;
     this.spotlight.distance = 1000;
     this.scene.add(this.spotlight);
 
     // add light helper
-    var spotlightDebug = false;
+    var spotlightDebug = true;
     if (spotlightDebug == true) {
       this.lightHelper = new THREE.SpotLightHelper(this.spotlight);
       this.scene.add(this.lightHelper);
@@ -119,7 +124,8 @@ class ThreeSceneDemo extends DemoBase {
     // cube
     this.cubeMesh.rotation.y = -1 + 2 * this.pointerPos.xNorm(this.el);
     this.cubeMesh.rotation.x = -1 + 2 * this.pointerPos.yNorm(this.el);
-    if (this.materialCube.map) this.materialCube.map.needsUpdate = true;
+    // if (this.materialCube.map) this.materialCube.map.needsUpdate = true;
+    // this.materialCube.needsUpdate = true;
     // lighthelper
     // if(this.lightHelper) this.lightHelper.update();
     // this.spotlight.position.y = this.pointerPos.y() * 10;
@@ -151,6 +157,7 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   raycastHoverChanged(mesh) {
+    console.log(mesh);
     this.materialCube.color.set(mesh == this.cubeMesh ? 0xffffbb : 0x00ffbb);
   }
 

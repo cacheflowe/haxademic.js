@@ -32,7 +32,10 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0x1e1e3a);
+    this.threeScene = new ThreeScene({
+      el: this.el,
+      bgColor: 0x1e1e3a,
+    });
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
   }
@@ -123,7 +126,7 @@ class ThreeSceneDemo extends DemoBase {
 
     // build geometry for particles
     // const buffGeom = new THREE.CircleBufferGeometry( 1, 8 );
-    const buffGeom = new THREE.PlaneBufferGeometry(1, 1, 1);
+    const buffGeom = new THREE.PlaneGeometry(1, 1, 1);
     let geometry = new THREE.InstancedBufferGeometry();
     geometry.index = buffGeom.index;
     geometry.attributes = buffGeom.attributes;

@@ -50,14 +50,14 @@ class ThreeSceneTextTextureDemo extends DemoBase {
   }
 
   addLights() {
-    var ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+    var ambientLight = new THREE.AmbientLight(0xffffff, Math.PI * 2);
     this.scene.add(ambientLight);
     // var ambientLight2 = new THREE.AmbientLight(0xffffff, 0.99);
     // this.scene.add(ambientLight2);
     // var pointLight = new THREE.PointLight(0x444444, 1, 0);
     // pointLight.position.set(-100, 100, 50);
     // this.scene.add(pointLight);
-    var directionalLight = new THREE.DirectionalLight(0xffffff, 0.25);
+    var directionalLight = new THREE.DirectionalLight(0xffffff, Math.PI);
     directionalLight.position.set(0.3, 0, 1); // default: (0, 1, 0);
     directionalLight.castShadow = true;
     this.scene.add(directionalLight);

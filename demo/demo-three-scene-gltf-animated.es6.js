@@ -50,7 +50,7 @@ class ThreeSceneGltfAnimatedDemo extends DemoBase {
     });
 
     this.cubeMesh = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
+      new THREE.BoxGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
       this.materialCube
     );
     this.cubeMesh.castShadow = true;
@@ -69,7 +69,7 @@ class ThreeSceneGltfAnimatedDemo extends DemoBase {
     var planeSize = 1000;
     this.floorY = -110;
     var plane = new THREE.Mesh(
-      new THREE.PlaneBufferGeometry(planeSize, planeSize),
+      new THREE.PlaneGeometry(planeSize, planeSize),
       new THREE.ShadowMaterial({ opacity: 0.5 })
     );
     plane.rotation.x = -Math.PI / 2;

@@ -26,7 +26,10 @@ class ThreeSceneTexturedShapeDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0xffdddd);
+    this.threeScene = new ThreeScene({
+      el: this.el,
+      bgColor: 0xffdddd,
+    });
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
   }

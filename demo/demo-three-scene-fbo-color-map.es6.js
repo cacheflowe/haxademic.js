@@ -1,16 +1,22 @@
-import DemoBase from './demo--base.es6.js';
-import * as THREE from '../vendor/three/three.module.js';
-import Stats from '../vendor/stats.module.js';
-import EasingFloat from '../src/easing-float.es6.js';
-import PointerPos from '../src/pointer-pos.es6.js';
-import MobileUtil from '../src/mobile-util.es6.js';
-import ThreeScene from '../src/three-scene-.es6.js';
-import ThreeSceneFBO from '../src/three-scene-fbo.es6.js';
+import DemoBase from "./demo--base.es6.js";
+import * as THREE from "../vendor/three/three.module.js";
+import Stats from "../vendor/stats.module.js";
+import EasingFloat from "../src/easing-float.es6.js";
+import PointerPos from "../src/pointer-pos.es6.js";
+import MobileUtil from "../src/mobile-util.es6.js";
+import ThreeScene from "../src/three-scene-.es6.js";
+import ThreeSceneFBO from "../src/three-scene-fbo.es6.js";
 
 class ThreeSceneDemo extends DemoBase {
-
   constructor(parentEl) {
-    super(parentEl, [], 'ThreeSceneFbo | Shader Color Map', 'three-scene-fbo-color-map', "Use a 2d shader render target as the color map uniform for a particle system.", true);
+    super(
+      parentEl,
+      [],
+      "ThreeSceneFbo | Shader Color Map",
+      "three-scene-fbo-color-map",
+      "Use a 2d shader render target as the color map uniform for a particle system.",
+      true
+    );
   }
 
   init() {
@@ -29,7 +35,7 @@ class ThreeSceneDemo extends DemoBase {
   }
 
   setupScene() {
-    this.threeScene = new ThreeScene(this.el, 0x1E1E3A);
+    this.threeScene = new ThreeScene(this.el, 0x1e1e3a);
     this.scene = this.threeScene.getScene();
     this.camera = this.threeScene.getCamera();
   }
@@ -37,14 +43,14 @@ class ThreeSceneDemo extends DemoBase {
   buildStats() {
     this.stats = new Stats();
     this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-    document.body.appendChild( this.stats.dom );
+    document.body.appendChild(this.stats.dom);
   }
 
   startAnimation() {
     this.animate();
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener("resize", () => this.resize());
     setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event("resize"));
     }, 400);
   }
 
@@ -55,15 +61,15 @@ class ThreeSceneDemo extends DemoBase {
 
     // add debug renderer to DOM
     this.debugEl.appendChild(debugFboCanvas);
-    debugFboCanvas.style.setProperty('width', '100%');
-    debugFboCanvas.style.setProperty('height', '32px');
-    debugFboCanvas.style.setProperty('border', '2px solid #000');
-    debugFboCanvas.style.setProperty('box-sizing', 'border-box');
+    debugFboCanvas.style.setProperty("width", "100%");
+    debugFboCanvas.style.setProperty("height", "32px");
+    debugFboCanvas.style.setProperty("border", "2px solid #000");
+    debugFboCanvas.style.setProperty("box-sizing", "border-box");
 
     // create shader material
-    this.gradientMaterial = new THREE.RawShaderMaterial( {
+    this.gradientMaterial = new THREE.RawShaderMaterial({
       uniforms: {
-        "time": { value: 0.0 },
+        time: { value: 0.0 },
       },
       vertexShader: ThreeSceneFBO.defaultRawVertShader,
       fragmentShader: `
@@ -91,7 +97,12 @@ class ThreeSceneDemo extends DemoBase {
     // add debug plane
     // build shape
     let planeResolution = 1;
-    this.debugPlaneGeometry = new THREE.PlaneGeometry(80, 80, planeResolution, planeResolution);
+    this.debugPlaneGeometry = new THREE.PlaneGeometry(
+      80,
+      80,
+      planeResolution,
+      planeResolution
+    );
     this.debugPlaneMaterial = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       side: THREE.DoubleSide,
@@ -99,15 +110,18 @@ class ThreeSceneDemo extends DemoBase {
       map: this.threeFBO.getTexture(),
       transparent: true,
     });
-    this.debugPlane = new THREE.Mesh( this.debugPlaneGeometry, this.debugPlaneMaterial );
+    this.debugPlane = new THREE.Mesh(
+      this.debugPlaneGeometry,
+      this.debugPlaneMaterial
+    );
     this.debugPlane.position.set(0, 0, 0);
-    this.scene.add( this.debugPlane );
+    this.scene.add(this.debugPlane);
   }
 
   buildParticles() {
-    // build geometry for particles 
+    // build geometry for particles
     // const buffGeom = new THREE.CircleBufferGeometry( 1, 8 );
-    const buffGeom = new THREE.PlaneBufferGeometry( 1, 1, 1 );
+    const buffGeom = new THREE.PlaneGeometry(1, 1, 1);
     let geometry = new THREE.InstancedBufferGeometry();
     geometry.index = buffGeom.index;
     geometry.attributes = buffGeom.attributes;
@@ -118,8 +132,8 @@ class ThreeSceneDemo extends DemoBase {
     this.meshDepth = 400;
 
     // create attributes arrays & assign to geometry
-    const translateArray = new Float32Array( particleCount * 3 );
-    const colorUVArray = new Float32Array( particleCount * 2 );
+    const translateArray = new Float32Array(particleCount * 3);
+    const colorUVArray = new Float32Array(particleCount * 2);
     // spehere helpers
     var inc = Math.PI * (3 - Math.sqrt(5));
     var x = 0;
@@ -128,11 +142,15 @@ class ThreeSceneDemo extends DemoBase {
     var r = 0;
     var phi = 0;
     var radius = 0.6;
-    for ( let i = 0, i2 = 0, i3 = 0, l = particleCount; i < l; i++, i2 += 2, i3 += 3 ) {
+    for (
+      let i = 0, i2 = 0, i3 = 0, l = particleCount;
+      i < l;
+      i++, i2 += 2, i3 += 3
+    ) {
       // random positions inside a unit cube
-      translateArray[ i3 + 0 ] = Math.random() * 2 - 1;
-      translateArray[ i3 + 1 ] = Math.random() * 2 - 1;
-      translateArray[ i3 + 2 ] = Math.random() * 2 - 1;
+      translateArray[i3 + 0] = Math.random() * 2 - 1;
+      translateArray[i3 + 1] = Math.random() * 2 - 1;
+      translateArray[i3 + 2] = Math.random() * 2 - 1;
 
       // evenly-spread positions on a unit sphere surface
       // var off = 2 / particleCount;
@@ -149,18 +167,26 @@ class ThreeSceneDemo extends DemoBase {
       // translateArray[ i3 + 2 ] = z;
 
       // color map progress
-      colorUVArray[i2 + 0] = i/particleCount;
+      colorUVArray[i2 + 0] = i / particleCount;
       colorUVArray[i2 + 1] = 0.5;
     }
 
-    geometry.setAttribute( 'translate', new THREE.InstancedBufferAttribute( translateArray, 3 ) );
-    geometry.setAttribute( 'colorUV', new THREE.InstancedBufferAttribute( colorUVArray, 2 ) );
+    geometry.setAttribute(
+      "translate",
+      new THREE.InstancedBufferAttribute(translateArray, 3)
+    );
+    geometry.setAttribute(
+      "colorUV",
+      new THREE.InstancedBufferAttribute(colorUVArray, 2)
+    );
 
-    this.material = new THREE.RawShaderMaterial( {
+    this.material = new THREE.RawShaderMaterial({
       uniforms: {
-        "map": { value: new THREE.TextureLoader().load('../data/particle.png')},
-        "colorMap": { value: this.threeFBO.getTexture()},
-        "time": { value: 0.0 },
+        map: {
+          value: new THREE.TextureLoader().load("../data/images/particle.png"),
+        },
+        colorMap: { value: this.threeFBO.getTexture() },
+        time: { value: 0.0 },
       },
       vertexShader: `
         precision highp float;
@@ -237,45 +263,49 @@ class ThreeSceneDemo extends DemoBase {
       blending: THREE.AdditiveBlending, // handle z-stacking, instead of more difficult measures: https://discourse.threejs.org/t/threejs-and-the-transparent-problem/11553/7
     });
 
-    this.mesh = new THREE.Mesh( geometry, this.material );
+    this.mesh = new THREE.Mesh(geometry, this.material);
     this.mesh.scale.set(this.meshRadius, this.meshRadius, this.meshDepth);
-    this.scene.add( this.mesh );
+    this.scene.add(this.mesh);
   }
 
   updateObjects() {
     // update shader
     const time = performance.now() * 0.0001;
-    this.material.uniforms[ "time" ].value = time;
-    this.gradientMaterial.uniforms[ "time" ].value = time;
+    this.material.uniforms["time"].value = time;
+    this.gradientMaterial.uniforms["time"].value = time;
 
     // rotate shape
     const cameraAmp = 0.3;
-    if(!this.cameraXEase) { // lazy init rotation lerping
+    if (!this.cameraXEase) {
+      // lazy init rotation lerping
       this.cameraXEase = new EasingFloat(0, 0.08, 0.00001);
       this.cameraYEase = new EasingFloat(0, 0.08, 0.00001);
     }
-    this.cameraYEase.setTarget(-cameraAmp + cameraAmp*2 * this.pointerPos.xNorm(this.el)).update();
-    this.cameraXEase.setTarget(-cameraAmp + cameraAmp*2 * this.pointerPos.yNorm(this.el)).update();
+    this.cameraYEase
+      .setTarget(-cameraAmp + cameraAmp * 2 * this.pointerPos.xNorm(this.el))
+      .update();
+    this.cameraXEase
+      .setTarget(-cameraAmp + cameraAmp * 2 * this.pointerPos.yNorm(this.el))
+      .update();
     this.mesh.rotation.x = this.cameraXEase.value();
     this.mesh.rotation.y = this.cameraYEase.value();
 
     // move camera z
-    this.mesh.position.set(0, 0, 0 + 200 * Math.sin(time*2));
+    this.mesh.position.set(0, 0, 0 + 200 * Math.sin(time * 2));
   }
 
   animate() {
-    if(this.stats) this.stats.begin();
+    if (this.stats) this.stats.begin();
     this.updateObjects();
     this.threeFBO.render(this.threeScene.getRenderer());
     this.threeScene.render();
     requestAnimationFrame(() => this.animate());
-    if(this.stats) this.stats.end();
+    if (this.stats) this.stats.end();
   }
-  
+
   resize() {
     this.threeScene.resize();
   }
-
 }
 
-if(window.autoInitDemo) window.demo = new ThreeSceneDemo(document.body);
+if (window.autoInitDemo) window.demo = new ThreeSceneDemo(document.body);
