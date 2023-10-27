@@ -64,7 +64,7 @@ class VideoRecorderDemo extends DemoBase {
     });
 
     this.cubeMesh = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
+      new THREE.BoxGeometry(cubeSize, cubeSize * 0.4, cubeSize * 0.4),
       this.materialCube
     );
     this.cubeMesh.castShadow = true;

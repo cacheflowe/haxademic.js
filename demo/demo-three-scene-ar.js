@@ -164,7 +164,7 @@ class ThreeSceneArDemo extends DemoBase {
         // this.arRoot.add(gltf.scene);
 
         let cubeMesh = new THREE.Mesh(
-          new THREE.BoxBufferGeometry(1, 1, 1),
+          new THREE.BoxGeometry(1, 1, 1),
           new THREE.MeshNormalMaterial({
             transparent: false,
             side: THREE.DoubleSide,
