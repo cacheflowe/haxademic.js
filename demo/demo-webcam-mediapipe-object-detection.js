@@ -21,7 +21,7 @@ class WebcamMediaPipeObjectDetectionDemo extends DemoBase {
   }
 
   init() {
-    this.modelURL = `../data/machine-learning/mediapipe-waffle-model.tflite`; // `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`;
+    this.modelURL = `../data/machine-learning/mediapipe-waffle-model_fp16.tflite`; // `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`;
     this.visionURL = `../vendor/mediapipe/wasm`; //  `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm`;
     this.addCSS();
     this.addOverlayContainer();
