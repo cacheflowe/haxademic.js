@@ -8,6 +8,9 @@ import {
 // TODO:
 // - Add custom data
 // - Add QR code with link to image that you can try out by showing your phone to the webcam
+// - Progress for requisite downloads: https://javascript.info/fetch-progress
+// - Use a FloatBuffer or something like that to reduce noise of detection
+//   - Interpolate box size & position for smoothness
 
 class WebcamMediaPipeObjectDetectionDemo extends DemoBase {
   constructor(parentEl) {
@@ -78,7 +81,7 @@ class WebcamMediaPipeObjectDetectionDemo extends DemoBase {
         (error) => {
           this.el.innerHTML = "[Webcam ERROR] :: " + error;
         },
-        true
+        Webcam.backFacingOptions()
       );
     });
   }
