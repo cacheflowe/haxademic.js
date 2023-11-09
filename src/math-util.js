@@ -1,6 +1,4 @@
 class MathUtil {
-
-
   /**
    *  Gives you the scale at which to apply to the current value, to reach the target value
    *  @param  cur The original value.
@@ -20,7 +18,7 @@ class MathUtil {
    *  @use    {@code let speed = MathUtil.speedToReachDestinationWithFriction( 20, 0.9 );}
    */
   static speedToReachDestinationWithFriction(distance, friction) {
-    return distance / ( ( friction ) * ( 1 / ( 1 - friction ) ) );
+    return distance / (friction * (1 / (1 - friction)));
   }
 
   /**
@@ -31,7 +29,7 @@ class MathUtil {
    *  @use    {@code let vRandRange = MathUtil.randRange( 0, 999999 );}
    */
   static randRange(min, max) {
-    return Math.round( Math.random() * ( max - min ) ) + min;
+    return Math.round(Math.random() * (max - min)) + min;
   }
 
   /**
@@ -46,11 +44,25 @@ class MathUtil {
   }
 
   static randBoolean() {
-    return (Math.random() > 0.5 ) ? true : false;
+    return Math.random() > 0.5 ? true : false;
   }
 
   static randBooleanWeighted(likeliness) {
-    return (Math.random() < likeliness ) ? true : false;
+    return Math.random() < likeliness ? true : false;
+  }
+
+  static randIndexWeighted(weightsArray) {
+    let totalWeight = weightsArray.reduce((acc, val) => {
+      return acc + val;
+    }, 0);
+    let rand = Math.floor(Math.random() * totalWeight);
+    let search = 0;
+    for (let i = 0; i < weightsArray.length; i++) {
+      search += weightsArray[i];
+      if (rand < search) {
+        return i;
+      }
+    }
   }
 
   /**
@@ -61,22 +73,25 @@ class MathUtil {
    *  @return The percentage [0-1] of valueInRange in the range.
    *  @use    {@code let vPercent = MathUtil.getPercentWithinRange( 50, 150, 100 );  // displays 50 }
    */
-  static getPercentWithinRange( bottomRange, topRange, valueInRange ) {
+  static getPercentWithinRange(bottomRange, topRange, valueInRange) {
     // normalize values to work positively from zero
     topRange += -bottomRange;
     valueInRange += -bottomRange;
-    bottomRange += -bottomRange;  // last to not break other offsets
+    bottomRange += -bottomRange; // last to not break other offsets
     // return percentage or normalized values
-    return ( valueInRange / ( topRange - bottomRange ) );
+    return valueInRange / (topRange - bottomRange);
   }
 
   static lerp(val1, val2, percent) {
-      // 0.5 percent is an even mix
-      return val1 + (val2 - val1) * percent;
+    // 0.5 percent is an even mix
+    return val1 + (val2 - val1) * percent;
   }
 
   static map(val, inputMin, inputMax, outputMin, outputMax) {
-    return ((outputMax - outputMin) * ((val - inputMin)/(inputMax - inputMin))) + outputMin;
+    return (
+      (outputMax - outputMin) * ((val - inputMin) / (inputMax - inputMin)) +
+      outputMin
+    );
   }
 
   /**
@@ -86,9 +101,9 @@ class MathUtil {
    *  @return The rounded number.
    *  @use    {@code let roundedNum = MathUtil.roundToDecimal( 10.3333, 1 );  // displays 10.3 }
    */
-  static roundToDecimal( inputNum, numPoints ) {
-    let multiplier = Math.pow( 10, numPoints );
-    return Math.round( inputNum * multiplier ) / multiplier;
+  static roundToDecimal(inputNum, numPoints) {
+    let multiplier = Math.pow(10, numPoints);
+    return Math.round(inputNum * multiplier) / multiplier;
   }
 
   /**
@@ -99,8 +114,8 @@ class MathUtil {
    *  @return number 50
    *  @use    {@code let vRadians = MathUtil.easeTo( 0, 100, 2 );}
    */
-  static easeTo( current, target, easeFactor ) {
-    return current -= ( ( current - target ) / easeFactor );
+  static easeTo(current, target, easeFactor) {
+    return (current -= (current - target) / easeFactor);
   }
 
   /**
@@ -109,8 +124,8 @@ class MathUtil {
    *  @return radians (3.14..., 1.57...)
    *  @use    {@code let vRadians = MathUtil.degreesToRadians( 180 );}
    */
-  static degreesToRadians( d ) {
-    return d * ( Math.PI / 180 );
+  static degreesToRadians(d) {
+    return d * (Math.PI / 180);
   }
 
   /**
@@ -119,8 +134,8 @@ class MathUtil {
    *  @return degrees (45°, 90°)
    *  @use    {@code let vDegrees = MathUtil.radiansToDegrees( 3.14 );}
    */
-  static radiansToDegrees( r ) {
-    return r * ( 180 / Math.PI );
+  static radiansToDegrees(r) {
+    return r * (180 / Math.PI);
   }
 
   /**
@@ -129,8 +144,8 @@ class MathUtil {
    *  @return degrees (360°, 180°)
    *  @use    {@code let vDegreesPercent = MathUtil.percentToDegrees( 50 );}
    */
-  static percentToDegrees( n ) {
-    return Math.abs( n ) * 360;
+  static percentToDegrees(n) {
+    return Math.abs(n) * 360;
   }
 
   /**
@@ -139,11 +154,11 @@ class MathUtil {
    *  @return percentage (1, .5)
    *  @use    {@code let vPercentDegrees = MathUtil.degreesToPercent( 180 );}
    */
-  static degreesToPercent( n ) {
-    return Math.abs( n / 360 );
+  static degreesToPercent(n) {
+    return Math.abs(n / 360);
   }
 
-  static saw( rads ) {
+  static saw(rads) {
     let val = Math.abs((rads % (Math.PI * 2)) - Math.PI);
     return (val / Math.PI) * 2 - 1;
   }
@@ -154,14 +169,14 @@ class MathUtil {
    *  @return the sum of all numbers.
    *  @use    {@code let vSums = MathUtil.sums( [ 12, 20, 7 ] );}
    */
-  static sums( nums ) {
+  static sums(nums) {
     // declare locals.
     let sum = 0;
     let numL = nums.length;
 
     // loop: convert and add.
-    for( let i = 0; i < numL; i++ ) {
-      sum += nums[ i ];
+    for (let i = 0; i < numL; i++) {
+      sum += nums[i];
     }
     return sum;
   }
@@ -172,22 +187,22 @@ class MathUtil {
    *  @return the average of all numbers.
    *  @use    {@code let vAverage = MathUtil.average( [ 12, 20, 7 ] );}
    */
-  static average( nums ) {
-    return MathUtil.sums( nums ) / nums.length;
+  static average(nums) {
+    return MathUtil.sums(nums) / nums.length;
   }
 
   static minValue(arr) {
     const min = arr.reduce((acc, val) => {
-        return acc < val ? acc : val;
+      return acc < val ? acc : val;
     });
     return min;
   }
 
   static maxValue(arr) {
-      const max= arr.reduce((acc, val) => {
-          return acc > val ? acc : val;
-      });
-      return max;
+    const max = arr.reduce((acc, val) => {
+      return acc > val ? acc : val;
+    });
+    return max;
   }
 
   /**
@@ -198,8 +213,8 @@ class MathUtil {
    *  @return number (12.3, 44.555)
    *  @use    {@code let value = MathUtil.interp( 10, 20, .5 );  //returns 15}
    */
-  static interp( lower, upper, n ) {
-    return ((upper-lower)*n)+lower;
+  static interp(lower, upper, n) {
+    return (upper - lower) * n + lower;
   }
 
   /**
@@ -212,13 +227,17 @@ class MathUtil {
    *  @return number (12.3, 44.555)
    *  @use    {@code let value = MathUtil.remap( 10, 0, 20, 1, 2 );  //returns 1.5}
    */
-  static remap( value, lower1, upper1, lower2, upper2 ) {
-    return MathUtil.interp(lower2,upper2, MathUtil.getPercentWithinRange(lower1,upper1,value));
+  static remap(value, lower1, upper1, lower2, upper2) {
+    return MathUtil.interp(
+      lower2,
+      upper2,
+      MathUtil.getPercentWithinRange(lower1, upper1, value)
+    );
   }
 
   // better version of above
   static remapRange(value, low1, high1, low2, high2) {
-    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+    return low2 + ((high2 - low2) * (value - low1)) / (high1 - low1);
   }
 
   /**
@@ -230,18 +249,16 @@ class MathUtil {
    *  @return The distance between point 1 and 2
    *  @use    {@code let distance = MathUtil.getDistance( 7, 5, 3, 2 );}
    */
-  static getDistance ( x1, y1, x2, y2 ) {
+  static getDistance(x1, y1, x2, y2) {
     let a = x1 - x2;
     let b = y1 - y2;
-    return Math.abs( Math.sqrt(a*a + b*b) );
+    return Math.abs(Math.sqrt(a * a + b * b));
   }
-
 
   static smoothstep(edge0, edge1, x) {
     x = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
     return x * x * (3 - 2 * x);
   }
-
 
   /**
    *  Keep a value between a min & max.
@@ -251,10 +268,9 @@ class MathUtil {
    *  @return The clamped value
    *  @use    {@code let singleDigit = MathUtil.getDistance( value, 0, 9 );}
    */
-  static clamp ( val, min, max ) {
+  static clamp(val, min, max) {
     return Math.max(min, Math.min(max, val));
   }
-
 
   /**
    *  Keep an angle between 0-360
@@ -262,9 +278,9 @@ class MathUtil {
    *  @return The normalized angle
    *  @use    {@code let angle = MathUtil.constrainAngle( 540 );}
    */
-  static constrainAngle( angle ) {
-    if( angle < 0 ) return angle + 360;
-    if( angle > 360 ) return angle - 360;
+  static constrainAngle(angle) {
+    if (angle < 0) return angle + 360;
+    if (angle > 360) return angle - 360;
     return angle;
   }
 
@@ -274,9 +290,9 @@ class MathUtil {
    *  @return The normalized angle
    *  @use    {@code let angle = MathUtil.constrainAngle( 540 );}
    */
-  static constrainRadians( radians ) {
-    if( radians < 0 ) return radians + Math.PI*2;
-    if( radians > Math.PI*2 ) return radians - Math.PI*2;
+  static constrainRadians(radians) {
+    if (radians < 0) return radians + Math.PI * 2;
+    if (radians > Math.PI * 2) return radians - Math.PI * 2;
     return radians;
   }
 
@@ -289,8 +305,10 @@ class MathUtil {
    *  @return The angle from point 1 and 2
    *  @use    {@code let angle = MathUtil.getAngleToTarget( 0, 0, 5, 5 );}
    */
-  static getAngleToTarget( x1, y1, x2, y2 ) {
-    return MathUtil.constrainAngle( -Math.atan2( x1 - x2, y1 - y2 ) * 180 / Math.PI );
+  static getAngleToTarget(x1, y1, x2, y2) {
+    return MathUtil.constrainAngle(
+      (-Math.atan2(x1 - x2, y1 - y2) * 180) / Math.PI
+    );
   }
 
   /**
@@ -302,10 +320,13 @@ class MathUtil {
    *  @return The radians from point 1 and 2
    *  @use    {@code let angle = MathUtil.getRadiansToTarget( 0, 0, 5, 5 );}
    */
-  static getRadiansToTarget( x1, y1, x2, y2 ) {
-    return (MathUtil.TWO_PI + -Math.PI / 2 + Math.atan2(x2 - x1, y2 - y1)) % MathUtil.TWO_PI;
+  static getRadiansToTarget(x1, y1, x2, y2) {
+    return (
+      (MathUtil.TWO_PI + -Math.PI / 2 + Math.atan2(x2 - x1, y2 - y1)) %
+      MathUtil.TWO_PI
+    );
   }
-  static getRadiansToTarget2( x1, y1, x2, y2 ) {
+  static getRadiansToTarget2(x1, y1, x2, y2) {
     return -Math.atan2(y2 - y1, x2 - x1) % MathUtil.TWO_PI;
   }
 
@@ -316,35 +337,35 @@ class MathUtil {
    *  @return +1 fo clockwise, -1 for counter-clockwise
    *  @use    {@code let direction = MathUtil.rotationDirectionToTarget( 90, 180 );}
    */
-  static getRotationDirectionToTarget( curAngle, targetAngle ) {
+  static getRotationDirectionToTarget(curAngle, targetAngle) {
     // calculate the difference between the current angle and destination angle
-    let angleDifference = Math.abs( curAngle - targetAngle );
+    let angleDifference = Math.abs(curAngle - targetAngle);
     // turn left or right to get to the target
-    if( curAngle > targetAngle ){
-      return (angleDifference < 180) ? -1 : 1;
+    if (curAngle > targetAngle) {
+      return angleDifference < 180 ? -1 : 1;
     } else {
-      return (angleDifference < 180) ? 1 : -1;
+      return angleDifference < 180 ? 1 : -1;
     }
   }
 
-
-  static circleRadiusToEnclosingSquareCorner( squareSize ) {
-    return (squareSize/2)*(Math.sqrt(2)-1);
+  static circleRadiusToEnclosingSquareCorner(squareSize) {
+    return (squareSize / 2) * (Math.sqrt(2) - 1);
   }
 
   static rectsIntersect(a, b) {
-    return (a.left <= b.right &&
-            b.left <= a.right &&
-            a.top <= b.bottom &&
-            b.top <= a.bottom);
+    return (
+      a.left <= b.right &&
+      b.left <= a.right &&
+      a.top <= b.bottom &&
+      b.top <= a.bottom
+    );
   }
-
 }
 
-  // static saw(rads) {
-  //   let val = Math.abs((rads % (Math.PI * 2)) - Math.PI);
-  //   return (val / Math.PI) * 2 - 1;
-  // };
+// static saw(rads) {
+//   let val = Math.abs((rads % (Math.PI * 2)) - Math.PI);
+//   return (val / Math.PI) * 2 - 1;
+// };
 
 MathUtil.TWO_PI = Math.PI * 2;
 
