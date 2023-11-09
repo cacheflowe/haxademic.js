@@ -1,45 +1,45 @@
 // dependencies:
-import ArrayUtil from './array-util.es6.js';
-import FloatBuffer from './float-buffer.es6.js';
+import ArrayUtil from "./array-util.js";
+import FloatBuffer from "./float-buffer.js";
 
 class SoundFFT {
-
-  constructor(context, sourceAudioNode=null, options={}) { // Howler.ctx, sound._sounds[0]._node
+  constructor(context, sourceAudioNode = null, options = {}) {
+    // Howler.ctx, sound._sounds[0]._node
     this.context = context;
     this.sourceAudioNode = sourceAudioNode;
     this.debug = false;
     this.options = {
-      fftSize: 512,                   // eq bands. analysis resolution
-      fftDecay: 0.98,                 // eq band decay
+      fftSize: 512, // eq bands. analysis resolution
+      fftDecay: 0.98, // eq band decay
       waveformCrossfadeEndsAmp: 0.05, // crossfade both ends of the waveform together
-      beatHoldTime: 300,              // minimum frames in between detected beats
-      beatDecayRate: 0.97,            // beat amp decay. smooths out likeliness of the next beat
-      beatMinAmp: 0.15,               // minimum normalized amp for a beat
-      beatAmpDirectionThresh: 0.01,   // minimum normalized amplitude direction for a beat
-      beatAmpDirectionSamples: 5,     // number of samples for amplitude direction tracking
-    }
+      beatHoldTime: 300, // minimum frames in between detected beats
+      beatDecayRate: 0.97, // beat amp decay. smooths out likeliness of the next beat
+      beatMinAmp: 0.15, // minimum normalized amp for a beat
+      beatAmpDirectionThresh: 0.01, // minimum normalized amplitude direction for a beat
+      beatAmpDirectionSamples: 5, // number of samples for amplitude direction tracking
+    };
     // override default options
-    for(let key in options) {
-      if(!!this.options[key]) this.options[key] = options[key];
+    for (let key in options) {
+      if (!!this.options[key]) this.options[key] = options[key];
     }
 
     // send sound node to analyser. the main destination output remains intact
     this.analyser = this.context.createAnalyser();
     this.analyser.fftSize = this.options.fftSize;
     this.analyser.smoothingTimeConstant = 0.1;
-    if(this.sourceAudioNode) this.sourceAudioNode.connect(this.analyser);
+    if (this.sourceAudioNode) this.sourceAudioNode.connect(this.analyser);
 
     // build audio data array
     this.binCount = this.analyser.frequencyBinCount;
     this.spectrumData = new Uint8Array(this.binCount);
     this.spectrum = new Array(this.binCount);
     this.spectrumCrossfaded = new Array(this.binCount);
-    for(var i=0; i < this.binCount; i++) this.spectrum[i] = 0; // reset to zero
+    for (var i = 0; i < this.binCount; i++) this.spectrum[i] = 0; // reset to zero
 
     this.waveformData = new Uint8Array(this.binCount);
     this.waveform = new Array(this.binCount);
     this.waveformCrossfadeEndsAmp = this.options.waveformCrossfadeEndsAmp;
-    for(var i=0; i < this.binCount; i++) this.waveform[i] = 0; // reset to zero
+    for (var i = 0; i < this.binCount; i++) this.waveform[i] = 0; // reset to zero
 
     // spectrum decay
     this.freqDecay = this.options.fftDecay;
@@ -74,7 +74,7 @@ class SoundFFT {
 
   setNewSourceAudioNode(newAudioNode) {
     // remove old audio source from analyzer chain
-    if(this.sourceAudioNode) {
+    if (this.sourceAudioNode) {
       this.sourceAudioNode.disconnect(this.analyser);
     }
 
@@ -100,7 +100,7 @@ class SoundFFT {
   }
 
   getPitch() {
-    if(Date.now() - this.lastPitchTime > this.pitchTimeThresh) {
+    if (Date.now() - this.lastPitchTime > this.pitchTimeThresh) {
       return 0;
     } else {
       return this.freqAvg.average();
@@ -114,7 +114,7 @@ class SoundFFT {
   ///////////////////////////////////////////////////////////////////////////
 
   update() {
-    if(this.analyser) {
+    if (this.analyser) {
       // get raw data
       this.analyser.getByteFrequencyData(this.spectrumData);
       this.analyser.getByteTimeDomainData(this.waveformData);
@@ -126,7 +126,7 @@ class SoundFFT {
       this.detectBeats();
       this.calculatePitch();
       ArrayUtil.crossfadeEnds(this.waveform, this.waveformCrossfadeEndsAmp);
-      if(this.debug) this.drawDebug();
+      if (this.debug) this.drawDebug();
     }
   }
 
@@ -138,7 +138,7 @@ class SoundFFT {
 
   calcAvgAmp() {
     let totalEQ = 0;
-    for(var i = 0; i < this.spectrumData.length; i++) {
+    for (var i = 0; i < this.spectrumData.length; i++) {
       totalEQ += this.spectrumData[i];
     }
     this.avgAmpDirect = totalEQ / this.spectrumData.length;
@@ -146,37 +146,43 @@ class SoundFFT {
   }
 
   normalizeSpectrumFloats(crossfadeEnds) {
-    if(crossfadeEnds == false) {
-      for(var i = 0; i < this.spectrumData.length; i++) {
+    if (crossfadeEnds == false) {
+      for (var i = 0; i < this.spectrumData.length; i++) {
         let curFloat = this.spectrumData[i] / 255;
-        this.spectrum[i] = Math.max(curFloat, this.spectrum[i] * this.freqDecay); // lerp decay
+        this.spectrum[i] = Math.max(
+          curFloat,
+          this.spectrum[i] * this.freqDecay
+        ); // lerp decay
       }
     } else {
       // create temp crossfaded array without decay
-      for(var i = 0; i < this.spectrumData.length; i++) {
+      for (var i = 0; i < this.spectrumData.length; i++) {
         let curFloat = this.spectrumData[i] / 255;
         this.spectrumCrossfaded[i] = curFloat;
       }
       ArrayUtil.crossfadeEnds(this.spectrumCrossfaded, 0.5);
       // use crossfaded array to decay
-      for(var i = 0; i < this.spectrumCrossfaded.length; i++) {
+      for (var i = 0; i < this.spectrumCrossfaded.length; i++) {
         let curFloat = this.spectrumCrossfaded[i];
-        this.spectrum[i] = Math.max(curFloat, this.spectrum[i] * this.freqDecay); // lerp decay
+        this.spectrum[i] = Math.max(
+          curFloat,
+          this.spectrum[i] * this.freqDecay
+        ); // lerp decay
       }
     }
   }
 
   normalizeWaveformFloats() {
-    for(var i = 0; i < this.waveformData.length; i++) {
+    for (var i = 0; i < this.waveformData.length; i++) {
       this.waveform[i] = 2 * (this.waveformData[i] / 255 - 0.5);
     }
   }
 
   resetSpectrum() {
     // bring spectrum back down to zero after song ends
-    if(this.spectrum) {
+    if (this.spectrum) {
       for (var i = 0; i < this.spectrum.length; i++) {
-        if(this.spectrum[i] > 0) {
+        if (this.spectrum[i] > 0) {
           this.spectrum[i] = this.spectrum[i] - 1;
         }
       }
@@ -192,7 +198,7 @@ class SoundFFT {
   calcAvgDecayedAmp() {
     let lastAmp = this.avgAmp;
     let ampSum = 0;
-    for(var i = 0; i < this.spectrum.length; i++) {
+    for (var i = 0; i < this.spectrum.length; i++) {
       ampSum += this.spectrum[i]; // `spectrum is decayed data`
     }
     this.avgAmp = ampSum / this.spectrum.length;
@@ -200,13 +206,18 @@ class SoundFFT {
   }
 
   detectBeats() {
-    if(this.avgAmp > this.beatCutOff && this.avgAmp > this.beatMinAmp && this.beatDetectAvailable() && this.ampDirection.average() > this.beatAmpDirectionThresh) {
+    if (
+      this.avgAmp > this.beatCutOff &&
+      this.avgAmp > this.beatMinAmp &&
+      this.beatDetectAvailable() &&
+      this.ampDirection.average() > this.beatAmpDirectionThresh
+    ) {
       this.detectedBeat = true;
-      this.beatCutOff = this.avgAmp * 1.1;  // put the cutoff a bit above the threshold where a beat was detected
+      this.beatCutOff = this.avgAmp * 1.1; // put the cutoff a bit above the threshold where a beat was detected
       this.beatLastTime = Date.now();
     } else {
       this.detectedBeat = false;
-      if(this.beatDetectAvailable()){
+      if (this.beatDetectAvailable()) {
         this.beatCutOff *= this.beatDecayRate;
         this.beatCutOff = Math.max(this.beatCutOff, this.beatMinAmp);
       }
@@ -247,7 +258,8 @@ class SoundFFT {
     // array of values from -1 to 1
     this.corrBuff = this.autoCorrelate(this.waveform);
     let freq = this.findFrequency(this.corrBuff);
-    if(freq > 0 && freq < 10000 && this.avgAmpDirect > 0.01) {   // if it's a valid freq & signal is loud enough, use it!
+    if (freq > 0 && freq < 10000 && this.avgAmpDirect > 0.01) {
+      // if it's a valid freq & signal is loud enough, use it!
       this.freqAvg.update(freq);
       this.lastPitchTime = Date.now();
     }
@@ -258,7 +270,7 @@ class SoundFFT {
     var nSamples = timeDomainBuffer.length;
 
     // pre-normalize the input buffer
-    if (this.preNormalize){
+    if (this.preNormalize) {
       timeDomainBuffer = this.normalize(timeDomainBuffer);
     }
 
@@ -268,10 +280,10 @@ class SoundFFT {
     }
 
     var autoCorrBuffer = [];
-    for (var lag = 0; lag < nSamples; lag++){
+    for (var lag = 0; lag < nSamples; lag++) {
       var sum = 0;
-      for (var index = 0; index < nSamples-lag; index++){
-        var indexLagged = index+lag;
+      for (var index = 0; index < nSamples - lag; index++) {
+        var indexLagged = index + lag;
         var sound1 = timeDomainBuffer[index];
         var sound2 = timeDomainBuffer[indexLagged];
         var product = sound1 * sound2;
@@ -279,11 +291,11 @@ class SoundFFT {
       }
 
       // average to a value between -1 and 1
-      autoCorrBuffer[lag] = sum/nSamples;
+      autoCorrBuffer[lag] = sum / nSamples;
     }
 
     // normalize the output buffer
-    if (this.postNormalize){
+    if (this.postNormalize) {
       autoCorrBuffer = this.normalize(autoCorrBuffer);
     }
     return autoCorrBuffer;
@@ -294,12 +306,12 @@ class SoundFFT {
   normalize(buffer) {
     var biggestVal = 0;
     var nSamples = buffer.length;
-    for (var index = 0; index < nSamples; index++){
-      if (Math.abs(buffer[index]) > biggestVal){
+    for (var index = 0; index < nSamples; index++) {
+      if (Math.abs(buffer[index]) > biggestVal) {
         biggestVal = Math.abs(buffer[index]);
       }
     }
-    for (var index = 0; index < nSamples; index++){
+    for (var index = 0; index < nSamples; index++) {
       // divide each sample of the buffer by the biggest val
       buffer[index] /= biggestVal;
     }
@@ -318,7 +330,7 @@ class SoundFFT {
     if (this.centerClipThreshold > 0.0) {
       for (var i = 0; i < nSamples; i++) {
         var val = buffer[i];
-        buffer[i] = (Math.abs(val) > this.centerClipThreshold) ? val : 0;
+        buffer[i] = Math.abs(val) > this.centerClipThreshold ? val : 0;
       }
     }
     return buffer;
@@ -333,14 +345,14 @@ class SoundFFT {
     var valOfLargestPeakSoFar = 0;
     var indexOfLargestPeakSoFar = -1;
 
-    for (var index = 1; index < nSamples; index++){
-      var valL = autocorr[index-1];
+    for (var index = 1; index < nSamples; index++) {
+      var valL = autocorr[index - 1];
       var valC = autocorr[index];
-      var valR = autocorr[index+1];
+      var valR = autocorr[index + 1];
 
-      var bIsPeak = ((valL < valC) && (valR < valC));
-      if (bIsPeak){
-        if (valC > valOfLargestPeakSoFar){
+      var bIsPeak = valL < valC && valR < valC;
+      if (bIsPeak) {
+        if (valC > valOfLargestPeakSoFar) {
           valOfLargestPeakSoFar = valC;
           indexOfLargestPeakSoFar = index;
         }
@@ -350,7 +362,8 @@ class SoundFFT {
     var distanceToNextLargestPeak = indexOfLargestPeakSoFar - 0;
 
     // convert sample count to frequency
-    var fundamentalFrequency = this.context.sampleRate / distanceToNextLargestPeak;
+    var fundamentalFrequency =
+      this.context.sampleRate / distanceToNextLargestPeak;
     return fundamentalFrequency;
   }
 
@@ -367,25 +380,29 @@ class SoundFFT {
     this.panelMediumH = 35;
     this.panelSmallH = 20;
     this.debugW = 256;
-    this.debugH = this.titleH * 5 + this.panelLargeH * 2 + this.panelMediumH * 1 + this.panelSmallH * 2;
+    this.debugH =
+      this.titleH * 5 +
+      this.panelLargeH * 2 +
+      this.panelMediumH * 1 +
+      this.panelSmallH * 2;
 
-    this.colorWhite = '#fff';
-    this.colorGreen = 'rgba(0, 255, 0, 1)';
-    this.colorYellow = 'rgba(255, 255, 0, 1)';
-    this.colorRed = 'rgba(255, 0, 0, 1)';
-    this.colorBlack = '#000';
-    this.clearColor = 'rgba(0, 0, 0, 0)';
+    this.colorWhite = "#fff";
+    this.colorGreen = "rgba(0, 255, 0, 1)";
+    this.colorYellow = "rgba(255, 255, 0, 1)";
+    this.colorRed = "rgba(255, 0, 0, 1)";
+    this.colorBlack = "#000";
+    this.clearColor = "rgba(0, 0, 0, 0)";
 
     // build canvas
-    this.canvas = document.createElement('canvas');
+    this.canvas = document.createElement("canvas");
     this.canvas.width = this.debugW;
     this.canvas.height = this.debugH;
-    this.canvas.setAttribute('class', 'sound-fft-debug');
-    this.canvas.style.setProperty('border', '2px solid #fff');
+    this.canvas.setAttribute("class", "sound-fft-debug");
+    this.canvas.style.setProperty("border", "2px solid #fff");
     document.body.appendChild(this.canvas);
 
     // setup canvas context dfaults
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = this.canvas.getContext("2d");
     this.ctx.fillStyle = this.colorBlack;
     this.ctx.strokeStyle = this.colorWhite;
     this.ctx.lineWidth = 2;
@@ -403,7 +420,7 @@ class SoundFFT {
   }
 
   drawDebug() {
-    if(this.ctx == null) this.buildDebugCanvas();
+    if (this.ctx == null) this.buildDebugCanvas();
 
     // clear background
     this.ctx.save();
@@ -417,7 +434,12 @@ class SoundFFT {
     // fft title
     this.drawPanelBg(0, 0, this.debugW, this.titleH);
     this.drawDebugText(`FFT [${this.binCount}]`, 4, 11, this.colorWhite);
-    this.drawDebugText(`sampleRate [${this.context.sampleRate}]`, this.debugW / 2, 11, this.colorWhite);
+    this.drawDebugText(
+      `sampleRate [${this.context.sampleRate}]`,
+      this.debugW / 2,
+      11,
+      this.colorWhite
+    );
 
     // fft bars
     this.ctx.translate(0, this.titleH);
@@ -428,13 +450,23 @@ class SoundFFT {
     this.ctx.lineWidth = barWidth;
     // decayed fft data
     this.ctx.fillStyle = this.colorWhite;
-    for(var i = 0; i < this.binCount; i++) {
-      this.ctx.fillRect(i * barWidth, this.panelLargeH, barWidth, -this.spectrum[i] * this.panelLargeH);
+    for (var i = 0; i < this.binCount; i++) {
+      this.ctx.fillRect(
+        i * barWidth,
+        this.panelLargeH,
+        barWidth,
+        -this.spectrum[i] * this.panelLargeH
+      );
     }
     // green original data
     this.ctx.fillStyle = this.colorGreen;
-    for(var i = 0; i < this.binCount; i++) {
-      this.ctx.fillRect(i * barWidth, this.panelLargeH, barWidth, -this.spectrumData[i]/255 * this.panelLargeH);
+    for (var i = 0; i < this.binCount; i++) {
+      this.ctx.fillRect(
+        i * barWidth,
+        this.panelLargeH,
+        barWidth,
+        (-this.spectrumData[i] / 255) * this.panelLargeH
+      );
     }
 
     ////////////////////////////////////
@@ -452,8 +484,11 @@ class SoundFFT {
     this.ctx.lineWidth = 2;
     this.ctx.strokeStyle = this.colorWhite;
     this.ctx.beginPath();
-    for(var i = 0; i < this.binCount; i++) {
-      this.ctx.lineTo(i * barWidth, this.panelLargeH / 2 + this.waveform[i] * this.panelLargeH / 2);
+    for (var i = 0; i < this.binCount; i++) {
+      this.ctx.lineTo(
+        i * barWidth,
+        this.panelLargeH / 2 + (this.waveform[i] * this.panelLargeH) / 2
+      );
     }
     this.ctx.stroke();
 
@@ -463,7 +498,12 @@ class SoundFFT {
     // pitch title
     this.ctx.translate(0, this.panelLargeH);
     this.drawPanelBg(0, 0, this.debugW, this.titleH);
-    this.drawDebugText(`Pitch: ${this.getPitch().toFixed(2)}hz`, 4, 11, this.colorWhite);
+    this.drawDebugText(
+      `Pitch: ${this.getPitch().toFixed(2)}hz`,
+      4,
+      11,
+      this.colorWhite
+    );
 
     // pitch data
     this.ctx.translate(0, this.titleH);
@@ -471,11 +511,15 @@ class SoundFFT {
 
     this.ctx.lineWidth = 1;
     this.ctx.strokeStyle = this.colorYellow;
-    if(Date.now() - this.lastPitchTime > this.pitchTimeThresh) this.ctx.strokeStyle = this.colorRed;
+    if (Date.now() - this.lastPitchTime > this.pitchTimeThresh)
+      this.ctx.strokeStyle = this.colorRed;
     this.ctx.beginPath();
-    for(var i = 0; i < this.binCount; i++) {
+    for (var i = 0; i < this.binCount; i++) {
       let pitchOsc = Math.sin(i * this.getPitch() * 0.0002);
-      this.ctx.lineTo(i * barWidth, this.panelMediumH / 2 + pitchOsc * this.panelMediumH / 2.5);
+      this.ctx.lineTo(
+        i * barWidth,
+        this.panelMediumH / 2 + (pitchOsc * this.panelMediumH) / 2.5
+      );
     }
     this.ctx.stroke();
 
@@ -485,7 +529,12 @@ class SoundFFT {
     // amp title
     this.ctx.translate(0, this.panelMediumH);
     this.drawPanelBg(0, 0, this.debugW, this.titleH);
-    this.drawDebugText(`Amplitude: ${this.avgAmpDirect.toFixed(2)}`, 4, 11, this.colorWhite);
+    this.drawDebugText(
+      `Amplitude: ${this.avgAmpDirect.toFixed(2)}`,
+      4,
+      11,
+      this.colorWhite
+    );
 
     // amp panel
     this.ctx.translate(0, this.titleH);
@@ -501,8 +550,18 @@ class SoundFFT {
     // amp title
     this.ctx.translate(0, this.panelSmallH);
     this.drawPanelBg(0, 0, this.debugW, this.titleH);
-    this.drawDebugText(`Beat Detect amp: ${this.avgAmpDirect.toFixed(2)}`, 4, 11, this.colorWhite);
-    this.drawDebugText(`Amp Up: ${Math.max(0, this.ampDirection.average().toFixed(3))}`, this.debugW / 2, 11, this.colorWhite);
+    this.drawDebugText(
+      `Beat Detect amp: ${this.avgAmpDirect.toFixed(2)}`,
+      4,
+      11,
+      this.colorWhite
+    );
+    this.drawDebugText(
+      `Amp Up: ${Math.max(0, this.ampDirection.average().toFixed(3))}`,
+      this.debugW / 2,
+      11,
+      this.colorWhite
+    );
 
     // amp panel
     this.ctx.translate(0, this.titleH);
@@ -518,7 +577,11 @@ class SoundFFT {
     this.ctx.fillRect(this.debugW * this.beatCutOff, 0, 2, this.panelSmallH);
 
     this.ctx.fillStyle = this.colorWhite;
-    if (this.beatDetectAvailable() == false && Date.now() < this.beatLastTime + 200) {  // flash green for a moment after beat detection
+    if (
+      this.beatDetectAvailable() == false &&
+      Date.now() < this.beatLastTime + 200
+    ) {
+      // flash green for a moment after beat detection
       this.ctx.fillStyle = this.colorYellow;
     }
     this.ctx.fillRect(0, 0, this.debugW * this.avgAmp, this.panelSmallH);
@@ -535,7 +598,6 @@ class SoundFFT {
     this.ctx.fillStyle = fill;
     this.ctx.fillText(str, x, y);
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -544,8 +606,8 @@ class SoundFFT {
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
-SoundFFT.FREQUENCIES = 'SoundFFT.FREQUENCIES';
-SoundFFT.WAVEFORM = 'SoundFFT.WAVEFORM';
-SoundFFT.BEAT = 'SoundFFT.BEAT';
+SoundFFT.FREQUENCIES = "SoundFFT.FREQUENCIES";
+SoundFFT.WAVEFORM = "SoundFFT.WAVEFORM";
+SoundFFT.BEAT = "SoundFFT.BEAT";
 
 export default SoundFFT;

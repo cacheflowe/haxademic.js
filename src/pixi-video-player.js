@@ -1,6 +1,6 @@
 import * as PIXI from "../vendor/pixi/pixi.mjs";
-import PixiSpriteScale from "./pixi-sprite-scale.es6.js";
-import VideoUtil from "./video-util.es6.js";
+import PixiSpriteScale from "./pixi-sprite-scale.js";
+import VideoUtil from "./video-util.js";
 
 export default class PixiVideoPlayer {
   static textureCache = {};

@@ -1,17 +1,20 @@
-import VideoRecorder from 'https://cacheflowe.github.io/haxademic.js/src/video-recorder.es6.js';
+import VideoRecorder from "https://cacheflowe.github.io/haxademic.js/src/video-recorder.js";
 
 class p5Recorder {
   constructor(loopFrames) {
     // grab main p5js canvas
-    this.recordEl = select('canvas').elt;
+    this.recordEl = select("canvas").elt;
     // set up options for VideoRecorder object
     const optionsOverride = {
-      fileType: 'webm',
+      fileType: "webm",
       audioKBPS: 320,
       videoMBPS: 20,
       callback: (aLink) => {
-        aLink.setAttribute('class', 'button');
-        aLink.setAttribute('style', "padding: 1rem; display: inline-block; background: black; color: white; margin-top: 0.5rem; text-decoration: none; font-family: Helvetica, Arial, sans-serif; border-radius: 0.5rem;");
+        aLink.setAttribute("class", "button");
+        aLink.setAttribute(
+          "style",
+          "padding: 1rem; display: inline-block; background: black; color: white; margin-top: 0.5rem; text-decoration: none; font-family: Helvetica, Arial, sans-serif; border-radius: 0.5rem;"
+        );
         this.recordEl.parentNode.appendChild(aLink);
       },
     };
@@ -25,25 +28,27 @@ class p5Recorder {
   }
 
   renderVideo() {
-    if(frameCount == this.startFrame) {
+    if (frameCount == this.startFrame) {
       this.videoRecorder.start();
-      console.log('p5Recorder :: start frame :: ', frameCount);
+      console.log("p5Recorder :: start frame :: ", frameCount);
     }
-    if(this.videoRecorder.recording()) {
+    if (this.videoRecorder.recording()) {
       this.numFramesRecorded++;
       this.videoRecorder.addFrame(); // record frames!
     }
-    if(frameCount == this.endFrame) {
+    if (frameCount == this.endFrame) {
       this.videoRecorder.finish();
-      console.log('p5Recorder :: finish frame ::', frameCount);
-      console.log('p5Recorder :: total frames recorded:: ', this.numFramesRecorded);
+      console.log("p5Recorder :: finish frame ::", frameCount);
+      console.log(
+        "p5Recorder :: total frames recorded:: ",
+        this.numFramesRecorded
+      );
     }
   }
 }
 
 // set class on window since this gets imported into editor.p5js.org, not as a module
 window.p5Recorder = p5Recorder;
-
 
 // add to the top of your sketch
 /*

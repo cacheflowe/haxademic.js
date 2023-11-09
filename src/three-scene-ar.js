@@ -1,5 +1,5 @@
 import * as THREE from "../vendor/three/three.module.js";
-import ThreeScene from "./three-scene-.es6.js";
+import ThreeScene from "./three-scene-.js";
 
 class ThreeSceneAr extends ThreeScene {
   // TODO:
