@@ -2,19 +2,21 @@ import DemoBase from "./demo--base.js";
 
 class CanvasDrawingDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "Canvas | Drawing", "canvas-tests-container", "");
+    super(parentEl, [], "Canvas | Drawing", "canvas-tests-container", " ");
   }
+
+  // TODO:
+  // - Add canvas factory method
+  // - Add x, y, w, h to reticle frame
+  //   - Share this info across drawing functions
+  // - Mask grid with rounded corners
+  // - Add max size of reticle so we don't extend beyond grid
+  // - Center the grid in the masekd area for reticle background
 
   init() {
     this.loadImage();
     this.buildCanvas();
-    this.buildCanvasGrid();
-    this.buildCanvasGradientMatte();
-    this.buildCanvasMaskedGrid();
-    this.resize();
-    this.initProps();
-
-    this.drawGrid();
+    this.buildReticle();
 
     this.frameCount = 0;
     this.animate();
@@ -31,44 +33,48 @@ class CanvasDrawingDemo extends DemoBase {
   }
 
   buildCanvas() {
+    this.canvasW = 800;
+    this.canvasH = 800;
     this.canvas = document.createElement("canvas");
+    this.canvas.width = this.canvasW;
+    this.canvas.height = this.canvasH;
     this.ctx = this.canvas.getContext("2d");
     this.el.appendChild(this.canvas);
   }
 
+  buildReticle() {
+    this.reticleW = 400;
+    this.reticleH = 400;
+    // build canvas elements
+    this.buildCanvasGrid();
+    this.buildCanvasGradientMatte();
+    this.buildCanvasMaskedGrid();
+    // draw any one-time assets
+    this.drawGrid();
+  }
+
   buildCanvasGrid() {
     this.canvasGrid = document.createElement("canvas");
+    this.canvasGrid.width = this.reticleW;
+    this.canvasGrid.height = this.reticleH;
     this.ctxGrid = this.canvasGrid.getContext("2d");
     this.el.appendChild(this.canvasGrid);
   }
 
   buildCanvasGradientMatte() {
     this.canvasGradientMatte = document.createElement("canvas");
+    this.canvasGradientMatte.width = this.reticleW;
+    this.canvasGradientMatte.height = this.reticleH;
     this.ctxGradientMatte = this.canvasGradientMatte.getContext("2d");
     this.el.appendChild(this.canvasGradientMatte);
   }
 
   buildCanvasMaskedGrid() {
     this.canvasMaskedGrid = document.createElement("canvas");
+    this.canvasMaskedGrid.width = this.reticleW;
+    this.canvasMaskedGrid.height = this.reticleH;
     this.ctxMaskedGrid = this.canvasMaskedGrid.getContext("2d");
     this.el.appendChild(this.canvasMaskedGrid);
-  }
-
-  initProps() {
-    this.backgroundColor = "#555555";
-  }
-
-  resize() {
-    this.width = 800;
-    this.height = 800;
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
-    this.canvasGrid.width = this.width;
-    this.canvasGrid.height = this.height;
-    this.canvasGradientMatte.width = this.width;
-    this.canvasGradientMatte.height = this.height;
-    this.canvasMaskedGrid.width = this.width;
-    this.canvasMaskedGrid.height = this.height;
   }
 
   saveImage() {
@@ -102,21 +108,17 @@ class CanvasDrawingDemo extends DemoBase {
   drawBackground() {
     // static color
     this.ctx.fillStyle = this.backgroundColor;
-    this.ctx.fillRect(0, 0, this.width, this.height);
+    this.ctx.fillRect(0, 0, this.canvasW, this.canvasH);
 
     // radial gradient
-    var gradient = this.ctx.createRadialGradient(
-      this.width / 2,
-      this.height / 2,
-      0,
-      this.width / 2,
-      this.height / 2,
-      this.width
-    );
-    gradient.addColorStop(0.0, this.backgroundColor);
-    gradient.addColorStop(1.0, "rgba(0,0,0,1)");
+    let x = this.canvasW / 2;
+    let y = this.canvasH / 2;
+    let r = this.canvasW;
+    var gradient = this.ctx.createRadialGradient(x, y, 0, x, y, r);
+    gradient.addColorStop(0.0, "rgba(80, 80, 80, 1)");
+    gradient.addColorStop(1.0, "rgba(0, 0, 0, 1)");
     this.ctx.fillStyle = gradient;
-    this.ctx.fillRect(0, 0, this.width, this.height);
+    this.ctx.fillRect(0, 0, this.canvasW, this.canvasH);
   }
 
   drawDashedOutline() {
@@ -126,27 +128,31 @@ class CanvasDrawingDemo extends DemoBase {
     this.ctx.lineDashOffset = this.frameCount;
     this.ctx.setLineDash([23 / 3, 23 / 3]); // why this magic number to make dashes loop properly?
     this.ctx.beginPath();
-    this.ctx.roundRect(200, 200, this.width - 400, this.height - 400, 20);
+    this.ctx.roundRect(200, 200, this.canvasW - 400, this.canvasH - 400, 20);
     this.ctx.stroke();
   }
 
   drawRadarGrid() {
     // draw masked radar grid
     this.ctx.drawImage(this.canvasMaskedGrid, 200, 200, 400, 400);
-    // draw think line at bottom
-    this.ctx.strokeStyle = "#ffffff";
-    this.ctx.lineWidth = 3;
-    this.ctx.moveTo(200, this.maskBot);
-    this.ctx.lineTo(600, this.maskBot);
-    this.ctx.setLineDash([]);
-    this.ctx.stroke();
+    // draw thick line at bottom
+    let y = 200 + this.maskBot;
+    if (y < this.reticleH + 200) {
+      this.ctx.strokeStyle = "#ffffff";
+      this.ctx.lineWidth = 3;
+      this.ctx.beginPath();
+      this.ctx.moveTo(200, y);
+      this.ctx.lineTo(600, y);
+      this.ctx.setLineDash([]);
+      this.ctx.stroke();
+    }
   }
 
   drawGradientMask() {
     let w = this.canvasGradientMatte.width;
     let h = this.canvasGradientMatte.height;
     let maskH = 200;
-    let y = -maskH + ((this.frameCount * 5) % (800 + maskH)); // TODO: needs to use delta time
+    let y = -maskH + ((this.frameCount * 5) % (400 + maskH)); // TODO: needs to use delta time
     let y2 = maskH;
     this.maskBot = y + y2;
     this.ctxGradientMatte.clearRect(0, 0, w, h);
@@ -173,6 +179,10 @@ class CanvasDrawingDemo extends DemoBase {
     let w = this.canvasGrid.width;
     let h = this.canvasGrid.height;
     this.ctxGrid.strokeStyle = "rgb(255, 255, 255)";
+
+    // transparent background
+    this.ctxGrid.fillStyle = "rgba(0, 0, 255, 0.3)";
+    this.ctxGrid.fillRect(0, 0, w, h);
 
     // vertical lines
     this.ctxGrid.beginPath();
