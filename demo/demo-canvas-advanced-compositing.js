@@ -2,7 +2,13 @@ import DemoBase from "./demo--base.js";
 
 class CanvasDrawingDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "Canvas | Drawing", "canvas-tests-container", " ");
+    super(
+      parentEl,
+      [],
+      "Canvas | Advanced Compositing",
+      "canvas-advanced-compositing-container",
+      " "
+    );
   }
 
   // TODO:
