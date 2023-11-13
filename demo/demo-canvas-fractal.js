@@ -40,7 +40,6 @@ class Fractal {
     this.width = window.innerWidth;
     this.height = window.innerHeight;
     this.canvas = document.createElement("canvas");
-    this.canvas.style.setProperty("border", "1px solid black");
     this.canvas.style.setProperty("position", "fixed");
     this.canvas.style.setProperty("left", "0");
     this.canvas.style.setProperty("top", "0");
