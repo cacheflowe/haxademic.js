@@ -12,7 +12,6 @@ class CanvasDrawingDemo extends DemoBase {
   }
 
   // TODO:
-  // - Add canvas factory method
   // - Add x, y, w, h to reticle frame
   //   - Share this info across drawing functions
   // - Mask grid with rounded corners
@@ -20,79 +19,66 @@ class CanvasDrawingDemo extends DemoBase {
   // - Center the grid in the masekd area for reticle background
 
   init() {
-    this.loadImage();
-    this.buildCanvas();
-    this.buildReticle();
+    // config
+    this.canvasW = 800;
+    this.canvasH = 800;
+    this.radarW = 400;
+    this.radarH = 400;
+    this.reticleW = 400;
+    this.reticleH = 400;
+    this.reticleMaxW = 400;
+    this.reticleMaxH = 400;
+    this.reticleR = 50;
+    this.gridStep = 40;
 
+    // build canvas elements
+    this.buildMainCanvas();
+    this.buildCanvasRadarGrid();
+    this.buildCanvasRadarGradientMatte();
+    this.buildCanvasRadarMaskedGrid();
+
+    // draw any one-time assets
+    this.drawGrid();
+
+    // animate
     this.frameCount = 0;
     this.animate();
   }
 
-  keyDown(key) {
-    if (key == "s") this.drawing.saveImage();
+  //////////////////////////////////
+  // Build canvases
+  //////////////////////////////////
+
+  createCanvas(w, h) {
+    let newCanvas = document.createElement("canvas");
+    newCanvas.width = w;
+    newCanvas.height = h;
+    return newCanvas;
   }
 
-  loadImage() {
-    let imagePath = "../data/images/bb.jpg";
-    this.imageEl = document.createElement("img");
-    this.imageEl.setAttribute("src", imagePath);
-  }
-
-  buildCanvas() {
-    this.canvasW = 800;
-    this.canvasH = 800;
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = this.canvasW;
-    this.canvas.height = this.canvasH;
+  buildMainCanvas() {
+    this.canvas = this.createCanvas(this.canvasW, this.canvasH);
     this.ctx = this.canvas.getContext("2d");
     this.el.appendChild(this.canvas);
+    this.el.appendChild(document.createElement("hr"));
   }
 
-  buildReticle() {
-    this.reticleW = 400;
-    this.reticleH = 400;
-    // build canvas elements
-    this.buildCanvasGrid();
-    this.buildCanvasGradientMatte();
-    this.buildCanvasMaskedGrid();
-    // draw any one-time assets
-    this.drawGrid();
-  }
-
-  buildCanvasGrid() {
-    this.canvasGrid = document.createElement("canvas");
-    this.canvasGrid.width = this.reticleW;
-    this.canvasGrid.height = this.reticleH;
+  buildCanvasRadarGrid() {
+    this.canvasGrid = this.createCanvas(this.radarW, this.radarH);
     this.ctxGrid = this.canvasGrid.getContext("2d");
     this.el.appendChild(this.canvasGrid);
   }
 
-  buildCanvasGradientMatte() {
-    this.canvasGradientMatte = document.createElement("canvas");
-    this.canvasGradientMatte.width = this.reticleW;
-    this.canvasGradientMatte.height = this.reticleH;
+  buildCanvasRadarGradientMatte() {
+    this.canvasGradientMatte = this.createCanvas(this.radarW, this.radarH);
     this.ctxGradientMatte = this.canvasGradientMatte.getContext("2d");
     this.el.appendChild(this.canvasGradientMatte);
   }
 
-  buildCanvasMaskedGrid() {
-    this.canvasMaskedGrid = document.createElement("canvas");
-    this.canvasMaskedGrid.width = this.reticleW;
-    this.canvasMaskedGrid.height = this.reticleH;
+  buildCanvasRadarMaskedGrid() {
+    this.canvasMaskedGrid = this.createCanvas(this.radarW, this.radarH);
     this.ctxMaskedGrid = this.canvasMaskedGrid.getContext("2d");
     this.el.appendChild(this.canvasMaskedGrid);
-  }
-
-  saveImage() {
-    if (this.renderedImg) document.body.removeChild(this.renderedImg);
-    let imgBase64 = this.canvas.toDataURL();
-    this.renderedImg = document.createElement("img");
-    this.renderedImg.src = imgBase64;
-    this.renderedImg.setAttribute(
-      "style",
-      "width: 250px; box-shadow: 0 0 5px #000000; position: fixed; bottom: 2rem; left: 50%; margin-left: -125px;"
-    );
-    document.body.appendChild(this.renderedImg);
   }
 
   //////////////////////////////////
@@ -100,19 +86,24 @@ class CanvasDrawingDemo extends DemoBase {
   //////////////////////////////////
 
   animate() {
-    // this.ctx.globalCompositeOperation = "color"; // "luminosity"; // normal | multiply | screen | overlay | darken | lighten | color-dodge | color-burn | hard-light | soft-light | difference | exclusion | hue | saturation | color | luminosity
+    // frame loop
     this.frameCount++;
-    this.ctx.globalCompositeOperation = "source-over"; // default blend mode
+    requestAnimationFrame(() => this.animate());
+    // off-screen compositing
     this.drawGradientMask();
     this.applyGridMask();
+    // main drawing
     this.drawBackground();
+    this.ctx.save();
+    this.setReticlePosition();
     this.drawRadarGrid();
     this.drawDashedOutline();
-    requestAnimationFrame(() => this.animate());
+    this.ctx.restore();
   }
 
   drawBackground() {
     // static color
+    this.ctx.globalCompositeOperation = "source-over"; // default blend mode
     this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0, 0, this.canvasW, this.canvasH);
 
@@ -127,28 +118,42 @@ class CanvasDrawingDemo extends DemoBase {
     this.ctx.fillRect(0, 0, this.canvasW, this.canvasH);
   }
 
+  setReticlePosition() {
+    // TODO: move this around for animation testing
+    // TODO: Also simulate reticle size here
+    this.ctx.translate(200, 200);
+  }
+
   drawDashedOutline() {
     this.ctx.globalCompositeOperation = "source-over"; // default blend mode
     this.ctx.strokeStyle = "#ffffff";
     this.ctx.lineWidth = 3;
     this.ctx.lineDashOffset = this.frameCount;
-    this.ctx.setLineDash([23 / 3, 23 / 3]); // why this magic number to make dashes loop properly?
+    this.ctx.setLineDash([this.reticleW / 55]);
     this.ctx.beginPath();
-    this.ctx.roundRect(200, 200, this.canvasW - 400, this.canvasH - 400, 20);
+    this.ctx.roundRect(0, 0, this.reticleW, this.reticleH, this.reticleR);
     this.ctx.stroke();
   }
 
   drawRadarGrid() {
     // draw masked radar grid
-    this.ctx.drawImage(this.canvasMaskedGrid, 200, 200, 400, 400);
+    this.ctx.drawImage(this.canvasMaskedGrid, 0, 0, this.radarW, this.radarH);
     // draw thick line at bottom
-    let y = 200 + this.maskBot;
-    if (y < this.reticleH + 200) {
+    let y = this.maskBot;
+    let lineW = this.radarW;
+    // deal with rounded corners
+    if (y > this.radarH - this.reticleR) {
+      let y2 = y - (this.radarH - this.reticleR);
+      let x = Math.sqrt(Math.pow(this.reticleR, 2) - Math.pow(y2, 2));
+      lineW = this.radarW - x;
+    }
+    // draw line
+    if (y < this.radarH) {
       this.ctx.strokeStyle = "#ffffff";
       this.ctx.lineWidth = 3;
       this.ctx.beginPath();
-      this.ctx.moveTo(200, y);
-      this.ctx.lineTo(600, y);
+      this.ctx.moveTo(0, y);
+      this.ctx.lineTo(lineW, y);
       this.ctx.setLineDash([]);
       this.ctx.stroke();
     }
@@ -157,42 +162,54 @@ class CanvasDrawingDemo extends DemoBase {
   drawGradientMask() {
     let w = this.canvasGradientMatte.width;
     let h = this.canvasGradientMatte.height;
-    let maskH = 200;
-    let y = -maskH + ((this.frameCount * 5) % (400 + maskH)); // TODO: needs to use delta time
+    let maskH = this.radarH / 2;
+    let yOffset = this.frameCount * 5; // TODO: needs to use deltaTime
+    let y = -maskH + (yOffset % (this.radarH + maskH));
     let y2 = maskH;
     this.maskBot = y + y2;
     this.ctxGradientMatte.clearRect(0, 0, w, h);
+    // rebuild moving gradient
     let gradient = this.ctxGradientMatte.createLinearGradient(0, y, 0, y + y2);
     gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
     gradient.addColorStop(1, "rgba(255, 255, 255, 1.0)");
+    // draw gradient
+    this.ctxGradientMatte.globalCompositeOperation = "source-over";
     this.ctxGradientMatte.fillStyle = gradient;
     this.ctxGradientMatte.fillRect(0, y, w, 200);
   }
 
   applyGridMask() {
-    let img = this.imageEl;
     let w = this.canvasGrid.width;
     let h = this.canvasGrid.height;
     this.ctxMaskedGrid.clearRect(0, 0, w, h);
+    // draw mask
     this.ctxMaskedGrid.globalCompositeOperation = "source-over";
     this.ctxMaskedGrid.drawImage(this.canvasGradientMatte, 0, 0);
+    // then draw grid, which is masked by the gradient image
     this.ctxMaskedGrid.globalCompositeOperation = "source-in";
     this.ctxMaskedGrid.drawImage(this.canvasGrid, 0, 0);
   }
 
   drawGrid() {
-    let step = 40;
     let w = this.canvasGrid.width;
     let h = this.canvasGrid.height;
     this.ctxGrid.strokeStyle = "rgb(255, 255, 255)";
 
-    // transparent background
+    // draw rounded mask
+    this.ctxGrid.globalCompositeOperation = "source-over";
+    this.ctxGrid.fillStyle = "#fff";
+    this.ctxGrid.roundRect(0, 0, w, h, this.reticleR);
+    this.ctxGrid.fill();
+
+    // semi-transparent background
+    this.ctxGrid.globalCompositeOperation = "source-in";
     this.ctxGrid.fillStyle = "rgba(0, 0, 255, 0.3)";
     this.ctxGrid.fillRect(0, 0, w, h);
 
     // vertical lines
+    this.ctxGrid.globalCompositeOperation = "source-over";
     this.ctxGrid.beginPath();
-    for (var x = 0; x <= w; x += step) {
+    for (var x = this.gridStep; x < w; x += this.gridStep) {
       this.ctxGrid.moveTo(x, 0);
       this.ctxGrid.lineTo(x, h);
     }
@@ -201,7 +218,7 @@ class CanvasDrawingDemo extends DemoBase {
 
     // for the sake of the example 2nd path
     this.ctxGrid.beginPath();
-    for (var y = 0; y <= h; y += step) {
+    for (var y = this.gridStep; y < h; y += this.gridStep) {
       this.ctxGrid.moveTo(0, y);
       this.ctxGrid.lineTo(w, y);
     }
@@ -210,7 +227,6 @@ class CanvasDrawingDemo extends DemoBase {
   }
 
   drawMaskedLines() {
-    let img = this.imageEl;
     let w = img.width;
     let h = img.height;
     this.ctx.drawImage(img, 0, 0, w, h, 0, 0, w, img.height);
