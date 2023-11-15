@@ -11,25 +11,20 @@ class CanvasDrawingDemo extends DemoBase {
     );
   }
 
-  // TODO:
-  // - Add x, y, w, h to reticle frame
-  //   - Share this info across drawing functions
-  // - Mask grid with rounded corners
-  // - Add max size of reticle so we don't extend beyond grid
-  // - Center the grid in the masekd area for reticle background
-
   init() {
     // config
     this.canvasW = 800;
     this.canvasH = 800;
     this.radarW = 400;
     this.radarH = 400;
-    this.reticleW = 400;
-    this.reticleH = 400;
-    this.reticleMaxW = 400;
-    this.reticleMaxH = 400;
-    this.reticleR = 50;
+    this.reticleW = this.radarW;
+    this.reticleH = this.radarH;
+    this.reticleMaxW = this.radarW;
+    this.reticleMaxH = this.radarH;
+    this.reticleRBase = 20;
+    this.reticleR = this.reticleRBase;
     this.gridStep = 40;
+    this.curScale = 1;
 
     // build canvas elements
     this.buildMainCanvas();
@@ -70,6 +65,7 @@ class CanvasDrawingDemo extends DemoBase {
   }
 
   buildCanvasRadarGradientMatte() {
+    this.maskTop = 0;
     this.canvasGradientMatte = this.createCanvas(this.radarW, this.radarH);
     this.ctxGradientMatte = this.canvasGradientMatte.getContext("2d");
     this.el.appendChild(this.canvasGradientMatte);
@@ -121,38 +117,65 @@ class CanvasDrawingDemo extends DemoBase {
   setReticlePosition() {
     // TODO: move this around for animation testing
     // TODO: Also simulate reticle size here
-    this.ctx.translate(200, 200);
+    let size = 300 + Math.sin(this.frameCount * 0.03) * 100;
+    this.curScale = size / this.reticleMaxW;
+    this.reticleR = this.reticleRBase * this.curScale;
+    this.reticleW = size;
+    this.reticleH = size;
+    // center + offset
+    let x = this.canvasW / 2 - this.reticleW / 2;
+    let y = this.canvasH / 2 - this.reticleH / 2;
+    this.ctx.translate(x, y);
   }
 
   drawDashedOutline() {
     this.ctx.globalCompositeOperation = "source-over"; // default blend mode
     this.ctx.strokeStyle = "#ffffff";
     this.ctx.lineWidth = 3;
-    this.ctx.lineDashOffset = this.frameCount;
-    this.ctx.setLineDash([this.reticleW / 55]);
+    // this.ctx.lineDashOffset = this.frameCount;
+    this.ctx.setLineDash([11 * this.curScale]);
     this.ctx.beginPath();
     this.ctx.roundRect(0, 0, this.reticleW, this.reticleH, this.reticleR);
     this.ctx.stroke();
   }
 
+  easeInCubic(x) {
+    return 1 - Math.sqrt(1 - Math.pow(x, 2));
+  }
+
+  easeOutCubic(x) {
+    return 1 - Math.pow(1 - x, 3);
+  }
+
   drawRadarGrid() {
     // draw masked radar grid
-    this.ctx.drawImage(this.canvasMaskedGrid, 0, 0, this.radarW, this.radarH);
+    let w = this.reticleW;
+    let h = this.reticleH;
+    this.ctx.drawImage(this.canvasMaskedGrid, 0, 0, w, h);
+
     // draw thick line at bottom
-    let y = this.maskBot;
-    let lineW = this.radarW;
-    // deal with rounded corners
-    if (y > this.radarH - this.reticleR) {
-      let y2 = y - (this.radarH - this.reticleR);
-      let x = Math.sqrt(Math.pow(this.reticleR, 2) - Math.pow(y2, 2));
-      lineW = this.radarW - x;
-    }
+    let x = 0;
+    let y = this.maskBot * this.curScale; // scale from reticle size change
+    let lineW = this.reticleW;
+
     // draw line
-    if (y < this.radarH) {
+    if (y < this.reticleH) {
+      // deal with rounded corners - shrink the line
+      if (y > this.reticleH - this.reticleR) {
+        let progress = (y - (this.reticleH - this.reticleR)) / this.reticleR;
+        let curveSubtract = this.easeInCubic(progress) * this.reticleR;
+        lineW -= curveSubtract;
+        x += curveSubtract;
+      } else if (y < this.reticleR) {
+        let progress = 1 - y / this.reticleR;
+        let curveSubtract = this.easeInCubic(progress) * this.reticleR;
+        lineW -= curveSubtract;
+        x += curveSubtract;
+      }
       this.ctx.strokeStyle = "#ffffff";
       this.ctx.lineWidth = 3;
       this.ctx.beginPath();
-      this.ctx.moveTo(0, y);
+      this.ctx.moveTo(x, y);
       this.ctx.lineTo(lineW, y);
       this.ctx.setLineDash([]);
       this.ctx.stroke();
@@ -162,11 +185,14 @@ class CanvasDrawingDemo extends DemoBase {
   drawGradientMask() {
     let w = this.canvasGradientMatte.width;
     let h = this.canvasGradientMatte.height;
+    this.ctxGradientMatte.clearRect(0, 0, w, h);
+
     let maskH = this.radarH / 2;
-    let yOffset = this.frameCount * 5; // TODO: needs to use deltaTime
-    let y = -maskH + (yOffset % (this.radarH + maskH));
-    let y2 = maskH;
-    this.maskBot = y + y2;
+    this.maskTop += 5;
+    this.maskBot = this.maskTop + maskH;
+    if (this.maskTop > this.reticleH + maskH) this.maskTop = -maskH;
+    let y = this.maskTop;
+    let y2 = this.maskBot;
     this.ctxGradientMatte.clearRect(0, 0, w, h);
     // rebuild moving gradient
     let gradient = this.ctxGradientMatte.createLinearGradient(0, y, 0, y + y2);
