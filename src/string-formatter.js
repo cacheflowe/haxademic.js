@@ -165,6 +165,10 @@ class StringFormatter {
     return (part1 + part2);
   }
 
+  static padNumberWithZeros(num, size) {
+    return String(num).padStart(size, "0");
+  }
+
 }
 
 export default StringFormatter;
