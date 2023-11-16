@@ -5,7 +5,13 @@ import VideoUtil from "../src/video-util.js";
 
 class SoundFFTVideoDemo extends DemoBase {
   constructor(parentEl) {
-    super(parentEl, [], "SoundFFT | Video", "video-fft-container");
+    super(
+      parentEl,
+      [],
+      "SoundFFT | Video",
+      "video-fft-container",
+      "Press the Start button to attach video to audio analysis."
+    );
   }
 
   init() {
@@ -13,11 +19,13 @@ class SoundFFTVideoDemo extends DemoBase {
     window._frameLoop = new FrameLoop().addListener(this);
 
     // add video element
-    let videoPath = "../data/videos/wash-your-hands.mp4";
+    let videoPath = "../data/videos/bball-sounds.mp4";
     this.videoEl = VideoUtil.buildVideoEl(videoPath, false);
-    this.videoEl.style.setProperty("width", "100%");
+    this.videoEl.style.setProperty("max-width", "100%");
+    this.videoEl.setAttribute("controls", "true");
     this.videoEl.volume = 0.3;
     this.el.appendChild(this.videoEl);
+    this.el.appendChild(document.createElement("hr"));
 
     // add button to start everything
     this.startButton = document.createElement("button");
@@ -50,9 +58,10 @@ class SoundFFTVideoDemo extends DemoBase {
   }
 
   updateBg() {
+    let amp = Math.round(this.soundFFT.getSpectrum()[10] * 255);
     document.body.style.setProperty(
       "background-color",
-      `rgba(0, ${Math.round(this.soundFFT.getSpectrum()[10] * 255)}, 0, 1)`
+      `rgba(${amp}, ${amp}, ${amp}, 1)`
     );
   }
 
