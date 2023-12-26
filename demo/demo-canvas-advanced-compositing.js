@@ -38,6 +38,10 @@ class CanvasDrawingDemo extends DemoBase {
     // animate
     this.frameCount = 0;
     this.animate();
+
+    // demo helpers
+    super.injectCSS(`canvas{ max-width: 100%; }`);
+    super.injectCSS(`.third{ width: 33%; }`);
   }
 
   //////////////////////////////////
@@ -60,6 +64,7 @@ class CanvasDrawingDemo extends DemoBase {
 
   buildCanvasRadarGrid() {
     this.canvasGrid = this.createCanvas(this.radarW, this.radarH);
+    this.canvasGrid.classList.add("third");
     this.ctxGrid = this.canvasGrid.getContext("2d");
     this.el.appendChild(this.canvasGrid);
   }
@@ -67,12 +72,14 @@ class CanvasDrawingDemo extends DemoBase {
   buildCanvasRadarGradientMatte() {
     this.maskTop = 0;
     this.canvasGradientMatte = this.createCanvas(this.radarW, this.radarH);
+    this.canvasGradientMatte.classList.add("third");
     this.ctxGradientMatte = this.canvasGradientMatte.getContext("2d");
     this.el.appendChild(this.canvasGradientMatte);
   }
 
   buildCanvasRadarMaskedGrid() {
     this.canvasMaskedGrid = this.createCanvas(this.radarW, this.radarH);
+    this.canvasMaskedGrid.classList.add("third");
     this.ctxMaskedGrid = this.canvasMaskedGrid.getContext("2d");
     this.el.appendChild(this.canvasMaskedGrid);
   }
@@ -172,6 +179,7 @@ class CanvasDrawingDemo extends DemoBase {
         lineW -= curveSubtract;
         x += curveSubtract;
       }
+      // finally draw the line
       this.ctx.strokeStyle = "#ffffff";
       this.ctx.lineWidth = 3;
       this.ctx.beginPath();
