@@ -8,7 +8,7 @@ class WebComponentDemo extends DemoBase {
       [],
       "WebComponent",
       "web-component-container",
-      "Testing out the WebComponent concept with container queries, ResizeObserver, and more."
+      "Testing out the WebComponent concept with container queries, ResizeObserver, custom Events and more."
     );
   }
 
@@ -41,6 +41,11 @@ class WebComponentDemo extends DemoBase {
     // query a child in the web component - relies on {mode: "open"}
     let div = this.component.shadowRoot.querySelector("div");
     console.log("Shadow div:", div);
+
+    // listen for custom events
+    this.component.addEventListener("colorUpdated", (e) => {
+      console.log("Color updated:", e.detail.color);
+    });
   }
 }
 
@@ -87,7 +92,11 @@ class CustomWebComponent extends HTMLElement {
   }
 
   colorPickedListener(e) {
-    this.article.style.backgroundColor = e.target.value;
+    const newColor = e.target.value;
+    this.article.style.backgroundColor = newColor;
+    this.dispatchEvent(
+      new CustomEvent("colorUpdated", { detail: { color: newColor } })
+    );
   }
 
   resized() {
