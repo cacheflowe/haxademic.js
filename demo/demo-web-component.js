@@ -6,9 +6,9 @@ class WebComponentDemo extends DemoBase {
     super(
       parentEl,
       [],
-      "WebComponent",
+      "Web Component",
       "web-component-container",
-      "Testing out the WebComponent concept with container queries, ResizeObserver, custom Events and more."
+      "Testing out the Web Component API with container queries, ResizeObserver, custom Events and more."
     );
   }
 
@@ -33,8 +33,10 @@ class WebComponentDemo extends DemoBase {
   }
 
   testUpdateComponent() {
+    // re-render after manually setting different attributes
     this.component = document.querySelector("custom-element");
     this.component.setAttribute("resolution", 200);
+    this.component.setAttribute("color", "#444444");
     this.component.setAttribute("debug", true);
     this.component.update();
 
@@ -44,7 +46,8 @@ class WebComponentDemo extends DemoBase {
 
     // listen for custom events
     this.component.addEventListener("colorUpdated", (e) => {
-      console.log("Color updated:", e.detail.color);
+      this.debugEl.innerHTML = "Color updated: " + e.detail.color;
+      this.debugEl.innerHTML = "Color updated: " + e.target.curColor();
     });
   }
 }
@@ -74,7 +77,7 @@ class CustomWebComponent extends HTMLElement {
     this.resizeObserver?.disconnect();
     this.colorPicker?.removeEventListener("input", this.colorPicked);
 
-    // add listeners
+    // add color picker listener
     if (!this.colorPicked)
       this.colorPicked = this.colorPickedListener.bind(this);
     this.colorPicker = this.el.querySelector("input.color");
@@ -89,6 +92,10 @@ class CustomWebComponent extends HTMLElement {
       }
     });
     this.resizeObserver.observe(this.container);
+  }
+
+  curColor() {
+    return this.colorPicker.value;
   }
 
   colorPickedListener(e) {
