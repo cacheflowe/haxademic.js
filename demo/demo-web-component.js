@@ -8,6 +8,7 @@ import URLUtil from "../src/url-util.js";
 // Resources:
 // - https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements
 // - https://mxb.dev/blog/container-queries-web-components/
+// - https://kinsta.com/blog/web-components/#web-component-criticisms-and-issues
 
 class WebComponentDemo extends DemoBase {
   constructor(parentEl) {
@@ -63,6 +64,7 @@ class WebComponentDemo extends DemoBase {
     this.component.addEventListener("colorUpdated", (e) => {
       this.debugEl.innerHTML = "Color updated: " + e.detail.color;
       this.debugEl.innerHTML = "Color updated: " + e.target.curColor();
+      this.debugEl.innerHTML = "Color updated: " + this.component.color;
     });
 
     // set a different attribute to trigger the callback
@@ -96,12 +98,18 @@ class CustomWebComponent extends HTMLElement {
     console.log("Custom element moved to new page.");
   }
 
-  static observedAttributes = ["color"]; // list of properties to watch for changes - these will trigger attributeChangedCallback()
+  static observedAttributes = ["color", "debug"]; // list of properties to watch for changes - these will trigger attributeChangedCallback()
 
   attributeChangedCallback(name, oldValue, newValue) {
+    // store any observed attribute on this object, whether it was part of the initial HTML or not
+    // this is a pretty opinionated way to do it, but it's simple
+    if (oldValue === newValue) return;
+    console.log("attributeChangedCallback", name);
+    this[name] = newValue;
+
     // only update if it's not the first render and we have a color picker
-    if (oldValue != null && name == "color" && this.colorPicker) {
-      console.log(`Attribute ${name} has changed.`, oldValue, newValue);
+    if (oldValue != null && name == "color") {
+      // console.log(`Attribute ${name} has changed.`, oldValue, newValue);
       this.colorPicker.value = newValue;
       this.colorPicked({ target: this.colorPicker });
     }
@@ -111,7 +119,7 @@ class CustomWebComponent extends HTMLElement {
 
   initComponent() {
     // get props
-    this.defColor = String(this.getAttribute("color")) || "#ff0000";
+    this.color = this.color || "#ff0000"; // this.color is set in attributeChangedCallback() on initialization
     const resolution = Number(this.getAttribute("resolution")) || 100;
     const debug = this.hasAttribute("debug");
     const size = { w: resolution, h: resolution };
@@ -129,7 +137,7 @@ class CustomWebComponent extends HTMLElement {
       ? this.colorPickedListener.bind(this)
       : this.colorPicked;
     this.colorPicker = this.el.querySelector("input.color");
-    this.colorPicker.value = this.defColor;
+    this.colorPicker.value = this.color;
     this.colorPicker.addEventListener("input", this.colorPicked);
     this.colorPicked({ target: this.colorPicker });
 
@@ -147,10 +155,10 @@ class CustomWebComponent extends HTMLElement {
   }
 
   colorPickedListener(e) {
-    const newColor = e.target.value;
-    this.article.style.backgroundColor = newColor;
+    this.color = e.target.value;
+    this.article.style.backgroundColor = this.color;
     this.dispatchEvent(
-      new CustomEvent("colorUpdated", { detail: { color: newColor } })
+      new CustomEvent("colorUpdated", { detail: { color: this.color } })
     );
   }
 
