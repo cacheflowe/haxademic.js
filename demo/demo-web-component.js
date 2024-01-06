@@ -9,6 +9,8 @@ import URLUtil from "../src/url-util.js";
 // - https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements
 // - https://mxb.dev/blog/container-queries-web-components/
 // - https://kinsta.com/blog/web-components/#web-component-criticisms-and-issues
+// - For syntax highlighting:
+//   - https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
 
 class WebComponentDemo extends DemoBase {
   constructor(parentEl) {
@@ -172,7 +174,7 @@ class CustomWebComponent extends HTMLElement {
   }
 
   css() {
-    return `
+    return /*css*/ `
       article {
         width: 100%;
         aspect-ratio: 1 / 1;
@@ -214,7 +216,7 @@ class CustomWebComponent extends HTMLElement {
   }
 
   html() {
-    return `
+    return /*html*/ `
       <div class="container">
         <article></article>
         <input class="color" type="color" value="#00ff00" />
@@ -224,9 +226,11 @@ class CustomWebComponent extends HTMLElement {
 
   render() {
     this.renderCount++;
-    this.el.innerHTML = `
+    this.el.innerHTML = /*html*/ `
       ${this.html()}
-      <style>${this.css()}</style>
+      <style>
+        ${this.css()}
+      </style>
     `;
     this.initComponent();
   }
