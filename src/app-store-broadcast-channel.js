@@ -1,4 +1,4 @@
-import AppStore from "../src/app-store-.js";
+import AppStore from "./app-store-.js";
 
 class AppStoreBroadcastChannel extends AppStore {
   constructor(broadcastChannel = "sharedChannel") {
