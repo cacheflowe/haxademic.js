@@ -9,12 +9,15 @@ import DemoBase from "./demo--base.js";
 // - https://jakelazaroff.com/words/web-components-will-outlive-your-javascript-framework/
 // - https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements
 // - https://mxb.dev/blog/container-queries-web-components/
+// - https://12daysofweb.dev/2023/web-components/
 // - https://kinsta.com/blog/web-components/#web-component-criticisms-and-issues
+// - https://www.alanwsmith.com/pages/2uoaxmqz/
 // - For syntax highlighting:
 //   - https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
 // - https://frontendmasters.com/blog/light-dom-only/
 // - https://social.gfsc.studio/@oluOnline/111685938435928671
 //   - https://www.matuzo.at/blog/2023/web-components-accessibility-faq
+//   - https://www.matuzo.at/blog/2023/pros-and-cons-of-shadow-dom/
 //   - https://webcomponents.today/
 //   - https://htmlwithsuperpowers.netlify.app/get-started/
 
