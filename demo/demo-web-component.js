@@ -1,16 +1,22 @@
 import DemoBase from "./demo--base.js";
-import URLUtil from "../src/url-util.js";
 
 // TODO:
 // - Add Intersection observer to know if we're on screen or not
 // - What else would we want a web component to do?
 
 // Resources:
+// - https://kinsta.com/blog/web-components/
+// - https://jakelazaroff.com/words/web-components-will-outlive-your-javascript-framework/
 // - https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements
 // - https://mxb.dev/blog/container-queries-web-components/
 // - https://kinsta.com/blog/web-components/#web-component-criticisms-and-issues
 // - For syntax highlighting:
 //   - https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
+// - https://frontendmasters.com/blog/light-dom-only/
+// - https://social.gfsc.studio/@oluOnline/111685938435928671
+//   - https://www.matuzo.at/blog/2023/web-components-accessibility-faq
+//   - https://webcomponents.today/
+//   - https://htmlwithsuperpowers.netlify.app/get-started/
 
 class WebComponentDemo extends DemoBase {
   constructor(parentEl) {
@@ -46,8 +52,8 @@ class WebComponentDemo extends DemoBase {
 
   addWebComponentsToDOM() {
     this.el.innerHTML = `
-      <custom-element color="#000066"></custom-element>
-      <custom-element color="#006600" debug></custom-element>
+      <custom-element color="#000066" debug></custom-element>
+      <custom-element color="#006600"></custom-element>
     `;
   }
 
@@ -188,11 +194,14 @@ class CustomWebComponent extends HTMLElement {
       }
 
       /* Testing container queries */
-      /* :host sets the context for the container queries */
+
+      :host([debug]) {
+        border: 1px solid #990000;
+      }
 
       :host {
         display: block;
-        container-type: inline-size;
+        container-type: inline-size; /* sets the context for the container queries */
       }
 
       @container (max-width: 199px) {
