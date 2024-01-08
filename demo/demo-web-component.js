@@ -89,6 +89,9 @@ class CustomWebComponent extends HTMLElement {
     super();
     this.renderCount = 0;
     this.el = this.attachShadow({ mode: "open" }); // "open" allows querying and probably lots more
+    this.el.addEventListener("click", (e) => {
+      console.log("Shadow DOM clicked", e.target);
+    });
   }
 
   // Web Component API callbacks --------------------------------------------
