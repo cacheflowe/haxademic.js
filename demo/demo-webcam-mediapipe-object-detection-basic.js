@@ -150,7 +150,7 @@ class WebcamMediaPipeObjectDetectionDemo extends DemoBase {
     for (let detection of result.detections) {
       const score = detection.categories[0].score;
       if (score > 0.5) {
-        this.confidenceSmoothed.update(score);
+        // this.confidenceSmoothed.update(score);
         const confidence = Math.round(parseFloat(score) * 100);
         const p = document.createElement("p");
         let itemName = detection.categories[0].categoryName;
