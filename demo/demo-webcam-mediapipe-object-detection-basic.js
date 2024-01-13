@@ -25,9 +25,9 @@ class WebcamMediaPipeObjectDetectionDemo extends DemoBase {
   }
 
   init() {
-    this.modelURL = `../data/machine-learning/mediapipe-waffle-model_fp16.tflite`; // `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`;
+    this.modelURL = `../data/machine-learning/mediapipe-swoosh-model_fp16.tflite`; // `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`;
     this.visionURL = `../vendor/mediapipe/wasm`; //  `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.2/wasm`;
-    this.webcamSample = `../data/videos/sample-webcam-2.mp4`;
+    // this.webcamSample = `../data/videos/sample-webcam.mp4`;
     this.addCSS();
     this.addOverlayContainer();
     if (this.webcamSample) {
@@ -153,7 +153,9 @@ class WebcamMediaPipeObjectDetectionDemo extends DemoBase {
         this.confidenceSmoothed.update(score);
         const confidence = Math.round(parseFloat(score) * 100);
         const p = document.createElement("p");
-        p.innerText = ` ${detection.categories[0].categoryName}  - with ${confidence}% confidence`;
+        let itemName = detection.categories[0].categoryName;
+        itemName = itemName.replace("waffle", "swoosh");
+        p.innerText = ` ${itemName}  - with ${confidence}% confidence`;
 
         let w = detection.boundingBox.width - 10;
         let h = detection.boundingBox.height;
