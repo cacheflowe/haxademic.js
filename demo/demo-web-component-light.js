@@ -12,10 +12,6 @@ class WebComponentLightDemo extends DemoBase {
   }
 
   init() {
-    this.addWebComponentsToDOM();
-  }
-
-  addWebComponentsToDOM() {
     this.el.innerHTML = /*html*/ `
       <custom-button>
         <button data-message="Hello">Light DOM button</button>
@@ -25,8 +21,8 @@ class WebComponentLightDemo extends DemoBase {
   }
 }
 
-// Custom Web Component, in the lightest form possible. Normally we'd have constructor() call super(), but we're keeping it simple here.\
-// With LightDom, the we lose some functionality of accessing the shadow DOM elements, but we gain the ability to style the component from the outside, and keep things super simple
+// Custom Web Component, in the lightest form possible. Normally we'd have constructor() that calls super(), but we're keeping it simple here.
+// With Light DOM, the we lose some functionality of accessing the shadow DOM elements, but we gain the ability to style the component from the outside, and keep things super simple
 
 class CustomButton extends HTMLElement {
   connectedCallback() {

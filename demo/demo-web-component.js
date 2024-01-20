@@ -12,6 +12,8 @@ import DemoBase from "./demo--base.js";
 // - https://12daysofweb.dev/2023/web-components/
 // - https://kinsta.com/blog/web-components/#web-component-criticisms-and-issues
 // - https://www.alanwsmith.com/pages/2uoaxmqz/
+// - https://www.raymondcamden.com/2023/05/17/handling-web-component-removal-with-disconnectedcallback
+// - https://www.smashingmagazine.com/2016/12/styling-web-components-using-a-shared-style-sheet/
 // - For syntax highlighting:
 //   - https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
 // - https://frontendmasters.com/blog/light-dom-only/
