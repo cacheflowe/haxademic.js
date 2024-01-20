@@ -4,7 +4,7 @@ import * as PIXI from "../vendor/pixi/pixi.mjs";
 import PixiStage from "../src/pixi-stage.js";
 import PixiSpriteScale from "../src/pixi-sprite-scale.js";
 import PixiVideoPlayer from "../src/pixi-video-player.js";
-import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.mjs";
+import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.js";
 
 class WebRtcVideoStreamToPixi extends DemoBase {
   constructor(parentEl) {

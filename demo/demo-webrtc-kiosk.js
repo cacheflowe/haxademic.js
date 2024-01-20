@@ -3,7 +3,7 @@ import URLUtil from "../src/url-util.js";
 import AppStoreDebug from "../src/app-store-debug.js";
 import AppStore from "../src/app-store-.js";
 
-import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.mjs";
+import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.js";
 import ShortUniqueId from "../vendor/short-unique-id.min.js";
 
 class WebRtcKioskDemo extends DemoBase {

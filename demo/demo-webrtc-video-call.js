@@ -1,6 +1,6 @@
 import DemoBase from "./demo--base.js";
 import URLUtil from "../src/url-util.js";
-import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.mjs";
+import { WebRtcClient, WebRtcKiosk } from "../src/webrtc-peer.js";
 
 class WebRtcVideoCall extends DemoBase {
   constructor(parentEl) {
