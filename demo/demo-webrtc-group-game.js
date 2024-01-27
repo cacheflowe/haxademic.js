@@ -173,26 +173,6 @@ class WebRtcGroupGameDemo extends DemoBase {
         <qr-code>Waiting for PeerJS connection...</qr-code>
       </div>
     `;
-
-    // // create container for QR code to update
-    // this.qrContainer = this.el.querySelector("qr-code");
-    // // kill connections button
-    // this.closeButton = this.el.querySelector("#close-connections");
-    // this.closeButton.addEventListener("click", () => {
-    //   this.kiosk.closeAllConnections();
-    //   this.qrId = new ShortUniqueId()(); // append handshake ID to querystring - uses ShortUniqueId module
-    //   this.kiosk.buildQrCode(`&qrId=${this.qrId}`);
-    // });
-    // // start game button
-    // this.startButton = this.el.querySelector("#game-start");
-    // this.startButton.addEventListener("click", () => {
-    //   this.kiosk.broadcastJSON({ cmd: "gameStart" });
-    // });
-    // // end game button
-    // this.endButton = this.el.querySelector("#game-end");
-    // this.endButton.addEventListener("click", () => {
-    //   this.kiosk.broadcastJSON({ cmd: "gameEnd" });
-    // });
   }
 
   buildClient(offer) {
