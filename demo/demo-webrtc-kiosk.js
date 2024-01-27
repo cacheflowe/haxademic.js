@@ -119,7 +119,7 @@ class WebRtcKioskDemo extends DemoBase {
 class KioskCustom extends WebRtcKiosk {
   // Custom kiosk features:
   // - Advertise the kiosk connection via single-use QR code
-  // - Disconnect clients from server after 3 minutes\
+  // - Disconnect clients from server after 3 minutes
   // - Handshake to allow client connections
   // - Keep list of active users with username
 
