@@ -114,6 +114,16 @@ class WebRtcPeer {
     } else console.log("No connection, can't send data");
   }
 
+  broadcastJSON(data) {
+    if (this.connections) {
+      this.connections.forEach((conn) => {
+        this.sendJSON(data, conn);
+      });
+    } else {
+      this.sendJSON(data);
+    }
+  }
+
   peerDataReceived(data) {
     // console.log("Received data:", data);
     this.emit("peerDataReceived", data);
@@ -291,11 +301,31 @@ class WebRtcKiosk extends WebRtcPeer {
   ) {
     super(customPeerId, peerJsOptions);
     console.log("KIOSK");
+    this.buildQrOptions();
     this.maxClientConnectionTime = maxClientConnectionTime;
     this.connections = [];
     this.reconnectInterval = setInterval(() => {
       this.checkServerConnection();
     }, 10000);
+  }
+
+  buildQrOptions() {
+    // override to customize QR code
+    this.qrOptions = {
+      errorCorrectionLevel: "Q", // L, M, Q, H
+      margin: 4,
+      scale: 5, // pixels per square
+      width: 256, // overides `scale`
+      color: {
+        dark: "#000",
+        light: "#bbb",
+      },
+    };
+  }
+
+  setQrOptions(options) {
+    // override specific options
+    this.qrOptions = { ...this.qrOptions, ...options };
   }
 
   checkServerConnection() {
@@ -325,18 +355,7 @@ class WebRtcKiosk extends WebRtcPeer {
     this.offerLink.href = connectionURL;
     this.canvas = this.canvas ? this.canvas : document.createElement("canvas");
     this.offerLink.appendChild(this.canvas);
-    // build QR code
-    let options = {
-      errorCorrectionLevel: "Q", // L, M, Q, H
-      margin: 4,
-      scale: 5, // pixels per square
-      width: 256, // overides `scale`
-      color: {
-        dark: "#000000",
-        light: "#ff2222",
-      },
-    };
-    await QRCode.toCanvas(this.canvas, connectionURL, options);
+    await QRCode.toCanvas(this.canvas, connectionURL, this.qrOptions);
     this.emit("qrCode", this.offerLink);
   }
 
@@ -379,11 +398,11 @@ class WebRtcKiosk extends WebRtcPeer {
       // }
     });
     // filter old connections from array
-    if (removedAny) {
-      this.connections = this.connections.filter((conn) => {
-        return this.connectionIsGood(conn);
-      });
-    }
+    // if (removedAny) {
+    this.connections = this.connections.filter((conn) => {
+      return this.connectionIsGood(conn);
+    });
+    // }
     this.emit("connections", this.connections);
   }
 
