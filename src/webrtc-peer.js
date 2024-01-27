@@ -354,6 +354,7 @@ class WebRtcKiosk extends WebRtcPeer {
     this.offerLink.innerHTML = "";
     this.offerLink.href = connectionURL;
     this.canvas = this.canvas ? this.canvas : document.createElement("canvas");
+    this.canvas.classList.add("webrtc-qr-code");
     this.offerLink.appendChild(this.canvas);
     await QRCode.toCanvas(this.canvas, connectionURL, this.qrOptions);
     this.emit("qrCode", this.offerLink);
