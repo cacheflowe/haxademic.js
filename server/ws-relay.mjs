@@ -14,6 +14,12 @@ process.title = "node-ws";
 import express from "express";
 import WebSocket, { WebSocketServer } from "ws";
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // const wss = new WebSocketServer({ port: 8080 });
 
 /////////////////////
@@ -25,9 +31,11 @@ const wssPort = 3001;
 const httpPort = process.env.httpPort || 3000;
 const debug = args.indexOf("--debug") != -1;
 
-function eventLog(msg) {
+function eventLog(...args) {
   console.log("===================================");
-  console.log("\x1b[42m%s\x1b[0m", msg);
+  for (let arg of args) {
+    console.log("\x1b[42m%s\x1b[0m", arg);
+  }
   console.log("===================================");
 }
 
@@ -35,18 +43,26 @@ function eventLog(msg) {
 // BUILD HTTP server
 /////////////////////
 
-const INDEX = "/index.html";
 const server = express()
-  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-  .listen(httpPort, () => eventLog(`Running Web server at port: ${httpPort}`));
+  .use((req, res) => res.sendFile("./index.html", { root: __dirname }))
+  .listen(httpPort, () =>
+    eventLog(`Running Express web server at port: ${httpPort}`)
+  );
 
 /////////////////////
 // BUILD WS SERVER
 /////////////////////
 
 // start server
-const wsServer = new WebSocketServer({ port: wssPort, path: "/ws" }); // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
-eventLog(`Running WebSocket server at port: ${wssPort}`);
+const wsServer = new WebSocketServer({
+  port: wssPort,
+  host: "0.0.0.0", // allows connections from localhost and IP addresses
+  path: "/ws",
+}); // For Heroku launch, remove `port`! Example server config here: https://github.com/heroku-examples/node-websockets
+eventLog(
+  `Running WebSocket server at port: ${wssPort}`,
+  `Be sure to connect at ws://localhost:3001/ws`
+);
 
 // listen for new connections
 wsServer.on("connection", (connection, request, client) => {
