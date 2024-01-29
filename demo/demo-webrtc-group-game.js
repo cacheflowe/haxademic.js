@@ -43,8 +43,7 @@ class WebRtcGroupGameDemo extends DemoBase {
     this.closeButton = this.el.querySelector("#close-connections");
     this.closeButton.addEventListener("click", () => {
       this.kiosk.closeAllConnections();
-      this.qrId = new ShortUniqueId()(); // append handshake ID to querystring - uses ShortUniqueId module
-      this.kiosk.buildQrCode(`&qrId=${this.qrId}`);
+      this.newQrSession();
     });
     // start game button
     this.startButton = this.el.querySelector("#game-start");
@@ -73,6 +72,11 @@ class WebRtcGroupGameDemo extends DemoBase {
     return this.userColors[this.colorIndex];
   }
 
+  newQrSession() {
+    this.qrId = new ShortUniqueId()(); // append handshake ID to querystring - uses ShortUniqueId module
+    this.kiosk.buildQrCode(`&qrId=${this.qrId}`);
+  }
+
   buildKiosk() {
     // Kiosk features:
     // - Advertise the kiosk connection via QR code & allow multiple connections
@@ -95,8 +99,7 @@ class WebRtcGroupGameDemo extends DemoBase {
       _notyfSuccess("serverConnected!");
       setTimeout(() => {
         // kick off QR code generation with qrId for single-session authentication handshake
-        this.qrId = new ShortUniqueId()();
-        this.kiosk.buildQrCode(`&qrId=${this.qrId}`);
+        this.newQrSession();
       }, 200);
     });
     this.kiosk.addListener("serverDisconnected", (data) => {
