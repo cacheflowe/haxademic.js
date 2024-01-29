@@ -338,10 +338,13 @@ class WebRtcKiosk extends WebRtcPeer {
     this.buildQrCode();
   }
 
-  async buildQrCode(urlParams = "") {
+  async buildQrCode(urlParams = "", replaceFunction = null) {
     // can override with your own urlParams
     // build URL for client connection
-    let connectionURL = `${window.location.href}&offer=${this.peerID}${urlParams}`;
+    let url = window.location.href;
+    if (replaceFunction) url = replaceFunction(url);
+    let separator = url.indexOf("#") == -1 ? "#" : "&";
+    let connectionURL = `${url}${separator}offer=${this.peerID}${urlParams}`;
 
     // add link container if it doesn't exist
     if (!this.offerLink) {

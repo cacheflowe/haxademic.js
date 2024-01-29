@@ -77,9 +77,9 @@ class WebRtcGroupGameDemo extends DemoBase {
     // Kiosk features:
     // - Advertise the kiosk connection via QR code & allow multiple connections
     // - Disconnect clients from server after 10 minutes
-    // - Handshake to init client connections with a `qrId` hash querystring
+    // - Handshake to init client connections with a `qrId` hash querystring, used only for the current game session
     // - Keep list of active users with username, color and score
-    // - Send data to all clients
+    // - Broadcast data to all clients
     // - Send data to specific client
     // - Disconnect all and regenerate QR code with new QR id while preserving original peerID for persistent connection
 
@@ -93,6 +93,11 @@ class WebRtcGroupGameDemo extends DemoBase {
     });
     this.kiosk.addListener("serverConnected", (data) => {
       _notyfSuccess("serverConnected!");
+      setTimeout(() => {
+        // kick off QR code generation with qrId for single-session authentication handshake
+        this.qrId = new ShortUniqueId()();
+        this.kiosk.buildQrCode(`&qrId=${this.qrId}`);
+      }, 200);
     });
     this.kiosk.addListener("serverDisconnected", (data) => {
       _notyfError("serverDisconnected!");
