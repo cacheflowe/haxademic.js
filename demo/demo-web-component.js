@@ -14,6 +14,8 @@ import DemoBase from "./demo--base.js";
 // - https://www.alanwsmith.com/pages/2uoaxmqz/
 // - https://www.raymondcamden.com/2023/05/17/handling-web-component-removal-with-disconnectedcallback
 // - https://www.smashingmagazine.com/2016/12/styling-web-components-using-a-shared-style-sheet/
+// - https://blog.jim-nielsen.com/2023/html-web-components/
+// - https://github.com/stefanjudis/sparkly-text/blob/main/sparkly-text.js
 // - For syntax highlighting:
 //   - https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
 // - https://frontendmasters.com/blog/light-dom-only/
@@ -251,8 +253,14 @@ class CustomWebComponent extends HTMLElement {
     `;
     this.initComponent();
   }
+
+  static register() {
+    if ("customElements" in window) {
+      window.customElements.define("custom-element", CustomWebComponent);
+    }
+  }
 }
 
-customElements.define("custom-element", CustomWebComponent);
+CustomWebComponent.register();
 
 if (window.autoInitDemo) window.demo = new WebComponentDemo(document.body);

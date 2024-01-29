@@ -32,8 +32,14 @@ class CustomButton extends HTMLElement {
       console.log(e.target.getAttribute("data-message"));
     });
   }
+
+  static register() {
+    if ("customElements" in window) {
+      window.customElements.define("custom-button", CustomButton);
+    }
+  }
 }
 
-customElements.define("custom-button", CustomButton);
+CustomButton.register();
 
 if (window.autoInitDemo) window.demo = new WebComponentLightDemo(document.body);
