@@ -343,7 +343,8 @@ class WebRtcKiosk extends WebRtcPeer {
     // build URL for client connection
     let url = window.location.href;
     if (replaceFunction) url = replaceFunction(url);
-    let separator = url.indexOf("#") == -1 ? "#" : "&";
+    let separator = url.indexOf("#") == -1 ? "#" : "%26";
+    urlParams = urlParams.replace("&", "%26");
     let connectionURL = `${url}${separator}offer=${this.peerID}${urlParams}`;
 
     // add link container if it doesn't exist
@@ -381,7 +382,9 @@ class WebRtcKiosk extends WebRtcPeer {
 
   connectionIsGood(conn) {
     return (
-      conn.open && Date.now() - conn.connectTime < this.maxClientConnectionTime
+      conn.open &&
+      conn.peerConnection.connectionState == "connected" &&
+      Date.now() - conn.connectTime < this.maxClientConnectionTime
     );
   }
 
@@ -394,19 +397,18 @@ class WebRtcKiosk extends WebRtcPeer {
     // remove any connections that have been closed
     let removedAny = false;
     this.connections.forEach((conn, i) => {
-      // if (this.connectionIsGood(conn) == false) {
-      //   this.removeConnectionListeners(conn);
-      //   if (conn.call) this.removeCallListeners(conn.call);
-      //   conn.close();
-      //   removedAny = true;
-      // }
+      if (this.connectionIsGood(conn) == false) {
+        this.removeConnectionListeners(conn);
+        if (conn.call) this.removeCallListeners(conn.call);
+        conn.close();
+        removedAny = true;
+      }
     });
+    console.log(removedAny);
     // filter old connections from array
-    // if (removedAny) {
     this.connections = this.connections.filter((conn) => {
       return this.connectionIsGood(conn);
     });
-    // }
     this.emit("connections", this.connections);
   }
 

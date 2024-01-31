@@ -22,6 +22,7 @@ class DemoBase {
   }
 
   static getDemoId() {
+    document.location.hash = document.location.hash.replace("%26", "&"); // replace url-encoded ampersand
     let id =
       document.location.hash.indexOf("&") == -1
         ? document.location.hash

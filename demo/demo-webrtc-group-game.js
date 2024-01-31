@@ -173,6 +173,15 @@ class WebRtcGroupGameDemo extends DemoBase {
         </div>
       `;
     });
+    this.kiosk.addListener("peerConnected", (data) => {
+      console.log("peerConnected", data);
+    });
+    this.kiosk.addListener("clientConnected", (data) => {
+      console.log("clientConnected", data);
+    });
+    this.kiosk.addListener("peerClose", (data) => {
+      console.log("peerClose", data);
+    });
   }
 
   buildClientUI() {
