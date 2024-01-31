@@ -383,7 +383,7 @@ class WebRtcKiosk extends WebRtcPeer {
   connectionIsGood(conn) {
     return (
       conn.open &&
-      conn.peerConnection.connectionState == "connected" &&
+      conn.peerConnection?.connectionState == "connected" &&
       Date.now() - conn.connectTime < this.maxClientConnectionTime
     );
   }
@@ -394,6 +394,7 @@ class WebRtcKiosk extends WebRtcPeer {
   }
 
   manageConnections() {
+    // console.log(this.connections);
     // remove any connections that have been closed
     let removedAny = false;
     this.connections.forEach((conn, i) => {
@@ -404,7 +405,7 @@ class WebRtcKiosk extends WebRtcPeer {
         removedAny = true;
       }
     });
-    console.log(removedAny);
+    // console.log(removedAny);
     // filter old connections from array
     this.connections = this.connections.filter((conn) => {
       return this.connectionIsGood(conn);
