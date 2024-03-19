@@ -6,7 +6,7 @@ import basicSsl from "@vitejs/plugin-basic-ssl";
 export default {
   plugins: [basicSsl()],
   server: {
-    host: "localhost", // use ip address if running on other local devices: 192.168.1.155
+    host: true, // use ip address if running on other local devices: 192.168.1.155
     port: "8002",
     https: true,
   },
