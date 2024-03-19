@@ -28,6 +28,24 @@ class ObjectUtil {
     });
   }
 
+  static callbackWhenPropertyExists(obj, prop, callback) {
+    if (obj[prop]) callback(obj[prop]);
+    else {
+      let interval = setInterval(() => {
+        if (obj[prop]) {
+          clearInterval(interval);
+          callback(obj[prop]);
+        }
+      }, 100);
+    }
+  }
+
+  static addProperties(obj, props) {
+    for (let key in props) {
+      obj[key] = props[key];
+    }
+  }
+
   static overrideOptionsObject(defaultOptions, customOptions) {
     for (let key in customOptions) {
       if (defaultOptions[key]) defaultOptions[key] = customOptions[key];
