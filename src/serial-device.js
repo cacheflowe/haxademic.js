@@ -38,7 +38,10 @@ class SerialDevice {
     // input from serial device
     this.decoder = new TextDecoderStream();
     let inputDone = this.port.readable.pipeTo(this.decoder.writable);
-    this.inputStream = this.decoder.readable;
+    // this.inputStream = this.decoder.readable;  // this works, but we want to split input by line, so we switched to the next line
+    this.inputStream = this.decoder.readable.pipeThrough(
+      new TransformStream(new LineBreakTransformer())
+    );
     this.reader = this.inputStream.getReader();
     this.readLoop();
   }
@@ -81,6 +84,24 @@ class SerialDevice {
     } else {
       console.log("[SerialDevice can't write string]", data);
     }
+  }
+}
+
+class LineBreakTransformer {
+  constructor() {
+    // A container for holding stream data until a new line.
+    this.container = "";
+  }
+
+  transform(chunk, controller) {
+    this.container += chunk;
+    const lines = this.container.split("\r\n");
+    this.container = lines.pop();
+    lines.forEach((line) => controller.enqueue(line));
+  }
+
+  flush(controller) {
+    controller.enqueue(this.container);
   }
 }
 
