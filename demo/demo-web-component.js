@@ -14,7 +14,10 @@ import DemoBase from "./demo--base.js";
 // - https://www.alanwsmith.com/pages/2uoaxmqz/
 // - https://naildrivin5.com/blog/2024/01/24/web-components-in-earnest.html
 // - https://www.raymondcamden.com/2023/05/17/handling-web-component-removal-with-disconnectedcallback
-// - https://www.smashingmagazine.com/2016/12/styling-web-components-using-a-shared-style-sheet/
+// - CSS:
+//   - https://www.smashingmagazine.com/2016/12/styling-web-components-using-a-shared-style-sheet/
+//   - https://javascript.info/shadow-dom-style#host-selector
+//   - https://css-tricks.com/styling-a-web-component/
 // - https://blog.jim-nielsen.com/2023/html-web-components/
 // - https://github.com/stefanjudis/sparkly-text/blob/main/sparkly-text.js
 // - For syntax highlighting:
