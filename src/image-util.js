@@ -22,6 +22,40 @@ class ImageUtil {
     return img;
   }
 
+  static async blobToImage(blob) {
+    return await ImageUtil.loadImageSync(URL.createObjectURL(blob));
+  }
+
+  static pasteImageCallback(callback) {
+    document.addEventListener("paste", async (e) => {
+      e.preventDefault();
+      const clipboardItems =
+        typeof navigator?.clipboard?.read === "function"
+          ? await navigator.clipboard.read()
+          : e.clipboardData.files;
+
+      for (const clipboardItem of clipboardItems) {
+        let blob;
+        if (clipboardItem.type?.startsWith("image/")) {
+          // For files from `e.clipboardData.files`.
+          blob = clipboardItem;
+          // Do something with the blob.
+          callback(await ImageUtil.blobToImage(blob));
+        } else {
+          // For files from `navigator.clipboard.read()`.
+          const imageTypes = clipboardItem.types?.filter((type) =>
+            type.startsWith("image/")
+          );
+          for (const imageType of imageTypes) {
+            blob = await clipboardItem.getType(imageType);
+            // Do something with the blob.
+            callback(await ImageUtil.blobToImage(blob));
+          }
+        }
+      }
+    });
+  }
+
   static getOffsetAndSizeToCrop(
     containerW,
     containerH,
