@@ -65,7 +65,7 @@ class AppStoreDistributed extends AppStore {
     }
   }
 
-  set(key, value, broadcast) {
+  set(key, value, broadcast = false) {
     if (broadcast) {
       // get data type for java AppStore
       var type = "number";
