@@ -44,7 +44,7 @@ class KeyboardUtil {
     window.addEventListener("keydown", (e) => {
       let key = e.key;
       if (key.length > 1) return; // ignore non alpha-numeric characters
-      charStream.push({ key: e.key, time: Date.now() });
+      charStream.push({ key: key, time: Date.now() });
       charStream = charStream.filter((char) => {
         return char.time > Date.now() - timeWindow;
       });
