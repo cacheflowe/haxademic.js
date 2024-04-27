@@ -24,6 +24,17 @@ class KeyboardUtilDemo extends DemoBase {
     KeyboardUtil.addSingleKeyListener("b", (e) => {
       this.debugEl.innerHTML = `B was pressed, and that's the one we were looking for!`;
     });
+    this.buildBarcodeScan();
+  }
+
+  buildBarcodeScan() {
+    KeyboardUtil.keyInputStreamListener((recentString) => {
+      this.el.innerHTML = `charStream: ${recentString}`;
+      if (recentString.indexOf("PIZZA") > -1) {
+        let randColor = Math.floor(Math.random() * 16777215).toString(16);
+        this.el.style.backgroundColor = `#${randColor}`;
+      }
+    });
   }
 }
 
