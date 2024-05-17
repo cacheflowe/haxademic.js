@@ -1,13 +1,15 @@
 class BrowserUtil {
   // Fullscreen API
 
+  static isFullscreen() {
+    return !!document.fullscreenElement;
+  }
+
   static toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
+    if (!BrowserUtil.isFullscreen()) {
+      BrowserUtil.enterFullscreen();
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
+      BrowserUtil.exitFullscreen();
     }
   }
 
@@ -24,6 +26,19 @@ class BrowserUtil {
   }
 
   // Wake Lock API
+  // info: https://developer.chrome.com/docs/capabilities/web-apis/wake-lock
+
+  static isWakeLocked() {
+    return !!BrowserUtil.wakeLock;
+  }
+
+  static toggleWakeLock() {
+    if (!BrowserUtil.isWakeLocked()) {
+      BrowserUtil.enableWakeLock();
+    } else {
+      BrowserUtil.disableWakeLock();
+    }
+  }
 
   static async enableWakeLock() {
     try {

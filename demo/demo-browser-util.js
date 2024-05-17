@@ -8,15 +8,25 @@ class BrowserUtilDemo extends DemoBase {
       [],
       "BrowserUtil",
       "browser-util-demo",
-      'Press "f" to toggle fullscreen, "s" to enable wake lock, and "d" to exit wake lock.'
+      `
+        Press "f" to toggle fullscreen<br>
+        "w" to toggle wake lock<br>
+        "s" to enable wake lock,<br>
+        and "d" to exit wake lock.
+      `
     );
   }
 
-  init() {}
+  init() {
+    this.updateStatus();
+  }
 
   keyDown(key) {
     if (key == "f") {
-      this.toggleFullScreen();
+      BrowserUtil.toggleFullscreen();
+    }
+    if (key == "w") {
+      BrowserUtil.toggleWakeLock();
     }
     if (key == "s") {
       BrowserUtil.enableWakeLock();
@@ -24,16 +34,14 @@ class BrowserUtilDemo extends DemoBase {
     if (key == "d") {
       BrowserUtil.disableWakeLock();
     }
+    setTimeout(() => this.updateStatus(), 100);
   }
 
-  toggleFullScreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
+  updateStatus() {
+    this.debugEl.innerHTML = `
+      <div>isFullscreen: <code>${BrowserUtil.isFullscreen()}</code></div>
+      <div>isWakeLocked: <code>${BrowserUtil.isWakeLocked()}</code></div>
+    `;
   }
 }
 
