@@ -62,7 +62,6 @@ class VideoDownloadDemo extends DemoBase {
     linkEl.setAttribute("href", imagePath);
     linkEl.setAttribute("download", "bb.jpg");
     linkEl.style.setProperty("display", "block");
-
     this.el.appendChild(linkEl);
 
     linkEl.addEventListener("click", (e) => {
@@ -73,6 +72,14 @@ class VideoDownloadDemo extends DemoBase {
         // do nothing - use default browser behavior
       }
     });
+
+    // add another basic download link
+    let link2 = document.createElement("a");
+    link2.innerText = "Download image (no Share API override for iOS)";
+    link2.setAttribute("href", imagePath);
+    link2.setAttribute("download", "bb.jpg");
+    link2.style.setProperty("display", "block");
+    this.el.appendChild(link2);
   }
 
   // if (
