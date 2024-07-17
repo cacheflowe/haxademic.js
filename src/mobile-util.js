@@ -193,6 +193,15 @@ class MobileUtil {
     link.dispatchEvent(clickevent);
     return false;
   }
+
+  static addDevPanel() {
+    var script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/eruda";
+    document.body.append(script);
+    script.onload = function () {
+      eruda.init();
+    };
+  }
 }
 
 MobileUtil.FULLSCREEN_LISTENING = false;

@@ -58,6 +58,7 @@ class MobileUtilDemo extends DemoBase {
     MobileUtil.enablePseudoStyles();
     MobileUtil.addFullscreenListener();
     MobileUtil.addFullscreenEl(document.getElementById("fullscreen"), true);
+    MobileUtil.addDevPanel();
   }
 
   initButtons() {
