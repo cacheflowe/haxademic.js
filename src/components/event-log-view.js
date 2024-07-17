@@ -2,11 +2,11 @@ import EventLog from "../event-log.js";
 
 class EventLogView extends HTMLElement {
   connectedCallback() {
-    this.shadow = this.attachShadow({ mode: "open" });
+    // this.shadow = this.attachShadow({ mode: "open" });
+    this.el = this.shadow ? this.shadow : this;
     this.render();
     _store.addListener(this);
-    this.div = this.shadow.querySelector("div");
-    this.eventLog = new EventLog(this.div, 10); // use <div> instead of this.shadow so we can keep <style> intact
+    this.eventLog = new EventLog(this.el, 10); // use <div> instead of this.shadow so we can keep <style> intact
   }
 
   storeUpdated(key, value) {
@@ -32,7 +32,7 @@ class EventLogView extends HTMLElement {
   }
 
   render() {
-    this.shadow.innerHTML = /*html*/ `
+    this.el.innerHTML = /*html*/ `
       ${this.html()}
       <style>
         ${this.css()}

@@ -41,7 +41,7 @@ class AppStateDistributed extends HTMLElement {
   // AppStore listeners
 
   AppStoreDistributed_CONNECTED(val) {
-    _store.set("TABLET_CONNECTED", true, true); // let desktop app know that we're here
+    _store.set("CLIENT_CONNECTED", true, true); // let desktop app know that we're here
   }
 
   storeUpdated(key, val) {}

@@ -60,12 +60,15 @@ class AppStoreDebug extends HTMLElement {
 
   initKeyListener() {
     window.addEventListener("keyup", (e) => {
-      if (e.key == "/") this.showing = !this.showing;
-      _store.set("SHOW_DEBUG", this.showing);
-      if (this.showing == false) {
-        this.hide();
-      } else {
-        this.show();
+      let notFocused = document.activeElement.tagName != "INPUT"; // e.target.tagName != "INPUT"
+      if (e.key == "/" && notFocused) {
+        this.showing = !this.showing;
+        _store.set("SHOW_DEBUG", this.showing);
+        if (this.showing == false) {
+          this.hide();
+        } else {
+          this.show();
+        }
       }
     });
   }
