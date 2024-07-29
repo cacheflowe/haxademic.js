@@ -13,8 +13,11 @@ class SerialDeviceDemo extends DemoBase {
   }
 
   async init() {
-    this.initSerialWithButton();
-    this.sendOnClick();
+    // this.sendOnClick();
+    this.initSlider();
+    // EITHER init serial with button or auto-init with index
+    // this.initSerialWithButton();
+    this.initSerial(0);
   }
 
   initSerialWithButton() {
@@ -26,23 +29,40 @@ class SerialDeviceDemo extends DemoBase {
     // click to init serial device selector
     this.startButton.addEventListener("click", (e) => {
       this.startButton.parentNode.removeChild(this.startButton);
-      // init serial device on user interaction
-      this.serialDevice = new SerialDevice(
-        115200,
-        (data) => this.serialRead(data),
-        (err) => this.serialError(err)
-      );
+      this.initSerial();
     });
+  }
+
+  initSerial(autoInitIndex = null) {
+    this.serialDevice = new SerialDevice(
+      115200,
+      (data) => this.serialRead(data),
+      (err) => this.serialError(err),
+      autoInitIndex
+    );
   }
 
   sendOnClick() {
     document.addEventListener("click", (e) => {
       if (!!this.serialDevice && this.serialDevice.initialized) {
-        // test write method
-        // this.serialDevice.writeDataArray([Math.round(Math.random() * 100)]);
-        this.serialDevice.writeString(
-          "a" + Math.round(100 + Math.random() * 300)
-        );
+        this.serialDevice.writeString("n" + Math.round(Math.random() * 20));
+      }
+    });
+  }
+
+  initSlider() {
+    // add slider to send data
+    this.slider = document.createElement("input");
+    this.slider.type = "range";
+    this.slider.min = 0;
+    this.slider.max = 30;
+    this.slider.value = 0;
+    this.el.appendChild(this.slider);
+
+    // send data on slider change
+    this.slider.addEventListener("input", (e) => {
+      if (!!this.serialDevice && this.serialDevice.initialized) {
+        this.serialDevice.writeString("n" + parseInt(this.slider.value));
       }
     });
   }
@@ -54,10 +74,10 @@ class SerialDeviceDemo extends DemoBase {
       } else if (parseInt(data) > 40) {
         this.el.innerHTML = `<p>Distance: ${data}mm</p>`;
       } else {
-        this.debugEl.innerHTML = `<p>Error: ${data}</p>`;
+        this.debugEl.innerHTML = `<p>Info: ${data}</p>`;
       }
     } else {
-      this.debugEl.innerHTML = `<p>Error: ${data}</p>`;
+      this.debugEl.innerHTML = `<p>Info: ${data}</p>`;
     }
   }
 

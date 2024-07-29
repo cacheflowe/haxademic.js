@@ -1,6 +1,7 @@
 class SerialDevice {
   // info:
   // - https://web.dev/serial/
+  // - https://whatwebcando.today/serial.html
   // - https://codelabs.developers.google.com/codelabs/web-serial/#0
   // - https://developer.mozilla.org/en-US/docs/Web/API/Navigator/serial
   // - https://github.com/williamkapke/webserial/blob/main/src/stores/connection.js <- check this for more code examples
@@ -11,16 +12,20 @@ class SerialDevice {
   // inputs & outputs:
   // - https://github.com/cacheflowe/haxademic/blob/master/arduino/PiezoBuzzerSerialRead/PiezoBuzzerSerialRead.ino
   // TODO:
-  // - [Works now??] Read/write at same time
   // - Init by index (this is added), and if that fails, present a button to connect, and log a list of ports
   //   - make the native picker it's own constructor option
 
-  constructor(baudRate = 115200, readCallback = null, errorCallback = null) {
+  constructor(
+    baudRate = 115200,
+    readCallback = null,
+    errorCallback = null,
+    index = null
+  ) {
     this.baudRate = baudRate;
     this.readCallback = readCallback;
     this.errorCallback = errorCallback;
-    // this.initSerialPicker();
-    this.initSerialByIndex();
+    if (index == null) this.initSerialPicker();
+    else this.initSerialByIndex(index);
   }
 
   async initSerialPicker() {
