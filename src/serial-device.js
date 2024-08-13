@@ -1,22 +1,34 @@
 class SerialDevice {
   // info:
   // - https://web.dev/serial/
+  // - https://whatwebcando.today/serial.html
   // - https://codelabs.developers.google.com/codelabs/web-serial/#0
+  // - https://developer.mozilla.org/en-US/docs/Web/API/Navigator/serial
+  // - https://github.com/williamkapke/webserial/blob/main/src/stores/connection.js <- check this for more code examples
   // Arduino code:
   // inputs:
   // - https://github.com/cacheflowe/haxademic/blob/master/arduino/VL53L0X/VL53L0X.ino
   // - https://github.com/cacheflowe/haxademic/blob/master/arduino/VL53L1X/VL53L1X.ino
   // inputs & outputs:
   // - https://github.com/cacheflowe/haxademic/blob/master/arduino/PiezoBuzzerSerialRead/PiezoBuzzerSerialRead.ino
+  // TODO:
+  // - Init by index (this is added), and if that fails, present a button to connect, and log a list of ports
+  //   - make the native picker it's own constructor option
 
-  constructor(baudRate = 115200, readCallback = null, errorCallback = null) {
+  constructor(
+    baudRate = 115200,
+    readCallback = null,
+    errorCallback = null,
+    index = null
+  ) {
     this.baudRate = baudRate;
     this.readCallback = readCallback;
     this.errorCallback = errorCallback;
-    this.initSerial();
+    if (index == null) this.initSerialPicker();
+    else this.initSerialByIndex(index);
   }
 
-  async initSerial() {
+  async initSerialPicker() {
     try {
       this.port = await navigator.serial.requestPort(); // Request a port and open a connection.
       await this.port.open({
@@ -25,13 +37,39 @@ class SerialDevice {
       }); // Wait for the port to open. Use new & old `baudrate` key for different browsers
       console.log(this.port);
       this.initialized = true;
+      // start reading input
+      this.startWriting();
+      this.startReading();
     } catch (err) {
       if (this.errorCallback) this.errorCallback(err);
       return;
     }
-    // start reading input
-    this.startWriting();
-    this.startReading();
+  }
+
+  async initSerialByIndex(index = 0) {
+    try {
+      let port = null;
+      const ports = await navigator.serial.getPorts();
+      await navigator.serial.getPorts().then((ports) => {
+        // Initialize the list of available ports with `ports` on page load.
+        console.log("Serial Ports:", ports);
+        port = ports[index];
+      });
+
+      this.port = port; // await navigator.serial.requestPort(); // Request a port and open a connection.
+      await this.port.open({
+        baudrate: this.baudRate,
+        baudRate: this.baudRate,
+      }); // Wait for the port to open. Use new & old `baudrate` key for different browsers
+      console.log(this.port);
+      this.initialized = true;
+      // start reading input
+      this.startWriting();
+      this.startReading();
+    } catch (err) {
+      if (this.errorCallback) this.errorCallback(err);
+      return;
+    }
   }
 
   async startReading() {

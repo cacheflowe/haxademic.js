@@ -9,7 +9,7 @@ class VideoDownloadDemo extends DemoBase {
       [],
       "Video Download",
       "video-download-container",
-      "Save a video file directly to the camera roll on iOS via the Web Share API. Needs user interaction and https to work! Android and desktop browsers properly respect the <code>download</code> attribute and don't need the Web Share API."
+      `Save a video file directly to the camera roll on iOS via the Web Share API. Needs user interaction and https to work! Android and desktop browsers properly respect the <code>download</code> attribute and don't need the Web Share API. See <a href="https://macarthur.me/posts/trigger-cross-origin-download/">this article</a> if the file is hosted on another origin and the attribute doesnt work.`
     );
   }
 
@@ -62,23 +62,24 @@ class VideoDownloadDemo extends DemoBase {
     linkEl.setAttribute("href", imagePath);
     linkEl.setAttribute("download", "bb.jpg");
     linkEl.style.setProperty("display", "block");
-
     this.el.appendChild(linkEl);
-
-    if (MobileUtil.isIOS()) {
-      linkEl.innerText =
-        "Tap & Hold Image to Save - it's the only way to get an image to the iOS photo roll";
-    }
 
     linkEl.addEventListener("click", (e) => {
       if (MobileUtil.isIOS()) {
         e.preventDefault();
-        // maybe someday this will work:
-        // this.shareFile(imagePath, "image/jpeg", "bb.jpg");
+        this.shareFile(imagePath, "image/jpeg", "bb.jpg");
       } else {
         // do nothing - use default browser behavior
       }
     });
+
+    // add another basic download link
+    let link2 = document.createElement("a");
+    link2.innerText = "Download image (no Share API override for iOS)";
+    link2.setAttribute("href", imagePath);
+    link2.setAttribute("download", "bb.jpg");
+    link2.style.setProperty("display", "block");
+    this.el.appendChild(link2);
   }
 
   // if (
@@ -99,6 +100,13 @@ class VideoDownloadDemo extends DemoBase {
       files: filesArray,
     };
     navigator.share(shareData);
+
+    // testing with a single file, but the image path doesn't give you a "save image" button... this is why we load a blob
+    // navigator.share({
+    //   title: "image test",
+    //   text: "yay",
+    //   url: filePath,
+    // });
   }
 }
 

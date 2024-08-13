@@ -1,5 +1,4 @@
 class StringFormatter {
-
   /**
    *  Returns a standardized phone number string.
    *  @param  str An unformatted phone number.
@@ -7,7 +6,10 @@ class StringFormatter {
    *  @use    {@code var phone = StringFormatter.formatPhone('3035558888');}
    */
   static formatPhone(str) {
-    return (str + '').replace(/[() -]*(?:\d?)[() -.]*(\d{3})[() -.]*(\d{3})[() -.]*(\d{4})[() -]*/, '($1) $2-$3');
+    return (str + "").replace(
+      /[() -]*(?:\d?)[() -.]*(\d{3})[() -.]*(\d{3})[() -.]*(\d{4})[() -]*/,
+      "($1) $2-$3"
+    );
   }
 
   /**
@@ -17,7 +19,7 @@ class StringFormatter {
    *  @use    {@code var ssn = StringFormatter.formatSSN('333002222');}
    */
   static formatSSN(str) {
-    return (str + '').replace(/(\d{3})[ -]*(\d{2})[ -]*(\d{4})/, '$1-$2-$3');
+    return (str + "").replace(/(\d{3})[ -]*(\d{2})[ -]*(\d{4})/, "$1-$2-$3");
   }
 
   /**
@@ -27,7 +29,10 @@ class StringFormatter {
    *  @use    {@code var cc = StringFormatter.formatCreditCard('1111-2222-3333-4444');}
    */
   static formatCreditCard(str) {
-    return (str + '').replace(/(\d{4})[ -]*(\d{4})[ -]*(\d{4})[ -]*(\d{4})/, '$1 $2 $3 $4');
+    return (str + "").replace(
+      /(\d{4})[ -]*(\d{4})[ -]*(\d{4})[ -]*(\d{4})/,
+      "$1 $2 $3 $4"
+    );
   }
 
   /**
@@ -62,9 +67,9 @@ class StringFormatter {
    *  @use    {@code var moneyVal = StringFormatter.numberToFormattedCurrency(30303.333333);}
    */
   static numberToFormattedCurrency(num) {
-    return num.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return num.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
     });
   }
 
@@ -75,9 +80,9 @@ class StringFormatter {
    *  @use    {@code var moneyVal = StringFormatter.numberToCompactString(30303.333333);}
    */
   static numberToCompactString(num) {
-    return num.toLocaleString('en-US', {
-      notation: 'compact',
-      compactDisplay: 'short',
+    return num.toLocaleString("en-US", {
+      notation: "compact",
+      compactDisplay: "short",
     });
   }
 
@@ -87,9 +92,9 @@ class StringFormatter {
    *  @return A number (in string format), converted to a percent.
    *  @use    {@code var percent = StringFormatter.numberToPercentString(0.1234, 2);}
    */
-  static numberToPercentString(num, decimalDigits=2) {
-    return num.toLocaleString('en-US', {
-      style: 'percent',
+  static numberToPercentString(num, decimalDigits = 2) {
+    return num.toLocaleString("en-US", {
+      style: "percent",
       minimumFractionDigits: decimalDigits,
     });
   }
@@ -102,16 +107,16 @@ class StringFormatter {
    */
   static formatDollarsCents(str) {
     var numParts;
-    numParts = (str + '').split('.');
+    numParts = (str + "").split(".");
     if (numParts.length === 1) {
-      numParts.push('00');
+      numParts.push("00");
     } else {
       while (numParts[1].length < 2) {
-        numParts[1] += '0';
+        numParts[1] += "0";
       }
       numParts[1] = numParts[1].substr(0, 2);
     }
-    return '$' + numParts.join('.');
+    return "$" + numParts.join(".");
   }
 
   /**
@@ -121,12 +126,12 @@ class StringFormatter {
    *  @use    {@code var formattedNumber = StringFormatter.addCommasToNumber('3000000');}
    */
   static addCommasToNumber(str) {
-    let x = (str + '').split('.');
+    let x = (str + "").split(".");
     let x1 = x[0];
-    let x2 = x.length > 1 ? '.' + x[1] : '';
+    let x2 = x.length > 1 ? "." + x[1] : "";
     var rgx = /(\d+)(\d{3})/;
     while (rgx.test(x1)) {
-      x1 = x1.replace(rgx, '$1' + ',' + '$2');
+      x1 = x1.replace(rgx, "$1" + "," + "$2");
     }
     return x1 + x2;
   }
@@ -138,20 +143,21 @@ class StringFormatter {
    *  @return A formatted time.
    *  @use    {@code var time = StringFormatter.timeFromSeconds(30000, true);}
    */
-  static timeFromSeconds(seconds, showHours=false, showMs=false) {
+  static timeFromSeconds(seconds, showHours = false, showMs = false) {
     var h = Math.floor(seconds / 60 / 60);
-    var m = Math.floor(seconds % 3600 / 60);
-    var ms = Math.floor((seconds % 1) * 100);// * 0.001;
+    var m = Math.floor((seconds % 3600) / 60);
+    var ms = Math.floor((seconds % 1) * 100); // * 0.001;
     var s = Math.floor(seconds % 60);
     var hStr = (h < 10 ? "0" : "") + h;
     var mStr = (m < 10 ? "0" : "") + m;
     var sStr = (s < 10 ? "0" : "") + s;
     var msStr = (ms < 10 ? "0" : "") + ms;
     return (
-      ((showHours) ? hStr + ':' : '') +
-      mStr + ':' +
+      (showHours ? hStr + ":" : "") +
+      mStr +
+      ":" +
       sStr +
-      ((showMs) ? ':' + msStr : '')
+      (showMs ? ":" + msStr : "")
     );
   }
 
@@ -162,13 +168,27 @@ class StringFormatter {
   static removeCharacterAtIndex(str, index) {
     part1 = str.substring(0, index);
     part2 = str.substring(index + 1, str.length);
-    return (part1 + part2);
+    return part1 + part2;
   }
 
   static padNumberWithZeros(num, size) {
     return String(num).padStart(size, "0");
   }
 
+  static lineLimit(text, limit) {
+    let lines = [];
+    let line = "";
+    text.split(" ").forEach((word) => {
+      if (line.length + word.length > limit) {
+        lines.push(line);
+        line = "";
+      }
+      line += word + " ";
+    });
+    lines.push(line);
+    text = lines.join("\n");
+    return text;
+  }
 }
 
 export default StringFormatter;
