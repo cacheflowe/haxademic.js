@@ -66,7 +66,7 @@ class CustomSketch extends P5App {
     if (!this.animated) this.noLoop();
 
     this.capture = this.createCapture(this.VIDEO);
-    this.capture.size(400, 300);
+    this.capture.size(800, 600);
     this.capture.hide();
     this.webcamPG = this.createGraphics(clientBounds.width, clientBounds.width);
   }
