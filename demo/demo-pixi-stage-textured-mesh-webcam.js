@@ -214,13 +214,12 @@ class PixiStageTexturedMeshDemo extends DemoBase {
       this.sprites.forEach((sprite) => {
         // different UV coord oscillations for funsies
         let xOsc, yOsc;
-        let distFromCenter =
-          MathUtil.getDistance(
-            sprite.gridX,
-            sprite.gridY,
-            this.cols / 2,
-            this.rows / 2
-          ) * 3;
+        let distFromCenter = MathUtil.getDistance(
+          sprite.gridX,
+          sprite.gridY,
+          this.cols / 2,
+          this.rows / 2
+        );
 
         if (this.frameCount % 900 < 300) {
           let radsToCenter = MathUtil.getRadiansToTarget(
@@ -230,12 +229,12 @@ class PixiStageTexturedMeshDemo extends DemoBase {
             this.rows / 2
           );
           let radialAmp =
-            1 * Math.sin(this.frameCount * 0.03 + distFromCenter / 6);
-          xOsc = 20 * radialAmp * Math.cos(-radsToCenter);
-          yOsc = 20 * radialAmp * Math.sin(-radsToCenter);
+            1 * Math.sin(this.frameCount * 0.03 + distFromCenter / 2);
+          xOsc = 40 * radialAmp * Math.cos(-radsToCenter);
+          yOsc = 40 * radialAmp * Math.sin(-radsToCenter);
         } else if (this.frameCount % 900 < 600) {
-          xOsc = 40 * Math.cos(distFromCenter + this.frameCount * 0.03);
-          yOsc = 40 * Math.sin(distFromCenter + this.frameCount * 0.03);
+          xOsc = 20 * Math.cos(distFromCenter + this.frameCount * 0.03);
+          yOsc = 20 * Math.sin(distFromCenter + this.frameCount * 0.03);
         } else {
           xOsc = 40 * Math.cos(sprite.gridX / 3 + this.frameCount * 0.03);
           yOsc = 40 * Math.sin(sprite.gridY / 3 + this.frameCount * 0.03);
