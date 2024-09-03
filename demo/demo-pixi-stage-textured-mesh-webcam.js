@@ -2,6 +2,7 @@ import * as PIXI from "../vendor/pixi/pixi.mjs";
 import DemoBase from "./demo--base.js";
 import MathUtil from "../src/math-util.js";
 import PixiStage from "../src/pixi-stage.js";
+import Webcam from "../src/webcam.js";
 
 class PixiStageTexturedMeshDemo extends DemoBase {
   constructor(parentEl) {
@@ -23,7 +24,72 @@ class PixiStageTexturedMeshDemo extends DemoBase {
 
     // build texture to display
     // this.buildTexture();
-    this.loadImage();
+    this.buildShader();
+    // this.loadImage();
+    this.buildWebcamButton();
+  }
+
+  buildShader() {
+    // add a shader. can we load from a text file?
+    var shaderFragTint = `
+      precision highp float;
+
+      varying vec2 vTextureCoord;
+      uniform sampler2D uSampler;
+      uniform float iTime;
+      uniform float amp;
+
+      void main() {
+        vec4 origColor = texture2D(uSampler, vTextureCoord);
+        gl_FragColor = origColor.rgba * vec4(0.5, 0.5, 1.0, 1.0);
+      }
+    `;
+    this.tint = new PIXI.Filter(null, shaderFragTint, {
+      iTime: 0,
+      amp: 1,
+    });
+  }
+
+  buildWebcamButton() {
+    // add button to start everything
+    this.startButton = document.createElement("button");
+    this.startButton.innerText = "Start";
+    this.el.appendChild(this.startButton);
+
+    // click video to load webcam
+    this.startButton.addEventListener("click", (e) => {
+      this.startButton.parentNode.removeChild(this.startButton);
+      this.initWebcam();
+    });
+  }
+
+  initWebcam() {
+    this.webcam = new Webcam(
+      (videoEl) => {
+        // start demo when webcam texture is ready
+        this.texture = PIXI.Texture.from(videoEl);
+        this.texture.once("update", (texture) => {
+          this.buildMesh(this.texture);
+          this.animate();
+        });
+
+        // attach webcam video element to DOM and flip to mirror the video
+        this.debugEl.appendChild(videoEl);
+        videoEl.style.setProperty("max-width", "100%");
+        videoEl.style.setProperty("padding", "2rem");
+        videoEl.style.setProperty("background", "#000");
+        // Webcam.flipH(videoEl);
+        this.animate();
+
+        // allow image saving on click
+        this.el.addEventListener("click", (e) => {
+          this.pixiStage.saveImage();
+        });
+      },
+      (error) => {
+        this.el.innerHTML = "[Webcam ERROR] :: " + error;
+      }
+    );
   }
 
   buildTexture() {
@@ -80,6 +146,12 @@ class PixiStageTexturedMeshDemo extends DemoBase {
         sprite.tileScale.set(this.baseTileScale, this.baseTileScale);
         this.sprites.push(sprite);
         this.pixiStage.container().addChild(sprite);
+
+        // randomly add filter
+        if (Math.random() > 0.7) {
+          // TODO: add tint filter here
+          sprite.filters = [this.tint];
+        }
       }
     }
 
@@ -88,7 +160,7 @@ class PixiStageTexturedMeshDemo extends DemoBase {
     let rows = 4;
     cellW = w / cols;
     cellH = h / rows;
-    let scaleAdj = 3;
+    let scaleAdj = 2;
     for (let x = 0; x < cols; x++) {
       for (let y = 0; y < rows; y++) {
         let curX = x * cellW;
@@ -107,14 +179,13 @@ class PixiStageTexturedMeshDemo extends DemoBase {
           this.baseTileScale * scaleAdj,
           this.baseTileScale * scaleAdj
         );
-        // if (Math.random() > 0.7) {
-        //   this.sprites.push(sprite);
-        //   this.pixiStage.container().addChild(sprite);
-        // }
+        if (Math.random() > 0.7) {
+          this.sprites.push(sprite);
+          this.pixiStage.container().addChild(sprite);
+        }
         if (Math.random() > 0.7) {
           // TODO: add tint filter here
-          // let adj = new PIXI.
-          // sprite.filters = [adj];
+          sprite.filters = [this.tint];
         }
       }
     }
@@ -141,7 +212,8 @@ class PixiStageTexturedMeshDemo extends DemoBase {
     this.frameCount++;
     if (this.sprites)
       this.sprites.forEach((sprite) => {
-        // move UV coords
+        // different UV coord oscillations for funsies
+        let xOsc, yOsc;
         let distFromCenter =
           MathUtil.getDistance(
             sprite.gridX,
@@ -149,20 +221,27 @@ class PixiStageTexturedMeshDemo extends DemoBase {
             this.cols / 2,
             this.rows / 2
           ) * 3;
-        let radsToCenter = MathUtil.getRadiansToTarget(
-          sprite.gridX,
-          sprite.gridY,
-          this.cols / 2,
-          this.rows / 2
-        );
-        let radialAmp =
-          1 * Math.sin(this.frameCount * 0.03 + distFromCenter / 6);
-        let xOsc = 20 * radialAmp * Math.cos(-radsToCenter);
-        let yOsc = 20 * radialAmp * Math.sin(-radsToCenter);
-        // let xOsc = 40 * Math.cos(distFromCenter + this.frameCount * 0.03);
-        // let yOsc = 40 * Math.sin(distFromCenter + this.frameCount * 0.03);
-        // let xOsc = 40 * Math.cos(sprite.gridX / 3 + this.frameCount * 0.03);
-        // let yOsc = 40 * Math.sin(sprite.gridY / 3 + this.frameCount * 0.03);
+
+        if (this.frameCount % 900 < 300) {
+          let radsToCenter = MathUtil.getRadiansToTarget(
+            sprite.gridX,
+            sprite.gridY,
+            this.cols / 2,
+            this.rows / 2
+          );
+          let radialAmp =
+            1 * Math.sin(this.frameCount * 0.03 + distFromCenter / 6);
+          xOsc = 20 * radialAmp * Math.cos(-radsToCenter);
+          yOsc = 20 * radialAmp * Math.sin(-radsToCenter);
+        } else if (this.frameCount % 900 < 600) {
+          xOsc = 40 * Math.cos(distFromCenter + this.frameCount * 0.03);
+          yOsc = 40 * Math.sin(distFromCenter + this.frameCount * 0.03);
+        } else {
+          xOsc = 40 * Math.cos(sprite.gridX / 3 + this.frameCount * 0.03);
+          yOsc = 40 * Math.sin(sprite.gridY / 3 + this.frameCount * 0.03);
+        }
+
+        // move UV coords
         sprite.tilePosition.set(
           sprite.tilePositionOrig.x - xOsc,
           sprite.tilePositionOrig.y - yOsc
