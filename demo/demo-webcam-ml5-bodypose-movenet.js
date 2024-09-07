@@ -6,6 +6,12 @@ import FrameLoop from "../src/frame-loop.js";
 import Webcam from "../src/webcam.js";
 import Stats from "../vendor/stats.module.js";
 
+// ML5 version - NOT MINIFIED, which causes errors for me
+// - https://github.com/ml5js/ml5-next-gen
+// - https://unpkg.com/ml5@1.0.1/dist/ml5.js
+//   - Came from: https://unpkg.com/ml5@latest/dist/ml5.js
+// - Original demo code: https://editor.p5js.org/ml5/sketches
+
 // NOTES
 // - https://editor.p5js.org/ml5/sketches/c8sl_hGmN
 // - https://github.com/ml5js/ml5-next-gen/blob/main/src/Bodypose/index.js
@@ -25,6 +31,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
+      // ["../vendor/ml5-v0.20.0-alpha.4.js"],
       ["../vendor/ml5.js"],
       "ml5 BodyPose MoveNet Demo",
       "ml5-bodypose-movenet-demo",
@@ -39,7 +46,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     this.log = new EventLog(this.debugEl);
     this.log.log(`Starting up...`);
     this.webcamSample = `../data/videos/dancing.mp4`;
-    this.demoImg = await ImageUtil.loadImageSync(`../data/images/towel.png`);
+    this.demoImg = await ImageUtil.loadImageSync(`../data/images/particle.png`);
     if (this.webcamSample) {
       this.addWebcamSample();
     } else {
@@ -117,6 +124,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     videoEl.classList.add("video-layer");
     this.videoEl = videoEl;
     this.videoContainer.appendChild(videoEl);
+    this.videoEl.play();
     // Webcam.flipH(videoEl);
     this.initBodyTracking();
     this.attachDetectionToVideo();
@@ -126,15 +134,16 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     window._decrementPreload = (e) => {
       this.log.log(`Preload:`, e);
     };
-    this.bodypose = await ml5.bodypose("MoveNet", {
-      modelUrl: "../data/machine-learning/bodypose-tfjs/model.json",
+    this.bodyPose = await ml5.bodyPose("MoveNet", {
+      modelUrl: "../data/machine-learning/bodypose-new/model.json",
     });
     setTimeout(() => {
-      this.bodypose.detectStart(this.videoEl, (results) =>
+      this.bodyPose.detectStart(this.videoEl, (results) =>
         this.gotPoses(results)
       );
-    }, 5000);
+    }, 1000);
     this.poses = [];
+    this.connections = this.bodyPose.getSkeleton(); // same array as Joints.pairs
   }
 
   gotPoses(results) {
@@ -180,6 +189,8 @@ class MediapipeBodyTrackingDemo extends DemoBase {
 
   handleSkeletons() {
     if (!this.canvasElement) return;
+    if (!this.poses) return;
+
     this.resizeCanvas();
     // clear canvas
     let canvW = this.canvasElement.width;
@@ -209,8 +220,9 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     // console.log(pose.keypoints.length); // 17!
     for (let j = 0; j < pose.keypoints.length; j++) {
       let keypoint = pose.keypoints[j];
+      // console.log(keypoint);
       // Only draw a circle if the keypoint's confidence is bigger than 0.1
-      if (keypoint.score > 0.1) {
+      if (keypoint.confidence > 0.1) {
         this.canvasCtx.fillStyle = "#ffffff";
         this.canvasCtx.fillRect(
           keypoint.x * scale - 5,
@@ -234,7 +246,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
       this.canvasCtx.stroke();
     }
 
-    // draw towel
+    // draw image
     let torsoTopX =
       (this.x(pose, Joints.shoulderL) + this.x(pose, Joints.shoulderR)) / 2;
     let torsoTopY =
@@ -248,7 +260,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     );
 
     // get image size
-    let imgTorsoScale = (torsoH / this.demoImg.height) * 1.8;
+    let imgTorsoScale = (torsoH / this.demoImg.height) * 5;
     let w = this.demoImg.width * imgTorsoScale;
     let h = this.demoImg.height * imgTorsoScale;
 
@@ -261,7 +273,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     this.canvasCtx.save();
     this.canvasCtx.translate(torsoCenterX, torsoCenterY);
     this.canvasCtx.rotate(angle - Math.PI / 2);
-    this.canvasCtx.drawImage(this.demoImg, -w / 2, -h * 0.3, w, h);
+    this.canvasCtx.drawImage(this.demoImg, -w / 2, -h / 2, w, h);
     this.canvasCtx.restore();
   }
 
