@@ -1,4 +1,5 @@
 import DemoBase from "./demo--base.js";
+import CanvasUtil from "../src/canvas-util.js";
 import DOMUtil from "../src/dom-util.js";
 import EventLog from "../src/event-log.js";
 import MathUtil from "../src/math-util.js";
@@ -28,13 +29,15 @@ import Stats from "../vendor/stats.module.js";
 //   - Why is it so much slower with the webcam?
 // - [WORKING] Track skeletons over time by checking distance between frames and matching them up in a Map
 //   - Hang onto skeletons for a few frames before pruning them, since a pose might be lost for several frames. Have a secondary array of skeletons that are "old", to make sure we check/match recent skeletons first
-//   - Ignore arms/hads/elbows, since these can flail, and increase the threshold for matching skeletons
 // - Draw debug info on skeleton
 //   - DIST_THRESH for matching skeletons
 // - Start building custom AR elements library
 // - Work on camera & canvas cropping to handle different aspect ratios
 // - Move renderer to PIXI.js?
 // - Add events for skeleton detection: onSkeletonDetected, onSkeletonLost, onSkeletonUpdated
+// - Skeleton calculations
+//   - Head & body angle based on closeness of sides vs overall scale
+//   - Ignore skeletons smaller than a certain size???
 
 class MediapipeBodyTrackingDemo extends DemoBase {
   constructor(parentEl) {
@@ -79,6 +82,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
       }
       video {
         width: 100%;
+        opacity: 0.2;
       }
       #output_canvas {
         position: absolute;
@@ -214,9 +218,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
       for (let j = 0; j < this.skeletons.length; j++) {
         if (foundMatch == false) {
           let skeleton = this.skeletons[j];
-          let dist = skeleton.distanceToPose(pose);
-          // console.log(dist);
-          if (dist < Skeleton.DIST_THRESH) {
+          if (skeleton.matchesPose(pose)) {
             foundMatch = true;
             skeleton.update(pose);
             this.poses.splice(i, 1);
@@ -260,48 +262,17 @@ class MediapipeBodyTrackingDemo extends DemoBase {
 
     // Draw all the tracked landmark points
     for (let i = 0; i < this.skeletons.length; i++) {
-      this.drawSkeleton(this.skeletons[i]);
+      this.skeletons[i].drawDebug(this.canvasCtx, this.scale());
+      // this.drawSkeleton(this.skeletons[i]);
     }
 
     // finish drawing
     this.canvasCtx.restore();
   }
 
-  drawSkeleton(skeleton, index) {
+  drawSkeleton(skeleton) {
     // canvas-scaling helpers
     let scale = this.scale();
-
-    // color per skeleton
-    let curColor = skeleton.debugColor;
-
-    // console.log(pose.keypoints.length); // 17!
-    let keypoints = skeleton.joints();
-    for (let j = 0; j < keypoints.length; j++) {
-      let keypoint = keypoints[j];
-      // Only draw a circle if the keypoint's confidence is bigger than 0.1
-      if (keypoint.confidence > 0.1) {
-        this.canvasCtx.strokeStyle = curColor;
-        this.canvasCtx.strokeRect(
-          keypoint.x * scale - 5,
-          keypoint.y * scale - 5,
-          10,
-          10
-        );
-      }
-    }
-
-    // draw lines between pairs
-    for (let j = 0; j < Joints.pairs.length; j++) {
-      let pair = Joints.pairs[j];
-      let a = keypoints[pair[0]];
-      let b = keypoints[pair[1]];
-      this.canvasCtx.beginPath();
-      this.canvasCtx.moveTo(a.x * scale, a.y * scale);
-      this.canvasCtx.lineTo(b.x * scale, b.y * scale);
-      this.canvasCtx.strokeStyle = curColor;
-      this.canvasCtx.strokeWeight = 3;
-      this.canvasCtx.stroke();
-    }
 
     // draw image
     let torsoTopX =
@@ -361,6 +332,125 @@ class MediapipeBodyTrackingDemo extends DemoBase {
   }
 }
 
+//////////////////////////////////////////////////
+// Skeleton
+//////////////////////////////////////////////////
+
+class Skeleton {
+  constructor(pose) {
+    this.pose = pose;
+    this.lastUpdate = performance.now();
+    this.updatedLastFrame = true;
+    Skeleton.count++;
+    this.debugColor = Joints.colors[Skeleton.count % Joints.colors.length];
+  }
+
+  static count = 0;
+  static DIST_THRESH = 1100;
+
+  joints() {
+    return this.pose.keypoints;
+  }
+
+  matchesPose(pose) {
+    // calculate total distance between pose and skeleton and pose
+    let totalDist = 0;
+    for (let i = 0; i < pose.keypoints.length; i++) {
+      let poseJoint = pose.keypoints[i];
+      let skelJoint = this.joints()[i];
+      let dist = MathUtil.getDistance(
+        poseJoint.x,
+        poseJoint.y,
+        skelJoint.x,
+        skelJoint.y
+      );
+
+      // Ignore hands/elbows, since these can flail, and increase the threshold for matching skeletons
+      if (!this.ignoreJoint(i)) {
+        totalDist += dist;
+      }
+    }
+
+    // return whether we've matched
+    let didMatch = totalDist < Skeleton.DIST_THRESH;
+    return didMatch;
+  }
+
+  ignoreJoint(i) {
+    return (
+      i == Joints.wristL ||
+      i == Joints.wristR ||
+      i == Joints.elbowL ||
+      i == Joints.elbowR ||
+      i == Joints.ankleL ||
+      i == Joints.ankleR
+    );
+  }
+
+  lerp(a, b, x) {
+    return (1 - x) * a + x * b;
+  }
+
+  reset() {
+    this.updatedLastFrame = false;
+  }
+
+  didUpdate() {
+    return this.updatedLastFrame;
+  }
+
+  update(pose) {
+    let easeFactor = 0.4;
+    this.updatedLastFrame = true;
+    this.lastUpdate = performance.now();
+    this.pose.keypoints.forEach((el, i) => {
+      // lerp towards new position
+      el.x = this.lerp(el.x, pose.keypoints[i].x, easeFactor);
+      el.y = this.lerp(el.y, pose.keypoints[i].y, easeFactor);
+      el.z = this.lerp(el.z, pose.keypoints[i].z, easeFactor);
+    });
+    this.lastUpdate = performance.now();
+  }
+
+  drawDebug(ctx, scale) {
+    ctx.save();
+    ctx.strokeWeight = 5;
+
+    // color per skeleton
+    let curColor = this.debugColor;
+
+    // console.log(pose.keypoints.length); // 17!
+    let keypoints = this.joints();
+    for (let j = 0; j < keypoints.length; j++) {
+      let keypoint = keypoints[j];
+      // Only draw a circle if the keypoint's confidence is bigger than 0.1
+      if (keypoint.confidence > 0.1) {
+        ctx.strokeStyle = curColor;
+        ctx.fillStyle = "transparent";
+        // ctx.strokeRect(keypoint.x * scale - 5, keypoint.y * scale - 5, 10, 10);
+        CanvasUtil.drawCircle(ctx, keypoint.x * scale, keypoint.y * scale, 5);
+      }
+    }
+
+    // draw lines between pairs
+    for (let j = 0; j < Joints.pairs.length; j++) {
+      let pair = Joints.pairs[j];
+      let a = keypoints[pair[0]];
+      let b = keypoints[pair[1]];
+      ctx.beginPath();
+      ctx.moveTo(a.x * scale, a.y * scale);
+      ctx.lineTo(b.x * scale, b.y * scale);
+      ctx.strokeStyle = curColor;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+//////////////////////////////////////////////////
+// Joints definitions & connections
+//////////////////////////////////////////////////
+
 class Joints {
   static nose = 0;
   static eyeL = 1;
@@ -408,71 +498,6 @@ class Joints {
     "#ff0000",
     "#0000ff",
   ];
-}
-
-class Skeleton {
-  constructor(pose) {
-    this.pose = pose;
-    this.lastUpdate = performance.now();
-    this.updatedLastFrame = true;
-    Skeleton.count++;
-    this.debugColor = Joints.colors[Skeleton.count % Joints.colors.length];
-  }
-
-  static count = 0;
-  static DIST_THRESH = 1000;
-
-  joints() {
-    return this.pose.keypoints;
-  }
-
-  distanceToPose(pose) {
-    let totalDist = 0;
-    for (let i = 0; i < pose.keypoints.length; i++) {
-      let posePoint = pose.keypoints[i];
-      let skeletonPoint = this.joints()[i];
-      let dist = MathUtil.getDistance(
-        posePoint.x,
-        posePoint.y,
-        skeletonPoint.x,
-        skeletonPoint.y
-      );
-      if (
-        i != Joints.wristL &&
-        i != Joints.wristR &&
-        i != Joints.elbowL &&
-        i != Joints.elbowR
-      ) {
-        totalDist += dist;
-      }
-    }
-    return totalDist;
-  }
-
-  lerp(a, b, x) {
-    return (1 - x) * a + x * b;
-  }
-
-  reset() {
-    this.updatedLastFrame = false;
-  }
-
-  didUpdate() {
-    return this.updatedLastFrame;
-  }
-
-  update(pose) {
-    let easeFactor = 0.4;
-    this.updatedLastFrame = true;
-    this.lastUpdate = performance.now();
-    this.pose.keypoints.forEach((el, i) => {
-      // lerp towards new position
-      el.x = this.lerp(el.x, pose.keypoints[i].x, easeFactor);
-      el.y = this.lerp(el.y, pose.keypoints[i].y, easeFactor);
-      el.z = this.lerp(el.z, pose.keypoints[i].z, easeFactor);
-    });
-    this.lastUpdate = performance.now();
-  }
 }
 
 if (window.autoInitDemo)
