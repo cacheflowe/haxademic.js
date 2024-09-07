@@ -29,12 +29,17 @@ import Stats from "../vendor/stats.module.js";
 // - [WORKING] Track skeletons over time by checking distance between frames and matching them up in a Map
 //   - Hang onto skeletons for a few frames before pruning them, since a pose might be lost for several frames. Have a secondary array of skeletons that are "old", to make sure we check/match recent skeletons first
 //   - Ignore arms/hads/elbows, since these can flail, and increase the threshold for matching skeletons
+// - Draw debug info on skeleton
+//   - DIST_THRESH for matching skeletons
+// - Start building custom AR elements library
+// - Work on camera & canvas cropping to handle different aspect ratios
+// - Move renderer to PIXI.js?
+// - Add events for skeleton detection: onSkeletonDetected, onSkeletonLost, onSkeletonUpdated
 
 class MediapipeBodyTrackingDemo extends DemoBase {
   constructor(parentEl) {
     super(
       parentEl,
-      // ["../vendor/ml5-v0.20.0-alpha.4.js"],
       ["../vendor/ml5.js"],
       "ml5 BodyPose Demo",
       "ml5-bodypose-demo",
@@ -209,9 +214,9 @@ class MediapipeBodyTrackingDemo extends DemoBase {
       for (let j = 0; j < this.skeletons.length; j++) {
         if (foundMatch == false) {
           let skeleton = this.skeletons[j];
-          let dist = this.distanceBetweenSkeletons(pose, skeleton);
+          let dist = skeleton.distanceToPose(pose);
           // console.log(dist);
-          if (dist < 1500) {
+          if (dist < Skeleton.DIST_THRESH) {
             foundMatch = true;
             skeleton.update(pose);
             this.poses.splice(i, 1);
@@ -231,22 +236,6 @@ class MediapipeBodyTrackingDemo extends DemoBase {
         this.skeletons.splice(j, 1);
       }
     }
-  }
-
-  distanceBetweenSkeletons(pose, skeleton) {
-    let totalDist = 0;
-    for (let i = 0; i < pose.keypoints.length; i++) {
-      let posePoint = pose.keypoints[i];
-      let skeletonPoint = skeleton.joints()[i];
-      let dist = MathUtil.getDistance(
-        posePoint.x,
-        posePoint.y,
-        skeletonPoint.x,
-        skeletonPoint.y
-      );
-      totalDist += dist;
-    }
-    return totalDist;
   }
 
   handleSkeletons() {
@@ -289,7 +278,6 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     let keypoints = skeleton.joints();
     for (let j = 0; j < keypoints.length; j++) {
       let keypoint = keypoints[j];
-      // console.log(keypoint);
       // Only draw a circle if the keypoint's confidence is bigger than 0.1
       if (keypoint.confidence > 0.1) {
         this.canvasCtx.strokeStyle = curColor;
@@ -432,9 +420,33 @@ class Skeleton {
   }
 
   static count = 0;
+  static DIST_THRESH = 1000;
 
   joints() {
     return this.pose.keypoints;
+  }
+
+  distanceToPose(pose) {
+    let totalDist = 0;
+    for (let i = 0; i < pose.keypoints.length; i++) {
+      let posePoint = pose.keypoints[i];
+      let skeletonPoint = this.joints()[i];
+      let dist = MathUtil.getDistance(
+        posePoint.x,
+        posePoint.y,
+        skeletonPoint.x,
+        skeletonPoint.y
+      );
+      if (
+        i != Joints.wristL &&
+        i != Joints.wristR &&
+        i != Joints.elbowL &&
+        i != Joints.elbowR
+      ) {
+        totalDist += dist;
+      }
+    }
+    return totalDist;
   }
 
   lerp(a, b, x) {
