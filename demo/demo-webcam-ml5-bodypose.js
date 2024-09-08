@@ -25,19 +25,18 @@ import Stats from "../vendor/stats.module.js";
 // - https://github.com/tensorflow/tfjs-models/blob/master/pose-detection/src/movenet/README.md
 
 // TODO
-// - Try shrinking the image into a <canvas> to speed up detection
+// - Try shrinking the image into a <canvas> to speed up ML detection
 //   - Why is it so much slower with the webcam?
-// - [WORKING] Track skeletons over time by checking distance between frames and matching them up in a Map
-//   - Hang onto skeletons for a few frames before pruning them, since a pose might be lost for several frames. Have a secondary array of skeletons that are "old", to make sure we check/match recent skeletons first
-// - Draw debug info on skeleton
-//   - DIST_THRESH for matching skeletons
+// - Hang onto skeletons for a few frames before pruning them, since a pose might be lost for several frames. Have a secondary array of skeletons that are "old", to make sure we check/match recent skeletons first
 // - Start building custom AR elements library
 // - Work on camera & canvas cropping to handle different aspect ratios
 // - Move renderer to PIXI.js?
 // - Add events for skeleton detection: onSkeletonDetected, onSkeletonLost, onSkeletonUpdated
+// - Draw debug info on skeleton
 // - Skeleton calculations
 //   - Head & body angle based on closeness of sides vs overall scale
 //   - Ignore skeletons smaller than a certain size???
+//   - Calculate general body scale (we already have something like this based on video/camera height?)
 
 class MediapipeBodyTrackingDemo extends DemoBase {
   constructor(parentEl) {
@@ -57,7 +56,6 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     this.log = new EventLog(this.debugEl);
     this.log.log(`Starting up...`);
     this.webcamSample = `../data/videos/dancing.mp4`;
-    this.demoImg = await ImageUtil.loadImageSync(`../data/images/particle.png`);
     if (this.webcamSample) {
       this.addWebcamSample();
     } else {
@@ -143,9 +141,11 @@ class MediapipeBodyTrackingDemo extends DemoBase {
   }
 
   async initBodyTracking() {
-    window._decrementPreload = (e) => {
-      this.log.log(`Preload:`, e);
-    };
+    // window._decrementPreload = (e) => {
+    //   this.log.log(`Preload:`, e);
+    // };
+
+    // load & start ML tool
     this.bodyPose = await ml5.bodyPose("MoveNet", {
       modelUrl: "../data/machine-learning/bodypose-new/model.json",
     });
@@ -154,15 +154,11 @@ class MediapipeBodyTrackingDemo extends DemoBase {
         this.gotPoses(results)
       );
     }, 1000);
+
+    // start persistent skeleton storage/tracking
     this.poses = [];
     this.skeletons = [];
     this.connections = this.bodyPose.getSkeleton(); // same array as Joints.pairs
-  }
-
-  gotPoses(results) {
-    this.poses = results;
-    this.posesCount = results.length;
-    this.comparePoses();
   }
 
   attachDetectionToVideo() {
@@ -202,8 +198,15 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     this.canvasElement.height = videoRect.height;
   }
 
+  gotPoses(results) {
+    this.poses = results;
+    this.posesCount = results.length;
+    this.comparePoses();
+  }
+
   comparePoses() {
     if (!this.poses) return;
+
     // reset for pruning
     for (let j = 0; j < this.skeletons.length; j++) {
       let skeleton = this.skeletons[j];
@@ -220,7 +223,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
           let skeleton = this.skeletons[j];
           if (skeleton.matchesPose(pose)) {
             foundMatch = true;
-            skeleton.update(pose);
+            skeleton.setTargetPose(pose);
             this.poses.splice(i, 1);
           }
         }
@@ -240,18 +243,27 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     }
   }
 
-  handleSkeletons() {
+  updateSkeletons() {
     if (!this.canvasElement) return;
-    if (!this.poses) return;
-
+    if (!this.poses || this.poses.length == 0) {
+      // console.log("NO POSES");
+    }
+    // if (!this.poses) return;
     this.resizeCanvas();
-    // clear canvas
+    this.prepCanvas();
+    this.updateDebugText();
+    this.drawSkeletons();
+    this.canvasCtx.restore();
+  }
+
+  prepCanvas() {
     let canvW = this.canvasElement.width;
     let canvH = this.canvasElement.height;
     this.canvasCtx.save();
     this.canvasCtx.clearRect(0, 0, canvW, canvH);
+  }
 
-    // debug
+  updateDebugText() {
     if (this.posesCount) {
       this.debugEl.innerHTML = `
       <div>poses.length: ${this.posesCount}</div>
@@ -259,15 +271,13 @@ class MediapipeBodyTrackingDemo extends DemoBase {
       <div>Skeleton.count: ${Skeleton.count}</div>
     `;
     }
+  }
 
-    // Draw all the tracked landmark points
+  drawSkeletons() {
     for (let i = 0; i < this.skeletons.length; i++) {
+      this.skeletons[i].update();
       this.skeletons[i].drawDebug(this.canvasCtx, this.scale());
-      // this.drawSkeleton(this.skeletons[i]);
     }
-
-    // finish drawing
-    this.canvasCtx.restore();
   }
 
   drawSkeleton(skeleton) {
@@ -327,7 +337,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
 
   frameLoop(frameCount) {
     if (this.stats) this.stats.begin();
-    this.handleSkeletons();
+    this.updateSkeletons();
     if (this.stats) this.stats.end();
   }
 }
@@ -339,6 +349,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
 class Skeleton {
   constructor(pose) {
     this.pose = pose;
+    this.targetPose = pose; // keep a copy and a target of the initial pose
     this.lastUpdate = performance.now();
     this.updatedLastFrame = true;
     Skeleton.count++;
@@ -346,7 +357,7 @@ class Skeleton {
   }
 
   static count = 0;
-  static DIST_THRESH = 1100;
+  static DIST_THRESH = 800;
 
   joints() {
     return this.pose.keypoints;
@@ -399,17 +410,20 @@ class Skeleton {
     return this.updatedLastFrame;
   }
 
-  update(pose) {
-    let easeFactor = 0.4;
+  setTargetPose(pose) {
+    this.targetPose = pose;
     this.updatedLastFrame = true;
     this.lastUpdate = performance.now();
+  }
+
+  update() {
+    let easeFactor = 0.3;
     this.pose.keypoints.forEach((el, i) => {
       // lerp towards new position
-      el.x = this.lerp(el.x, pose.keypoints[i].x, easeFactor);
-      el.y = this.lerp(el.y, pose.keypoints[i].y, easeFactor);
-      el.z = this.lerp(el.z, pose.keypoints[i].z, easeFactor);
+      el.x = this.lerp(el.x, this.targetPose.keypoints[i].x, easeFactor);
+      el.y = this.lerp(el.y, this.targetPose.keypoints[i].y, easeFactor);
+      el.z = this.lerp(el.z, this.targetPose.keypoints[i].z, easeFactor);
     });
-    this.lastUpdate = performance.now();
   }
 
   drawDebug(ctx, scale) {
@@ -445,6 +459,21 @@ class Skeleton {
     }
     ctx.restore();
   }
+}
+
+//////////////////////////////////////////////////
+// ARElement
+//////////////////////////////////////////////////
+
+class ARElement {
+  constructor() {
+    this.demoImg = ImageUtil.loadImageSync(
+      // `../data/images/particle-circle-no-alpha.png`
+      `../data/images/data/images/smiley.png`
+    );
+  }
+
+  update(skeleton) {}
 }
 
 //////////////////////////////////////////////////
