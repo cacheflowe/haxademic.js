@@ -30,13 +30,13 @@ import Stats from "../vendor/stats.module.js";
 // - Hang onto skeletons for a few frames before pruning them, since a pose might be lost for several frames. Have a secondary array of skeletons that are "old", to make sure we check/match recent skeletons first
 // - Start building custom AR elements library
 // - Work on camera & canvas cropping to handle different aspect ratios
-// - Move renderer to PIXI.js?
-// - Add events for skeleton detection: onSkeletonDetected, onSkeletonLost, onSkeletonUpdated
 // - Draw debug info on skeleton
 // - Skeleton calculations
 //   - Head & body angle based on closeness of sides vs overall scale
 //   - Ignore skeletons smaller than a certain size???
 //   - Calculate general body scale (we already have something like this based on video/camera height?)
+// - Add events for skeleton detection: onSkeletonDetected, onSkeletonLost, onSkeletonUpdated
+// - Move renderer to PIXI.js?
 
 class MediapipeBodyTrackingDemo extends DemoBase {
   constructor(parentEl) {
@@ -159,6 +159,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     this.poses = [];
     this.skeletons = [];
     this.connections = this.bodyPose.getSkeleton(); // same array as Joints.pairs
+    this.arElement = new ARElement();
   }
 
   attachDetectionToVideo() {
@@ -229,7 +230,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
         }
       }
       if (!foundMatch) {
-        this.skeletons.push(new Skeleton(pose));
+        this.skeletons.push(new Skeleton(pose, this.arElement));
         this.poses.splice(i, 1);
       }
     }
@@ -277,48 +278,8 @@ class MediapipeBodyTrackingDemo extends DemoBase {
     for (let i = 0; i < this.skeletons.length; i++) {
       this.skeletons[i].update();
       this.skeletons[i].drawDebug(this.canvasCtx, this.scale());
+      this.skeletons[i].drawArElements(this.canvasCtx, this.scale());
     }
-  }
-
-  drawSkeleton(skeleton) {
-    // canvas-scaling helpers
-    let scale = this.scale();
-
-    // draw image
-    let torsoTopX =
-      (this.x(keypoints, Joints.shoulderL) +
-        this.x(keypoints, Joints.shoulderR)) /
-      2;
-    let torsoTopY =
-      (this.y(keypoints, Joints.shoulderL) +
-        this.y(keypoints, Joints.shoulderR)) /
-      2;
-    let torsoBotX =
-      (this.x(keypoints, Joints.hipL) + this.x(keypoints, Joints.hipR)) / 2;
-    let torsoBotY =
-      (this.y(keypoints, Joints.hipL) + this.y(keypoints, Joints.hipR)) / 2;
-    let torsoCenterX = (torsoTopX + torsoBotX) / 2;
-    let torsoCenterY = (torsoTopY + torsoBotY) / 2;
-    let torsoH = Math.sqrt(
-      Math.pow(torsoBotX - torsoTopX, 2) + Math.pow(torsoBotY - torsoTopY, 2)
-    );
-
-    // get image size
-    let imgTorsoScale = (torsoH / this.demoImg.height) * 5;
-    let w = this.demoImg.width * imgTorsoScale;
-    let h = this.demoImg.height * imgTorsoScale;
-
-    // get rotation from torso top/bottom
-    let dx = torsoBotX - torsoTopX;
-    let dy = torsoBotY - torsoTopY;
-    let angle = Math.atan2(dy, dx);
-
-    // draw!
-    this.canvasCtx.save();
-    this.canvasCtx.translate(torsoCenterX, torsoCenterY);
-    this.canvasCtx.rotate(angle - Math.PI / 2);
-    this.canvasCtx.drawImage(this.demoImg, -w / 2, -h / 2, w, h);
-    this.canvasCtx.restore();
   }
 
   scale() {
@@ -347,13 +308,14 @@ class MediapipeBodyTrackingDemo extends DemoBase {
 //////////////////////////////////////////////////
 
 class Skeleton {
-  constructor(pose) {
+  constructor(pose, arElement = null) {
     this.pose = pose;
     this.targetPose = pose; // keep a copy and a target of the initial pose
     this.lastUpdate = performance.now();
     this.updatedLastFrame = true;
     Skeleton.count++;
     this.debugColor = Joints.colors[Skeleton.count % Joints.colors.length];
+    this.arElement = arElement;
   }
 
   static count = 0;
@@ -426,6 +388,10 @@ class Skeleton {
     });
   }
 
+  drawArElements(ctx, scale) {
+    if (this.arElement) this.arElement.update(ctx, scale, this);
+  }
+
   drawDebug(ctx, scale) {
     ctx.save();
     ctx.strokeWeight = 5;
@@ -473,7 +439,52 @@ class ARElement {
     );
   }
 
-  update(skeleton) {}
+  x(keypoints, joint) {
+    return keypoints[joint].x * this.scale();
+  }
+
+  y(keypoints, joint) {
+    return keypoints[joint].y * this.scale();
+  }
+
+  update(ctx, scale, skeleton) {
+    let keypoints = skeleton.joints();
+    // draw image
+    let torsoTopX =
+      (this.x(keypoints, Joints.shoulderL) +
+        this.x(keypoints, Joints.shoulderR)) /
+      2;
+    let torsoTopY =
+      (this.y(keypoints, Joints.shoulderL) +
+        this.y(keypoints, Joints.shoulderR)) /
+      2;
+    let torsoBotX =
+      (this.x(keypoints, Joints.hipL) + this.x(keypoints, Joints.hipR)) / 2;
+    let torsoBotY =
+      (this.y(keypoints, Joints.hipL) + this.y(keypoints, Joints.hipR)) / 2;
+    let torsoCenterX = (torsoTopX + torsoBotX) / 2;
+    let torsoCenterY = (torsoTopY + torsoBotY) / 2;
+    let torsoH = Math.sqrt(
+      Math.pow(torsoBotX - torsoTopX, 2) + Math.pow(torsoBotY - torsoTopY, 2)
+    );
+
+    // get image size
+    let imgTorsoScale = (torsoH / this.demoImg.height) * 5;
+    let w = this.demoImg.width * imgTorsoScale;
+    let h = this.demoImg.height * imgTorsoScale;
+
+    // get rotation from torso top/bottom
+    let dx = torsoBotX - torsoTopX;
+    let dy = torsoBotY - torsoTopY;
+    let angle = Math.atan2(dy, dx);
+
+    // draw!
+    ctx.save();
+    ctx.translate(torsoCenterX, torsoCenterY);
+    ctx.rotate(angle - Math.PI / 2);
+    ctx.drawImage(this.demoImg, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
 }
 
 //////////////////////////////////////////////////
