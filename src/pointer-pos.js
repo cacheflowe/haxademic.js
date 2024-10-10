@@ -26,12 +26,12 @@ class PointerPos {
     this.startListener = this.pointerStart.bind(this);
     this.moveListener = this.pointerMove.bind(this);
     this.endListener = this.pointerEnd.bind(this);
-    document.addEventListener("mousedown", this.startListener);
-    document.addEventListener("mousemove", this.moveListener);
-    document.addEventListener("mouseup", this.endListener);
     document.addEventListener("touchstart", this.startListener);
     document.addEventListener("touchmove", this.moveListener);
     document.addEventListener("touchend", this.endListener);
+    document.addEventListener("mousedown", this.startListener);
+    document.addEventListener("mousemove", this.moveListener);
+    document.addEventListener("mouseup", this.endListener);
   }
 
   removeTouchListeners() {
