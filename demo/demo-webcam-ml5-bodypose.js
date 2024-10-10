@@ -25,10 +25,11 @@ import Stats from "../vendor/stats.module.js";
 // - https://github.com/tensorflow/tfjs-models/blob/master/pose-detection/src/movenet/README.md
 
 // TODO
+// - Start building custom AR elements library
+// - Solve for responsive shrinking of canvas and pose scale transformations breaking
 // - Try shrinking the image into a <canvas> to speed up ML detection
 //   - Why is it so much slower with the webcam?
 // - Hang onto skeletons for a few frames before pruning them, since a pose might be lost for several frames. Have a secondary array of skeletons that are "old", to make sure we check/match recent skeletons first
-// - Start building custom AR elements library
 // - Work on camera & canvas cropping to handle different aspect ratios
 // - Draw debug info on skeleton
 // - Skeleton calculations
@@ -200,6 +201,12 @@ class MediapipeBodyTrackingDemo extends DemoBase {
   }
 
   gotPoses(results) {
+    results.forEach((pose) => {
+      pose.keypoints.forEach((el) => {
+        el.x *= this.scale();
+        el.y *= this.scale();
+      });
+    });
     this.poses = results;
     this.posesCount = results.length;
     this.comparePoses();
@@ -283,15 +290,7 @@ class MediapipeBodyTrackingDemo extends DemoBase {
   }
 
   scale() {
-    return this.canvasElement.width / this.videoEl.videoWidth;
-  }
-
-  x(keypoints, joint) {
-    return keypoints[joint].x * this.scale();
-  }
-
-  y(keypoints, joint) {
-    return keypoints[joint].y * this.scale();
+    return this.canvasElement.height / this.videoEl.videoHeight;
   }
 
   keyDown(key) {}
@@ -328,6 +327,11 @@ class Skeleton {
   matchesPose(pose) {
     // calculate total distance between pose and skeleton and pose
     let totalDist = 0;
+    if (!window.hasLogged) {
+      console.log("pose.keypoints", pose.keypoints);
+      console.log("this.joints()", this.joints());
+      window.hasLogged = true;
+    }
     for (let i = 0; i < pose.keypoints.length; i++) {
       let poseJoint = pose.keypoints[i];
       let skelJoint = this.joints()[i];
@@ -394,7 +398,7 @@ class Skeleton {
 
   drawDebug(ctx, scale) {
     ctx.save();
-    ctx.strokeWeight = 5;
+    ctx.lineWidth = 3;
 
     // color per skeleton
     let curColor = this.debugColor;
@@ -407,8 +411,8 @@ class Skeleton {
       if (keypoint.confidence > 0.1) {
         ctx.strokeStyle = curColor;
         ctx.fillStyle = "transparent";
-        // ctx.strokeRect(keypoint.x * scale - 5, keypoint.y * scale - 5, 10, 10);
-        CanvasUtil.drawCircle(ctx, keypoint.x * scale, keypoint.y * scale, 5);
+        // ctx.strokeRect(keypoint.x - 5, keypoint.y - 5, 10, 10);
+        CanvasUtil.drawCircle(ctx, keypoint.x, keypoint.y, 5);
       }
     }
 
@@ -418,8 +422,8 @@ class Skeleton {
       let a = keypoints[pair[0]];
       let b = keypoints[pair[1]];
       ctx.beginPath();
-      ctx.moveTo(a.x * scale, a.y * scale);
-      ctx.lineTo(b.x * scale, b.y * scale);
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
       ctx.strokeStyle = curColor;
       ctx.stroke();
     }
@@ -433,35 +437,30 @@ class Skeleton {
 
 class ARElement {
   constructor() {
-    this.demoImg = ImageUtil.loadImageSync(
-      // `../data/images/particle-circle-no-alpha.png`
-      `../data/images/data/images/smiley.png`
-    );
+    this.loadAssets();
+  }
+
+  async loadAssets() {
+    this.demoImg = await ImageUtil.loadImageSync(`../data/images/smiley.png`);
   }
 
   x(keypoints, joint) {
-    return keypoints[joint].x * this.scale();
+    return keypoints[joint].x; //  * this.scale()
   }
 
   y(keypoints, joint) {
-    return keypoints[joint].y * this.scale();
+    return keypoints[joint].y;
   }
 
   update(ctx, scale, skeleton) {
     let keypoints = skeleton.joints();
     // draw image
     let torsoTopX =
-      (this.x(keypoints, Joints.shoulderL) +
-        this.x(keypoints, Joints.shoulderR)) /
-      2;
+      (keypoints[Joints.shoulderL].x + keypoints[Joints.shoulderR].x) / 2;
     let torsoTopY =
-      (this.y(keypoints, Joints.shoulderL) +
-        this.y(keypoints, Joints.shoulderR)) /
-      2;
-    let torsoBotX =
-      (this.x(keypoints, Joints.hipL) + this.x(keypoints, Joints.hipR)) / 2;
-    let torsoBotY =
-      (this.y(keypoints, Joints.hipL) + this.y(keypoints, Joints.hipR)) / 2;
+      (keypoints[Joints.shoulderL].y + keypoints[Joints.shoulderR].y) / 2;
+    let torsoBotX = (keypoints[Joints.hipL].x + keypoints[Joints.hipR].x) / 2;
+    let torsoBotY = (keypoints[Joints.hipL].y + keypoints[Joints.hipR].y) / 2;
     let torsoCenterX = (torsoTopX + torsoBotX) / 2;
     let torsoCenterY = (torsoTopY + torsoBotY) / 2;
     let torsoH = Math.sqrt(
@@ -469,7 +468,7 @@ class ARElement {
     );
 
     // get image size
-    let imgTorsoScale = (torsoH / this.demoImg.height) * 5;
+    let imgTorsoScale = (torsoH / this.demoImg.height) * 1.5;
     let w = this.demoImg.width * imgTorsoScale;
     let h = this.demoImg.height * imgTorsoScale;
 
@@ -530,14 +529,7 @@ class Joints {
     [Joints.kneeR, Joints.ankleR],
   ];
 
-  static colors = [
-    "#ffff00",
-    "#ff00ff",
-    "#00ffff",
-    "#0000ff",
-    "#ff0000",
-    "#0000ff",
-  ];
+  static colors = ["#ffff00", "#ff00ff", "#00ffff", "#8888ff", "#ff0000"];
 }
 
 if (window.autoInitDemo)
