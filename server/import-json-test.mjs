@@ -11,6 +11,9 @@ console.log(data);
 
 /*
 
+// https://2ality.com/2025/01/import-attributes.html
+
 import data from '../data/sample-data.json' assert { type: "json" };
+import data from '../data/sample-data.json' with { type: 'json' };
 
 */
