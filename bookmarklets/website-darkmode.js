@@ -3,7 +3,7 @@ var cssString = `
   html {
     background-color: #fff;
     color: #444;
-    filter: invert(1) hue-rotate(180deg);
+    filter: invert(1) hue-rotate(180deg) contrast(0.8);
   }
   img, video {
     filter: invert(1) hue-rotate(180deg)
