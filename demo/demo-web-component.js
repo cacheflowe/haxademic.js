@@ -5,6 +5,8 @@ import DemoBase from "./demo--base.js";
 // - What else would we want a web component to do?
 
 // Resources:
+// - https://plainvanillaweb.com/
+// - https://scottjehl.com/posts/html-web-components-shadow-dom/
 // - https://kinsta.com/blog/web-components/
 // - https://jakelazaroff.com/words/web-components-will-outlive-your-javascript-framework/
 // - https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements
@@ -20,6 +22,8 @@ import DemoBase from "./demo--base.js";
 //   - https://css-tricks.com/styling-a-web-component/
 // - https://blog.jim-nielsen.com/2023/html-web-components/
 // - https://github.com/stefanjudis/sparkly-text/blob/main/sparkly-text.js
+// - https://utilitybend.com/blog/getting-into-web-components-an-intro/
+// - https://genericcomponents.netlify.app/
 // - For syntax highlighting:
 //   - https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
 // - https://frontendmasters.com/blog/light-dom-only/
@@ -28,6 +32,7 @@ import DemoBase from "./demo--base.js";
 //   - https://www.matuzo.at/blog/2023/pros-and-cons-of-shadow-dom/
 //   - https://webcomponents.today/
 //   - https://htmlwithsuperpowers.netlify.app/get-started/
+// - https://nolanlawson.com/2024/09/28/web-components-are-okay/
 
 class WebComponentDemo extends DemoBase {
   constructor(parentEl) {
