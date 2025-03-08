@@ -3,20 +3,16 @@ import DashboardCheckinPoller from "../src/dashboard-checkin-poller.js";
 
 class DashboardCheckinPollerDemo extends DemoBase {
   constructor(parentEl) {
-    super(
-      parentEl,
-      [],
-      "DashboardCheckinPoller",
-      "dashboard-checkin-poller-container"
-    );
+    super(parentEl, [], "DashboardCheckinPoller", "dashboard-checkin-poller-container");
   }
 
   init() {
     this.dashboardCheckin = new DashboardCheckinPoller(
-      "http://localhost/haxademic/www/dashboard-new/",
+      // "http://localhost/haxademic/www/dashboard-new/",
+      "http://localhost:5173/secret/dashboard/",
       "test-app-web",
       "Test Web App",
-      10 * 1 * 1000
+      3 * 1 * 1000
     );
     this.dashboardCheckin.successCallback(this.successCallback.bind(this));
   }
@@ -27,5 +23,4 @@ class DashboardCheckinPollerDemo extends DemoBase {
   }
 }
 
-if (window.autoInitDemo)
-  window.demo = new DashboardCheckinPollerDemo(document.body);
+if (window.autoInitDemo) window.demo = new DashboardCheckinPollerDemo(document.body);
