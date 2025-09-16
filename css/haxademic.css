@@ -23,6 +23,11 @@
   place-items: center;
 }
 
+.vertical-center-simple {
+  align-content: center;
+  text-align: center;
+}
+
 /* Disable text/element selection */
 .nocopy {
   -webkit-touch-callout: none;
@@ -100,4 +105,37 @@ a {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+
+/* Appear/hide on scroll */
+/* Check out: https://component-odyssey.com/articles/08-refactoring-a-js-driven-scroll-animation-to-css */
+
+@keyframes appear {
+  /* from {
+    opacity: 0;
+    scale: 0.3;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  } */
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  50% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.3;
+  }
+}
+
+.scroll-show-hide {
+  animation: appear linear;
+  animation-timeline: view();
+  animation-range: entry -5% cover 105%;
 }
