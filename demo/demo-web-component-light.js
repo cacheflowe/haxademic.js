@@ -14,7 +14,10 @@ class WebComponentLightDemo extends DemoBase {
   init() {
     this.el.innerHTML = /*html*/ `
       <custom-button>
-        <button data-message="Hello">Light DOM button</button>
+        <button data-message="Hello">Light DOM button 1</button>
+      </custom-button>
+      <custom-button>
+        <button data-message="Hello">Light DOM button 2</button>
       </custom-button>
       <p>Click to change bg color</p>
     `;
@@ -33,9 +36,26 @@ class CustomButton extends HTMLElement {
     });
   }
 
+  static css = /*css*/ `
+    custom-button button {
+      border-radius: 4px;
+      padding: 1rem 2rem;
+      cursor: pointer;
+    }
+  `;
+
   static register() {
     if ("customElements" in window) {
       window.customElements.define("custom-button", CustomButton);
+
+      // Only add the style once, so multiple components don't keep adding more instances
+      let styleId = "custom-button-style";
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement("style");
+        style.id = styleId;
+        style.textContent = CustomButton.css;
+        document.head.appendChild(style);
+      }
     }
   }
 }

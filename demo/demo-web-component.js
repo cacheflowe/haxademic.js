@@ -2,6 +2,7 @@ import DemoBase from "./demo--base.js";
 
 // TODO:
 // - Add Intersection observer to know if we're on screen or not
+// - Check out AbortController for cleaning up observers & listeners: https://12daysofweb.dev/2023/web-components/#cleanup
 // - What else would we want a web component to do?
 
 class WebComponentDemo extends DemoBase {
