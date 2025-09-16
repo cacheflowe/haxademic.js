@@ -4,36 +4,6 @@ import DemoBase from "./demo--base.js";
 // - Add Intersection observer to know if we're on screen or not
 // - What else would we want a web component to do?
 
-// Resources:
-// - https://plainvanillaweb.com/
-// - https://scottjehl.com/posts/html-web-components-shadow-dom/
-// - https://kinsta.com/blog/web-components/
-// - https://jakelazaroff.com/words/web-components-will-outlive-your-javascript-framework/
-// - https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements
-// - https://mxb.dev/blog/container-queries-web-components/
-// - https://12daysofweb.dev/2023/web-components/
-// - https://kinsta.com/blog/web-components/#web-component-criticisms-and-issues
-// - https://www.alanwsmith.com/pages/2uoaxmqz/
-// - https://naildrivin5.com/blog/2024/01/24/web-components-in-earnest.html
-// - https://www.raymondcamden.com/2023/05/17/handling-web-component-removal-with-disconnectedcallback
-// - CSS:
-//   - https://www.smashingmagazine.com/2016/12/styling-web-components-using-a-shared-style-sheet/
-//   - https://javascript.info/shadow-dom-style#host-selector
-//   - https://css-tricks.com/styling-a-web-component/
-// - https://blog.jim-nielsen.com/2023/html-web-components/
-// - https://github.com/stefanjudis/sparkly-text/blob/main/sparkly-text.js
-// - https://utilitybend.com/blog/getting-into-web-components-an-intro/
-// - https://genericcomponents.netlify.app/
-// - For syntax highlighting:
-//   - https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html
-// - https://frontendmasters.com/blog/light-dom-only/
-// - https://social.gfsc.studio/@oluOnline/111685938435928671
-//   - https://www.matuzo.at/blog/2023/web-components-accessibility-faq
-//   - https://www.matuzo.at/blog/2023/pros-and-cons-of-shadow-dom/
-//   - https://webcomponents.today/
-//   - https://htmlwithsuperpowers.netlify.app/get-started/
-// - https://nolanlawson.com/2024/09/28/web-components-are-okay/
-
 class WebComponentDemo extends DemoBase {
   constructor(parentEl) {
     super(
@@ -78,7 +48,7 @@ class WebComponentDemo extends DemoBase {
     this.component = document.querySelector("custom-element");
     this.component.setAttribute("resolution", 200);
     this.component.setAttribute("color", "#444444"); // should trigger attributeChangedCallback()
-    this.component.setAttribute("debug", true);
+    this.component.setAttribute("debug", "");
 
     // query a child in the web component - relies on {mode: "open"}
     let div = this.component.shadowRoot.querySelector("div");
@@ -160,9 +130,7 @@ class CustomWebComponent extends HTMLElement {
     this.colorPicker?.removeEventListener("input", this.colorPicked);
 
     // add color picker listener
-    this.colorPicked = !this.colorPicked
-      ? this.colorPickedListener.bind(this)
-      : this.colorPicked;
+    this.colorPicked = !this.colorPicked ? this.colorPickedListener.bind(this) : this.colorPicked;
     this.colorPicker = this.el.querySelector("input.color");
     this.colorPicker.value = this.color;
     this.colorPicker.addEventListener("input", this.colorPicked);
@@ -184,9 +152,7 @@ class CustomWebComponent extends HTMLElement {
   colorPickedListener(e) {
     this.color = e.target.value;
     this.article.style.backgroundColor = this.color;
-    this.dispatchEvent(
-      new CustomEvent("colorUpdated", { detail: { color: this.color } })
-    );
+    this.dispatchEvent(new CustomEvent("colorUpdated", { detail: { color: this.color } }));
   }
 
   resized() {
@@ -202,7 +168,7 @@ class CustomWebComponent extends HTMLElement {
     return /*css*/ `
       article {
         width: 100%;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 2 / 1;
         padding: 2rem;
         box-sizing: border-box;
       }
