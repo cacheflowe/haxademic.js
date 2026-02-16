@@ -32,6 +32,20 @@ class DateUtil {
   static datesAreEqual(date1, date2) {
     return date1.getTime() == date2.getTime();
   }
+
+  static formattedTime(seconds, showHours = true) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 100);
+
+    const hStr = h.toString().padStart(2, "0");
+    const mStr = m.toString().padStart(2, "0");
+    const sStr = s.toString().padStart(2, "0");
+    const msStr = ms.toString().padStart(2, "0");
+
+    return `${showHours ? `${hStr}:` : ""}${mStr}:${sStr}`;
+  }
 }
 
 DateUtil.midnightTimeSuffix = "T00:00:00Z";
