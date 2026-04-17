@@ -69,10 +69,11 @@ class DOMUtil {
     window.dispatchEvent(new Event("resize"));
   }
 
-  static loadJavascript(url, callback = null, type = null) {
+  static loadJavascript(url, callback = null, type = null, onError = null) {
     const script = document.createElement("script");
     if (!!type) script.setAttribute("type", type);
     if (callback) script.addEventListener("load", callback);
+    if (onError) script.addEventListener("error", onError);
     script.src = url;
     document.head.appendChild(script);
     return script;
