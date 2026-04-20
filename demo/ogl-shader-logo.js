@@ -4,7 +4,7 @@ class OglShaderLogo extends HTMLElement {
   static meta = {
     title: "ogl Shader Logo",
     category: "Graphics",
-    description: "Two rounded cubes in an iridescent raymarch scene — tilt with mouse",
+    description: "Hovercraft logo animation",
   };
 
   connectedCallback() {
@@ -147,6 +147,12 @@ class OglShaderLogo extends HTMLElement {
         //   d3: |dot(p,n3)| ≤ sz*(|sx|+|sy|)/|s|  (diagonal faces, n3 ⊥ shear)
         //
         // SDF uses the same pattern as sdBox2D, generalised to 3 constraints.
+        float opSmoothUnion(float a, float b, float k) {
+          k *= 4.0;
+          float h = max(k - abs(a - b), 0.0);
+          return min(a, b) - h * h * 0.25 / k;
+        }
+
         float sdHex(vec2 p, float sz, vec2 shear) {
           float d1 = abs(p.x) - sz * (1.0 + abs(shear.x));
           float d2 = abs(p.y) - sz * (1.0 + abs(shear.y));
@@ -167,9 +173,10 @@ class OglShaderLogo extends HTMLElement {
         float map2D(vec2 p, vec2 shear) {
           float baseSz   = 0.3;
           float bMerge   = smoothstep(0.00, 0.38, uBlend);
-          float bRotate  = smoothstep(0.20, 0.65, uBlend);  // spin window
-          float bScatter = smoothstep(0.65, 1.00, uBlend);
+          float bRotate  = smoothstep(0.20, 0.75, uBlend);  // spin window
+          float bScatter = smoothstep(0.8, 1.00, uBlend);
           float bCircle  = sin(bRotate * 3.14159);           // bell: 0 → 1 → 0
+          bCircle  = sin(smoothstep(0.05, 0.65, uBlend) * 3.14159); // blend union
 
           float gridScale = mix(1.0, 0.3, bScatter);
           float scaledSz  = baseSz * gridScale;
@@ -209,7 +216,8 @@ class OglShaderLogo extends HTMLElement {
           float circleR = scaledGap + scaledSz * 0.5 * bCircle;
           float dCircle = length(q) - circleR;
 
-          return mix(min(d1, d2), dCircle, bCircle);
+          float blended = opSmoothUnion(d1, d2, mix(0.001, 0.5, bCircle));
+          return mix(blended, dCircle, bCircle);
         }
 
         void main() {
@@ -218,7 +226,8 @@ class OglShaderLogo extends HTMLElement {
           vec2 uv = vUv - 0.5;
           uv.x *= uResolution.x / uResolution.y;
 
-          float zoom = uZoom * mix(1., 1.5, uBlend);
+          float zoomBell = sin(smoothstep(0.3, 1.0, uBlend) * 3.14159);
+          float zoom = uZoom * (1.0 + zoomBell * -0.35);
           vec2  p    = uv * zoom;
 
           float d = map2D(p, shear);

@@ -3,6 +3,8 @@ import ErrorUtil from "../src/error-util.js";
 import KeyboardUtil from "../src/keyboard-util.js";
 import MobileUtil from "../src/mobile-util.js";
 import VideoRecorder from "../src/video-recorder.js";
+// import { FFmpeg } from "@ffmpeg/ffmpeg";
+// import { fetchFile, toBlobURL } from "@ffmpeg/util";
 
 class DemoBase {
   static loadDemo(demoJsFile = null) {
@@ -23,27 +25,15 @@ class DemoBase {
 
   static getDemoId() {
     document.location.hash = document.location.hash.replace("%26", "&"); // replace url-encoded ampersand
-    let id =
-      document.location.hash.indexOf("&") == -1
-        ? document.location.hash
-        : document.location.hash.split("&")[0];
+    let id = document.location.hash.indexOf("&") == -1 ? document.location.hash : document.location.hash.split("&")[0];
     return id.substring(1);
   }
 
   static demoJsFile() {
-    return `./demo-${DemoBase.getDemoId()}.js?v=${Math.round(
-      Math.random() * 9999999
-    )}`;
+    return `./demo-${DemoBase.getDemoId()}.js?v=${Math.round(Math.random() * 9999999)}`;
   }
 
-  constructor(
-    parentEl,
-    jsFiles,
-    layoutHtmlOrTitle = null,
-    elId = null,
-    desc = null,
-    fullscreen = false
-  ) {
+  constructor(parentEl, jsFiles, layoutHtmlOrTitle = null, elId = null, desc = null, fullscreen = false) {
     this.parentEl = parentEl;
     if (layoutHtmlOrTitle != null && elId == null) {
       this.buildLayout(layoutHtmlOrTitle);
@@ -110,11 +100,7 @@ class DemoBase {
       // cache-bust
       nextJsFile += `?v=${Math.round(Math.random() * 9999999)}`;
       // load into <head>
-      DOMUtil.loadJavascript(
-        nextJsFile,
-        () => this.loadNextScript(),
-        moduleStatus
-      );
+      DOMUtil.loadJavascript(nextJsFile, () => this.loadNextScript(), moduleStatus);
     } else {
       this.init();
     }
@@ -205,12 +191,13 @@ class DemoBase {
   initRecording(el, loopFrames, startFrame, extraFrames = 1) {
     this.recordEl = el;
     const optionsOverride = {
-      fileType: "webm",
+      fileType: "webm", // "webm",
       audioKBPS: 320,
       videoMBPS: 20,
-      callback: (aLink) => {
+      callback: (aLink, blob) => {
         aLink.setAttribute("class", "button");
         this.el.appendChild(aLink);
+        this.convertToMp4(blob);
       },
     };
     this.videoRecorder = new VideoRecorder(this.recordEl, optionsOverride);
@@ -232,15 +219,57 @@ class DemoBase {
     if (_frameLoop.count() == this.endFrame) {
       this.videoRecorder.finish();
       console.log("VideoRecorder :: finish frame ::", frameCount);
-      console.log(
-        "VideoRecorder :: total frames recorded:: ",
-        this.numFramesRecorded
-      );
+      console.log("VideoRecorder :: total frames recorded:: ", this.numFramesRecorded);
     }
     if (frameCount == this.startFrame - 1) {
       this.videoRecorder.start();
       console.log("VideoRecorder :: start frame :: ", frameCount);
     }
+  }
+
+  async blobToUint8Array(blob) {
+    const arrayBuffer = await new Response(blob).arrayBuffer();
+    var uint8View = new Uint8Array(arrayBuffer);
+    return uint8View;
+  }
+
+  // MP4 conversion
+  // - https://github.com/ffmpegwasm/ffmpeg.wasm
+  // - https://ffmpegwasm.netlify.app/docs/getting-started/usage
+  // - https://www.linkedin.com/pulse/web-based-video-conversion-from-webm-mp4-ffmpegwasm-hladchenko-wfejf/
+
+  async convertToMp4(webmBlob) {
+    console.log("webmBlob", webmBlob);
+    let videoEl1 = document.createElement("video");
+    videoEl1.src = webmBlob;
+    this.el.appendChild(videoEl1);
+
+    this.ffmpeg = new FFmpeg();
+    this.ffmpeg.on("log", ({ message }) => {
+      console.log(message);
+    });
+    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm";
+    await this.ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
+    });
+
+    // convert!
+    const videoUintArr = await this.blobToUint8Array(webmBlob);
+    await this.ffmpeg.writeFile("input.webm", videoUintArr);
+    await this.ffmpeg.exec(["-i", "input.webm", "output.mp4"]);
+    const data = await this.ffmpeg.readFile("output.mp4");
+
+    let videoEl = document.createElement("video");
+    videoEl.src = URL.createObjectURL(new Blob([data.buffer], { type: "video/mp4" }));
+
+    // create download link
+    let link = document.createElement("a");
+    link.setAttribute("download", "new-mp4.mp4");
+    link.setAttribute("role", "button");
+    link.href = videoEl.src;
+    link.textContent = "Download mp4";
+    this.el.appendChild(link);
   }
 }
 

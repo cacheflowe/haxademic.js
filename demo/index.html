@@ -12,19 +12,76 @@
     <link rel="stylesheet" href="../css/lightbox.css" />
     <link rel="stylesheet" href="../css/site.css" />
     <script src="../src/console.js"></script>
-    <!-- <script type="importmap">
-      // not respected by Vite yet
-      {
-        "imports": {
-          "three": "/vendor/three/three.module.js"
-        }
-      }
-    </script> -->
   </head>
   <body>
+    <!--
+      Shell layout for new-style web component demos.
+      Shown only after a new-style demo loads (hidden for legacy demos).
+      Legacy demos (demo-*.js) build their own layout and append to <body>.
+    -->
+    <main class="container demo" id="demo-shell" hidden>
+      <a id="demo-back-btn" href="../" role="button">← All Demos</a>
+      <a id="demo-src-btn" href="#" target="_blank" role="button" style="float:right">Demo source</a>
+      <h1 id="demo-title"></h1>
+      <p id="demo-desc" hidden></p>
+      <div id="demo-host" class="demo-el"></div>
+      <p id="demo-debug" class="demo-debug"></p>
+    </main>
+
     <script type="module">
-      import DemoBase from "./demo--base.js";
-      DemoBase.loadDemo();
+      import ErrorUtil from "../src/error-util.js";
+
+      window.addEventListener("hashchange", () => location.reload());
+
+      const hash = document.location.hash.replace("%26", "&");
+      const parts = hash.substring(1).split("&");
+      const demoId = parts[0];
+      const isBare = parts.includes("bare");
+
+      if (!demoId || demoId.length < 2) {
+        document.location.href = "../";
+      } else {
+        ErrorUtil.initErrorCatching();
+
+        if (isBare) {
+          document.body.style.cssText = "margin:0;padding:0;overflow:hidden";
+        }
+
+        try {
+          // New-style: hash = element name = filename (no demo- prefix).
+          // Dynamic import registers the custom element, then we create it.
+          await import(`./${demoId}.js`);
+
+          const DemoClass = customElements.get(demoId);
+          const meta = DemoClass?.meta || {};
+
+          if (!isBare) {
+            if (meta.title) document.title = `Haxademic.js | ${meta.title}`;
+            document.getElementById("demo-title").textContent = meta.title || demoId;
+            document.getElementById("demo-src-btn").href =
+              `https://github.com/cacheflowe/haxademic.js/blob/master/demo/${demoId}.js`;
+
+            const descEl = document.getElementById("demo-desc");
+            if (meta.description) {
+              descEl.textContent = meta.description;
+              descEl.hidden = false;
+            }
+
+            document.getElementById("demo-shell").hidden = false;
+            document.getElementById("demo-host").appendChild(document.createElement(demoId));
+          } else {
+            document.body.appendChild(document.createElement(demoId));
+          }
+        } catch (e) {
+          // Legacy fallback: demo-${demoId}.js sets window.autoInitDemo and self-appends.
+          if (!isBare) {
+            document.getElementById("demo-src-btn").href =
+              `https://github.com/cacheflowe/haxademic.js/blob/master/demo/demo-${demoId}.js`;
+          }
+          window.autoInitDemo = true;
+          await import(`./demo-${demoId}.js`);
+        }
+      }
     </script>
   </body>
 </html>
