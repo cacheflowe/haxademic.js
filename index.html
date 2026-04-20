@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -8,8 +8,6 @@
     <title>Haxademic.js</title>
     <link rel="stylesheet" href="css/pico.css" />
     <link rel="stylesheet" href="css/haxademic.css" />
-    <link rel="stylesheet" href="css/lazy-image-loader.css" />
-    <link rel="stylesheet" href="css/lightbox.css" />
     <link rel="stylesheet" href="css/site.css" />
   </head>
   <body>
@@ -18,174 +16,163 @@
       <header class="container">
         <hgroup>
           <h1>Haxademic.js</h1>
-          <p>
-            A personal JavaScript toolkit of general utility and
-            realtime/graphics helper classes.
-          </p>
-          <p>
-            View the code <a href="https://github.com/cacheflowe/haxademic.js">on GitHub</a>
-          </p>
+          <p>A personal JavaScript toolkit of utilities and realtime/graphics helpers.</p>
+          <p>View the code <a href="https://github.com/cacheflowe/haxademic.js">on GitHub</a></p>
         </hgroup>
       </header>
     </div>
-    <!-- ./ Hero -->
 
     <!-- Main -->
     <main class="container">
       <div class="grid">
         <section>
           <hgroup>
-            <h2>Demos</h2>
-            <h3>Try them out and view the source</h3>
+            <h2>Catalog</h2>
+            <h3>Demos, tools, and bookmarklets</h3>
           </hgroup>
-          <h4>Browser</h4>
-          <ul>
-            <li><a href="./demo/#app-store-broadcast-channel">AppStoreBroadcastChannel</a></li>
-            <li><a href="./demo/#broadcast-channel">BroadcastChannel</a></li>
-            <li><a href="./demo/#browser-util">BrowserUtil</a></li>
-            <li><a href="./demo/#date-util">DateUtil</a></li>
-            <li><a href="./demo/#image-util-paste">ImageUtil | Paste Image</a></li>
-            <li><a href="./demo/#mobile-util">MobileUtil</a></li>
-            <li><a href="./demo/#screen-capture">ScreenCapture</a></li>
-            <li><a href="./demo/#web-component">Web Component</a></li>
-            <li><a href="./demo/#web-component-light">Web Component | Light DOM</a></li>
-          </ul>
-          <!-- <h4>Data</h4>
-          <ul>
-          </ul> -->
-          <h4>Debug</h4>
-          <ul>
-            <li><a href="./demo/#ui-control-panel">UIControlPanel</a></li>
-          </ul>
-          <h4>Draw</h4>
-          <ul>
-            <li><a href="./demo/#canvas-fractal">Canvas | Fractal</a></li>
-            <li><a href="./demo/#canvas-advanced-compositing">Canvas | Advanced Compositing</a></li>
-            <li><a href="./demo/#canvas-util-image-map">CanvasUtil | Image Map</a></li>
-            <li><a href="./demo/#css-scale-animation">CSS Scale Animation</a></li>
-            <li><a href="./demo/#object-pool-particles">ObjectPool | Particles</a></li>
-            <li><a href="./demo/#object-pool-touch-ripples">ObjectPool | Touch Ripples</a></li>
-            <li><a href="./demo/#scroll-viz">ScrollViz</a></li>
-            <li><a href="./demo/#svg-util-uniform-points">SVGUtil | Path to Uniform Points</a></li>
-          </ul>
-          <h5>Draw | P5</h5>
-          <ul>
-            <li><a href="./demo/#p5-app-basic">P5App | Basic</a></li>
-            <li><a href="./demo/#p5-sketch-audio">P5Sketch | Audio</a></li>
-            <li><a href="./demo/#p5-sketch-basic">P5Sketch | Basic</a></li>
-          </ul>
-          <h5>Draw | Pixi</h5>
-          <ul>
-            <li><a href="./demo/#pixi-stage">PixiStage</a></li>
-            <li><a href="./demo/#pixi-stage-shader">PixiStage | Shader</a></li>
-            <li><a href="./demo/#pixi-stage-textured-mesh">PixiStage | Textured Mesh</a></li>
-            <li><a href="./demo/#pixi-stage-textured-mesh-globe">PixiStage | Textured Mesh Globe</a></li>
-            <li><a href="./demo/#pixi-stage-webcam">PixiStage | Webcam</a></li>
-            <li><a href="./demo/#pixi-stage-webcam-square">PixiStage | Webcam Square</a></li>
-            <li><a href="./demo/#pixi-video-player">PixiVideoPlayer</a></li>
-            <li><a href="./demo/#pixi-video-player-webrtc-video">PixiVideoPlayer | Video Stream to PIXI</a></li>
-          </ul>
-          <h5>Draw | THREE</h5>
-          <ul>
-            <li><a href="./demo/#three-double-buffer">ThreeDoubleBuffer</a></li>
-            <li><a href="./demo/#three-scene-">ThreeScene</a></li>
-            <li><a href="./demo/#three-scene-billboard-particles">ThreeScene | Billboard Particles</a></li>
-            <li><a href="./demo/#three-scene-convex-hull">ThreeScene | ConvexHull</a></li>
-            <li><a href="./demo/#three-scene-fbo-background">ThreeScene | FBO Background</a></li>
-            <li><a href="./demo/#three-scene-gltf">ThreeScene | glTF</a></li>
-            <li><a href="./demo/#three-scene-gltf-animated">ThreeScene | glTF Animated</a></li>
-            <li><a href="./demo/#three-scene-custom-textured-shape">ThreeScene | Textured shape UV animation</a></li>
-            <li><a href="./demo/#three-scene-text-texture">ThreeScene | Canvas text texture</a></li>
-            <li><a href="./demo/#three-scene-ar">ThreeSceneAr</a></li>
-            <li><a href="./demo/#three-scene-fbo">ThreeSceneFbo | Chroma EffectComposer Attempt</a></li>
-            <li><a href="./demo/#three-scene-fbo-color-map">ThreeSceneFbo | Color Map</a></li>
-            <li><a href="./demo/#three-scene-gpu-particles-noise">ThreeSceneFbo | GPU Particles</a></li>
-            <li><a href="./demo/#three-scene-plane">ThreeScenePlane</a></li>
-            <li><a href="./demo/#three-scene-video-texture">ThreeScene | Video displace texture</a></li>
-            <li><a href="./demo/#three-scene-video-texture-chroma">ThreeScene | Video Texture w/Chroma Shader</a></li>
-          </ul>
 
-          <!-- <h4>File</h4>
-          <ul>
-          </ul> -->
-          <h4>Hardware / Inputs</h4>
-          <ul>
-            <li><a href="./demo/#device-motion">DeviceMotion</a></li>
-            <li><a href="./demo/#keyboard-util">KeyboardUtil</a></li>
-            <li><a href="./demo/#midi-interface">MidiInterface</a></li>
-            <li><a href="./demo/#microphone-node">MicrophoneNode | SoundFFT</a></li>
-            <li><a href="./demo/#pointer-pos">PointerPos</a></li>
-            <li><a href="./demo/#scroll-snap">Scroll Snap</a></li>
-            <li><a href="./demo/#serial-device">SerialDevice</a></li>
-            <li><a href="./demo/#wheel-util">WheelUtil</a></li>
-            <li><a href="./demo/#webcam">Webcam</a></li>
-            <li><a href="./demo/#webcam-back-camera">Webcam | Back Camera (Mobile-only)</a></li>
-            <li><a href="./demo/#webcam-mediapipe-body-tracking">MediaPipe Body Tracking</a></li>
-            <li><a href="./demo/#webcam-ml5-bodypose-movenet">ml5 BodyPose MoveNet</a></li>
-            <li><a href="./demo/#webcam-to-canvas">Webcam | To Canvas</a></li>
-          </ul>
-          <h4>Math</h4>
-          <ul>
-            <li><a href="./demo/#easing-color">EasingColor</a></li>
-            <li><a href="./demo/#float-buffer">FloatBuffer</a></li>
-            <li><a href="./demo/#gesture-tracker">GestureTracker</a></li>
-            <li><a href="./demo/#math-util">MathUtil</a></li>
-          </ul>
-          <h4>Media</h4>
-          <ul>
-            <li><a href="./demo/#model-viewer">ModelViewer</a></li>
-            <li><a href="./demo/#sound-fft-video">SoundFFT | Video</a></li>
-            <li><a href="./demo/#sound-player">SoundPlayer</a></li>
-            <li><a href="./demo/#sound-player-loops-matched">SoundPlayer | Loops Matched</a></li>
-            <li><a href="./demo/#video-download">Video Download</a></li>
-            <li><a href="./demo/#vtt-video">VTT | Video</a></li>
-            <li><a href="./demo/#vttcue-audio">VTTCue | Audio</a></li>
-          </ul>
-          <h4>Net</h4>
-          <ul>
-            <li><a href="./demo/#qr-code">QRCode</a></li>
-            <li><a href="./demo/#webrtc-image-transfer">WebRTC | Image Transfer</a></li>
-            <li><a href="./demo/#webrtc-kiosk">WebRTC | Kiosk</a></li>
-            <li><a href="./demo/#webrtc-group-game">WebRTC | Group Game</a></li>
-            <li><a href="./demo/#webrtc-video-call">WebRTC | Video Call</a></li>
-            <li><a href="./demo/#webrtc-client-video-stream">WebRTC | One-way Video stream</a></li>
-            <li><a href="./demo/#solid-socket&server=ws://192.168.1.171:3001">SolidSocket</a></li>
-            <li><a href="./demo/?param=okay#url-util&test=yes">URLUtil</a></li>
-          </ul>
-          <h4>Render</h4>
-          <ul>
-            <li><a href="./demo/#frame-loop">FrameLoop</a></li>
-            <li><a href="./demo/#video-recorder">VideoRecorder</a></li>
-          </ul>
-          <h4>Speech</h4>
-          <ul>
-            <li><a href="./demo/#speech-recognizer">SpeechRecognizer</a></li>
-          </ul>
-          <h4>Text</h4>
-          <ul>
-            <li><a href="./demo/#font-util">FontUtil</a></li>
-            <li><a href="./demo/#string-formatter">StringFormatter</a></li>
-          </ul>
-          <ul>
-          </ul>
+          <input type="search" id="search-input" placeholder="Search..." aria-label="Search demos and bookmarklets" />
+
+          <div id="catalog-demos"></div>
+          <div id="catalog-bookmarklets" class="catalog-section"></div>
         </section>
       </div>
     </main>
-    <!-- ./ Main -->
 
     <!-- Footer -->
     <footer class="container">
       <small>Built by <a href="https://cacheflowe.com">Cacheflowe</a> <date-year>&copy;</date-year></small>
     </footer>
-    <!-- ./ Footer -->
 
     <!-- Components -->
     <script src="src/components/date-year.js" type="module"></script>
 
-    <!-- Minimal theme switcher -->
-    <script src="js/minimal-theme-switcher.js"></script>
+    <script type="module">
+      // -----------------------------------------------------------------------
+      // Load manifest and render catalog
+      // -----------------------------------------------------------------------
 
-    <!-- Vendor -->
-    <script src="./vendor/zora.js"></script>
+      const manifest = await fetch("./demo/manifest.json").then((r) => r.json());
+
+      // --- Demos section ---
+
+      function groupBy(arr, key) {
+        const map = {};
+        for (const item of arr) {
+          (map[item[key]] = map[item[key]] || []).push(item);
+        }
+        return map;
+      }
+
+      const demosByCategory = groupBy(manifest.demos, "category");
+      const demosEl = document.getElementById("catalog-demos");
+
+      const demoHeader = document.createElement("hgroup");
+      demoHeader.innerHTML = "<h3>Demos</h3>";
+      demosEl.appendChild(demoHeader);
+
+      for (const [category, demos] of Object.entries(demosByCategory)) {
+        const h = document.createElement("h4");
+        h.textContent = category;
+        h.dataset.categoryHeader = category;
+        demosEl.appendChild(h);
+
+        const ul = document.createElement("ul");
+        ul.dataset.categoryList = category;
+        for (const demo of demos) {
+          const li = document.createElement("li");
+          li.dataset.searchText = `${demo.title} ${demo.category} ${demo.description}`.toLowerCase();
+          li.innerHTML = `<a href="./demo/#${demo.id}">${demo.title}</a>${demo.description ? ` <small>— ${demo.description}</small>` : ""}`;
+          ul.appendChild(li);
+        }
+        demosEl.appendChild(ul);
+      }
+
+      // --- Bookmarklets section ---
+
+      const bookmarkletsEl = document.getElementById("catalog-bookmarklets");
+
+      if (manifest.bookmarklets.length > 0) {
+        const bmHeader = document.createElement("hgroup");
+        bmHeader.innerHTML =
+          "<h3>Bookmarklets</h3><p>Drag a title to your bookmarks bar to install, or expand to copy the source.</p>";
+        bookmarkletsEl.appendChild(bmHeader);
+
+        for (const bm of manifest.bookmarklets) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "bookmarklet-entry";
+          wrapper.dataset.searchText = `${bm.title} ${bm.description}`.toLowerCase();
+
+          const details = document.createElement("details");
+          details.innerHTML = `
+            <summary>
+              <strong>${bm.title}</strong>
+              ${bm.description ? `<span class="bookmarklet-drag">${bm.description}</span>` : ""}
+            </summary>
+            <div class="bookmarklet-source">
+              <pre><code>Loading...</code></pre>
+              <div class="bookmarklet-actions">
+                <button class="copy-btn secondary outline" style="width:auto">Copy source</button>
+                <small class="bookmarklet-drag">Drag to bookmarks bar to install</small>
+              </div>
+            </div>
+          `;
+
+          // Lazy-load source when expanded
+          const pre = details.querySelector("pre code");
+          const copyBtn = details.querySelector(".copy-btn");
+          let sourceLoaded = false;
+          let sourceText = "";
+
+          details.addEventListener("toggle", async () => {
+            if (!details.open || sourceLoaded) return;
+            sourceLoaded = true;
+            try {
+              sourceText = await fetch(`./bookmarklets/${bm.file}`).then((r) => r.text());
+              pre.textContent = sourceText;
+            } catch {
+              pre.textContent = "(could not load source)";
+            }
+          });
+
+          copyBtn.addEventListener("click", () => {
+            navigator.clipboard.writeText(sourceText).then(() => {
+              copyBtn.textContent = "Copied!";
+              setTimeout(() => (copyBtn.textContent = "Copy source"), 1500);
+            });
+          });
+
+          wrapper.appendChild(details);
+          bookmarkletsEl.appendChild(wrapper);
+        }
+      }
+
+      // --- Search / filter ---
+
+      document.getElementById("search-input").addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase().trim();
+
+        // Filter demo list items
+        for (const li of demosEl.querySelectorAll("li")) {
+          const match = !q || li.dataset.searchText.includes(q);
+          li.toggleAttribute("data-hidden", !match);
+        }
+
+        // Hide empty category headers + lists
+        for (const ul of demosEl.querySelectorAll("ul[data-category-list]")) {
+          const hasVisible = [...ul.querySelectorAll("li")].some((li) => !li.hasAttribute("data-hidden"));
+          const category = ul.dataset.categoryList;
+          const h = demosEl.querySelector(`[data-category-header="${category}"]`);
+          ul.toggleAttribute("data-hidden", !hasVisible);
+          if (h) h.toggleAttribute("data-hidden", !hasVisible);
+        }
+
+        // Filter bookmarklet entries
+        for (const entry of bookmarkletsEl.querySelectorAll(".bookmarklet-entry")) {
+          const match = !q || entry.dataset.searchText.includes(q);
+          entry.toggleAttribute("data-hidden", !match);
+        }
+      });
+    </script>
   </body>
 </html>

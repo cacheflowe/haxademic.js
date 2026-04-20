@@ -41,10 +41,7 @@ class LinearFloat {
   }
 
   map(val, inputMin, inputMax, outputMin, outputMax) {
-    return (
-      (outputMax - outputMin) * ((val - inputMin) / (inputMax - inputMin)) +
-      outputMin
-    );
+    return (outputMax - outputMin) * ((val - inputMin) / (inputMax - inputMin)) + outputMin;
   }
 
   target() {

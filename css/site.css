@@ -76,3 +76,61 @@ p:empty {
   padding: var(--pico-spacing);
   background-color: var(--pico-secondary-background);
 }
+
+/* Homepage search, bookmarklet display, etc */
+
+#search-input {
+  margin-bottom: 1rem;
+}
+.catalog-section + .catalog-section {
+  margin-top: 2rem;
+}
+.bookmarklet-entry {
+  margin-bottom: 0.5rem;
+}
+.bookmarklet-entry summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.bookmarklet-entry summary::-webkit-details-marker {
+  display: none;
+}
+.bookmarklet-entry summary::before {
+  content: "▶";
+  font-size: 0.6em;
+  opacity: 0.5;
+}
+details[open] summary::before {
+  content: "▼";
+}
+.bookmarklet-source {
+  margin-top: 0.5rem;
+  position: relative;
+}
+.bookmarklet-source pre {
+  font-size: 0.75em;
+  max-height: 200px;
+  overflow: auto;
+  background: var(--pico-code-background-color, #1a1a2e);
+  padding: 0.75rem;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.bookmarklet-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.bookmarklet-drag {
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+[data-hidden] {
+  display: none !important;
+}
