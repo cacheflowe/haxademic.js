@@ -47,14 +47,14 @@
           document.body.style.cssText = "margin:0;padding:0;overflow:hidden";
         }
 
-        // import.meta.glob tells Vite to watch the whole directory, so new
-        // demo files are picked up automatically without restarting the server.
-        const newStyleDemos = import.meta.glob("./*.js");
+        // import.meta.glob is a Vite-only API; fall back to a plain dynamic
+        // import when running outside Vite (e.g. a static file server).
+        const newStyleDemos = import.meta.glob ? import.meta.glob("./*.js") : null;
 
         try {
           // New-style: hash = element name = filename (no demo- prefix).
           // Dynamic import registers the custom element, then we create it.
-          const loader = newStyleDemos[`./${demoId}.js`];
+          const loader = newStyleDemos?.[`./${demoId}.js`] ?? (() => import(`./${demoId}.js`));
           if (!loader) throw new Error(`No demo file found: ${demoId}.js`);
           await loader();
 
