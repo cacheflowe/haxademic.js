@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -21,7 +21,7 @@
     -->
     <main class="container demo" id="demo-shell" hidden>
       <a id="demo-back-btn" href="../" role="button">← All Demos</a>
-      <a id="demo-src-btn" href="#" target="_blank" role="button" style="float:right">Demo source</a>
+      <a id="demo-src-btn" href="#" target="_blank" role="button" style="float: right">Demo source</a>
       <h1 id="demo-title"></h1>
       <p id="demo-desc" hidden></p>
       <div id="demo-host" class="demo-el"></div>
@@ -47,10 +47,16 @@
           document.body.style.cssText = "margin:0;padding:0;overflow:hidden";
         }
 
+        // import.meta.glob tells Vite to watch the whole directory, so new
+        // demo files are picked up automatically without restarting the server.
+        const newStyleDemos = import.meta.glob("./*.js");
+
         try {
           // New-style: hash = element name = filename (no demo- prefix).
           // Dynamic import registers the custom element, then we create it.
-          await import(`./${demoId}.js`);
+          const loader = newStyleDemos[`./${demoId}.js`];
+          if (!loader) throw new Error(`No demo file found: ${demoId}.js`);
+          await loader();
 
           const DemoClass = customElements.get(demoId);
           const meta = DemoClass?.meta || {};

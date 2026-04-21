@@ -427,6 +427,18 @@
       "description": "TB-303-style acid bass synthesizer with 16-step sequencer"
     },
     {
+      "id": "tone-generative-music",
+      "title": "Tone.js Generative Music",
+      "category": "Media",
+      "description": "Mood, excitement, and health sliders drive real-time synthesized generative music"
+    },
+    {
+      "id": "web-audio-generative-music",
+      "title": "Web Audio Generative Music",
+      "category": "Media",
+      "description": "Pure Web Audio API port — same mood/excitement/health model, custom instrument and sequencer library"
+    },
+    {
       "id": "qr-code",
       "title": "QRCode",
       "category": "Net",
