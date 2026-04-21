@@ -6,12 +6,9 @@
  *
  * playbackRate = (targetBpm / originalBpm) * speedMultiplier
  *
- * Call trigger() on every sequencer step — the player handles loop-boundary
- * restarts internally. On a random jump the playhead seeks to one of
- * `subdivision` equally-spaced on-beat positions in the buffer, then returns
- * to the nominal position after `returnSteps` steps. The buffer is never
- * force-stopped mid-play; it runs until its natural end and restarts from the
- * correct nominal offset on the next step.
+ * Forward playback uses BufferSourceNode loop=true so the Web Audio engine
+ * handles the wrap-around at sample precision — no stop/start at the loop
+ * boundary, no click. Jumps and BPM changes restart from the nominal offset.
  *
  * Usage:
  *   const brk = new WebAudioBreakPlayer(ctx, { subdivision: 8, returnSteps: 4 });
@@ -46,10 +43,7 @@ export default class WebAudioBreakPlayer {
     this._originalBpm = 120;
 
     this._source = null;
-    this._sourceOffset = 0;
-    this._sourceStartTime = 0;
     this._sourcePlaybackRate = 1;
-    this._sourceReverse = false;
     this._returnAtStep = -1;
 
     this._out = ctx.createGain();
@@ -112,8 +106,8 @@ export default class WebAudioBreakPlayer {
   // ---- Playback ----
 
   /**
-   * Call on every sequencer step. The player decides whether to start,
-   * continue, jump, or return based on the step position and random chance.
+   * Call on every sequencer step. The looping source runs continuously;
+   * this only intervenes for initial start, BPM changes, jumps, and returns.
    *
    * @param {number} globalStep  Absolute step count (resets to 0 on play).
    * @param {number} bpm         Current tempo in BPM.
@@ -124,17 +118,17 @@ export default class WebAudioBreakPlayer {
 
     const playbackRate = (bpm / this._originalBpm) * this.speedMultiplier;
     const loopSteps = Math.max(1, Math.round((this._bars * 16) / this.speedMultiplier));
-
-    // Nominal buffer offset — where we should be in the loop at this step
     const nominalOffset = ((globalStep % loopSteps) / loopSteps) * this._buffer.duration;
 
-    // Has the current source naturally played to the end by atTime?
-    const sourceEndTime =
-      this._sourceStartTime + (this._buffer.duration - this._sourceOffset) / this._sourcePlaybackRate;
-    const sourceEnded = !this._source || sourceEndTime <= atTime + 0.001;
+    // Initial start or reverse event ended naturally — start looping from nominal
+    if (!this._source) {
+      this._startSource(nominalOffset, atTime, playbackRate, false);
+      this._returnAtStep = -1;
+      return;
+    }
 
-    // Loop boundary or source ended — restart from nominal (forward)
-    if (globalStep % loopSteps === 0 || sourceEnded) {
+    // BPM changed — resync to nominal position with new rate
+    if (Math.abs(this._sourcePlaybackRate - playbackRate) > 0.0001) {
       this._startSource(nominalOffset, atTime, playbackRate, false);
       this._returnAtStep = -1;
       return;
@@ -180,13 +174,17 @@ export default class WebAudioBreakPlayer {
     const source = this.ctx.createBufferSource();
     source.buffer = buf;
     source.playbackRate.value = playbackRate;
+    // Forward sources loop seamlessly at the sample level — no stop/start glitch
+    // Reverse sources play once; trigger() handles the return when they end
+    if (!reverse) {
+      source.loop = true;
+      source.loopStart = 0;
+      source.loopEnd = buf.duration;
+    }
     source.connect(this._out);
     source.start(atTime, offset);
     this._source = source;
-    this._sourceOffset = offset;
-    this._sourceStartTime = atTime;
     this._sourcePlaybackRate = playbackRate;
-    this._sourceReverse = reverse;
     source.onended = () => {
       if (this._source === source) this._source = null;
       source.disconnect();
