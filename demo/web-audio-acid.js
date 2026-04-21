@@ -1,4 +1,8 @@
 import DemoBase from "./demo--base-element.js";
+import WebAudioSequencer from "../src/web-audio/web-audio-sequencer.js";
+import WebAudioSynthAcid from "../src/web-audio/web-audio-synth-acid.js";
+import WebAudioFxReverb from "../src/web-audio/web-audio-fx-reverb.js";
+import WebAudioBreakPlayer from "../src/web-audio-break-player.js";
 
 const SCALES = {
   Minor: [0, 2, 3, 5, 7, 8, 10],
@@ -15,11 +19,36 @@ const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", 
 // Rhythmic probability per 16th-note step — downbeats and upbeats weighted for acid density
 const STEP_WEIGHTS = [0.95, 0.35, 0.65, 0.25, 0.8, 0.3, 0.6, 0.7, 0.85, 0.35, 0.65, 0.25, 0.75, 0.4, 0.65, 0.55];
 
+const BREAK_FILES = [
+  { label: "— None —", file: "" },
+  { label: "FunkyDrum (8 bars)", file: "0032-break-FUNKYDRUM_loop_8_.wav" },
+  { label: "Shackup (16 bars)", file: "0033-break-shackup_loop_16_.wav" },
+  { label: "Think (4 bars)", file: "0034-break-think.badsister_loop_4_.wav" },
+  { label: "Hotpants (4 bars)", file: "0037_SamplepackHotpants_loop_4_.wav" },
+];
+
+const SPEED_MULTIPLIERS = [
+  { label: "×0.5", value: 0.5 },
+  { label: "×1", value: 1 },
+  { label: "×2", value: 2 },
+  { label: "×4", value: 4 },
+];
+
+// Delay intervals as beat multiples (1 beat = 1 quarter note)
+const DELAY_INTERVALS = [
+  { label: "1/16", beats: 0.25 },
+  { label: "1/8", beats: 0.5 },
+  { label: "1/8·", beats: 0.75 },
+  { label: "1/4", beats: 1 },
+  { label: "1/4·", beats: 1.5 },
+  { label: "1/2", beats: 2 },
+];
+
 class WebAudioAcid extends DemoBase {
   static meta = {
     title: "Web Audio Acid / TB-303",
     category: "Media",
-    description: "TB-303-style acid bass synthesizer with 16-step sequencer",
+    description: "TB-303-style acid bass synthesizer with 16-step sequencer and break player",
   };
 
   init() {
@@ -28,7 +57,12 @@ class WebAudioAcid extends DemoBase {
     this._delayNode = null;
     this._delayFeedback = null;
     this._delayWet = null;
-    this._distortionCurve = this._makeDistortionCurve(0);
+    this._acidReverb = null;
+    this._acid = null;
+    this._break = null;
+    this._seq = null;
+    this._globalStep = 0;
+    this._playing = false;
 
     this._p = {
       bpm: 128,
@@ -39,24 +73,26 @@ class WebAudioAcid extends DemoBase {
       attack: 0.005,
       distortion: 0,
       portamento: 0,
-      delayTime: 0.375,
+      reverbWet: 0.15,
+      delayInterval: 0.75,
       delayFeedback: 0.35,
       delayMix: 0,
       volume: 0.7,
       waveform: "sawtooth",
+      breakSpeedMultiplier: 4,
+      breakSubdivision: 8,
+      breakReturnSteps: 4,
+      breakRandomChance: 0.1,
+      breakReverseChance: 0.04,
+      breakVolume: 0.8,
     };
 
     this._steps = this._defaultPattern();
-    this._playing = false;
-    this._schedulerStep = 0;
-    this._nextNoteTime = 0;
-    this._schedulerTimer = null;
-    this._lastScheduledFreq = null;
-
     this._stepEls = [];
     this._stepOnBtns = [];
     this._stepNoteSelects = [];
     this._stepAccentChks = [];
+    this._breakFileSelect = null;
 
     this.buildUI();
     this.addCSS();
@@ -76,135 +112,100 @@ class WebAudioAcid extends DemoBase {
     this._ctx = new AudioContext();
 
     this._masterGain = this._ctx.createGain();
-    this._masterGain.gain.value = this._p.volume;
+    this._masterGain.gain.value = 1.0;
     this._masterGain.connect(this._ctx.destination);
 
-    // Delay network — vca feeds both masterGain (dry) and delayNode (wet)
+    // Delay network — acid feeds reverb (dry path) and delayNode (wet send)
     this._delayNode = this._ctx.createDelay(2.0);
     this._delayFeedback = this._ctx.createGain();
     this._delayWet = this._ctx.createGain();
-    this._delayNode.delayTime.value = this._p.delayTime;
+    this._delayNode.delayTime.value = this._computeDelayTime();
     this._delayFeedback.gain.value = this._p.delayFeedback;
     this._delayWet.gain.value = this._p.delayMix;
     this._delayNode.connect(this._delayFeedback);
     this._delayFeedback.connect(this._delayNode);
     this._delayNode.connect(this._delayWet);
     this._delayWet.connect(this._masterGain);
+
+    // Acid synth → reverb → master (dry path); also → delay (wet send)
+    this._acid = new WebAudioSynthAcid(this._ctx, {
+      cutoff: this._p.cutoff,
+      resonance: this._p.resonance,
+      envMod: this._p.envMod,
+      decay: this._p.decay,
+      attack: this._p.attack,
+      distortion: this._p.distortion,
+      portamento: this._p.portamento,
+      volume: this._p.volume,
+      oscType: this._p.waveform,
+    });
+    this._acidReverb = new WebAudioFxReverb(this._ctx, { wet: this._p.reverbWet });
+    this._acid.connect(this._acidReverb);
+    this._acidReverb.connect(this._masterGain);
+    this._acid.connect(this._delayNode);
+
+    // Break player
+    this._break = new WebAudioBreakPlayer(this._ctx, {
+      speedMultiplier: this._p.breakSpeedMultiplier,
+      subdivision: this._p.breakSubdivision,
+      returnSteps: this._p.breakReturnSteps,
+      randomChance: this._p.breakRandomChance,
+      reverseChance: this._p.breakReverseChance,
+      volume: this._p.breakVolume,
+    });
+    this._break.connect(this._masterGain);
+    this._loadBreak();
+
+    // Sequencer
+    this._seq = new WebAudioSequencer(this._ctx, {
+      bpm: this._p.bpm,
+      steps: 16,
+      subdivision: 16,
+    });
+    this._seq.onStep((step, time) => {
+      // Acid
+      const acidStep = this._steps[step];
+      if (acidStep.active) {
+        this._acid.trigger(acidStep.note, this._seq.stepDurationSec(), acidStep.accent, time);
+      }
+
+      // Break — call every step, player handles loop-boundary logic internally
+      if (this._break.loaded) {
+        this._break.trigger(this._globalStep, this._p.bpm, time);
+      }
+
+      // UI step highlight
+      const uiDelay = Math.max(0, (time - this._ctx.currentTime) * 1000);
+      setTimeout(() => this._highlightStep(step), uiDelay);
+
+      this._globalStep++;
+    });
   }
 
-  _makeDistortionCurve(amount) {
-    const n = 512;
-    const curve = new Float32Array(n);
-    const k = amount * 200;
-    for (let i = 0; i < n; i++) {
-      const x = (i * 2) / n - 1;
-      curve[i] = k > 0 ? ((Math.PI + k) * x) / (Math.PI + k * Math.abs(x)) : x;
-    }
-    return curve;
+  _computeDelayTime() {
+    return (60 / this._p.bpm) * this._p.delayInterval;
   }
 
-  _updateDistortionCurve() {
-    this._distortionCurve = this._makeDistortionCurve(this._p.distortion);
-  }
-
-  _midiToFreq(midi) {
-    return 440 * Math.pow(2, (midi - 69) / 12);
-  }
-
-  _triggerNote(midi, time, accent, stepDur) {
-    const ctx = this._ctx;
-    const freq = this._midiToFreq(midi);
-    const prevFreq = this._lastScheduledFreq;
-    this._lastScheduledFreq = freq;
-
-    const osc = ctx.createOscillator();
-    const dist = ctx.createWaveShaper();
-    const filter = ctx.createBiquadFilter();
-    const vca = ctx.createGain();
-
-    osc.type = this._p.waveform;
-
-    // Portamento: slide from previous note's frequency
-    if (this._p.portamento > 0 && prevFreq !== null && prevFreq !== freq) {
-      osc.frequency.setValueAtTime(prevFreq, time);
-      osc.frequency.exponentialRampToValueAtTime(freq, time + this._p.portamento);
-    } else {
-      osc.frequency.setValueAtTime(freq, time);
-    }
-
-    // Distortion before filter so harmonics get shaped by the cutoff sweep
-    dist.curve = this._distortionCurve;
-
-    // Filter envelope
-    filter.type = "lowpass";
-    filter.Q.value = this._p.resonance;
-    const base = this._p.cutoff;
-    const peak = Math.min(base + base * this._p.envMod * 4 * (accent ? 1.5 : 1), 18000);
-    filter.frequency.setValueAtTime(base, time);
-    filter.frequency.linearRampToValueAtTime(peak, time + this._p.attack);
-    filter.frequency.exponentialRampToValueAtTime(Math.max(base, 30), time + this._p.attack + this._p.decay);
-
-    // VCA envelope — attack matches filter attack so they feel unified
-    const vel = accent ? 1.0 : 0.65;
-    const hold = stepDur * 0.7;
-    const release = 0.05;
-    vca.gain.setValueAtTime(0.0001, time);
-    vca.gain.linearRampToValueAtTime(vel, time + this._p.attack);
-    vca.gain.setValueAtTime(vel, time + hold);
-    vca.gain.exponentialRampToValueAtTime(0.0001, time + hold + release);
-
-    // Chain: osc → dist → filter → vca → dry + wet
-    osc.connect(dist);
-    dist.connect(filter);
-    filter.connect(vca);
-    vca.connect(this._masterGain);
-    vca.connect(this._delayNode);
-
-    osc.start(time);
-    osc.stop(time + hold + release + 0.01);
-    osc.onended = () => {
-      osc.disconnect();
-      dist.disconnect();
-      filter.disconnect();
-      vca.disconnect();
-    };
-  }
-
-  _stepDuration() {
-    return 60 / this._p.bpm / 4;
-  }
-
-  _scheduler() {
-    if (!this._playing) return;
-    const lookahead = 0.1;
-    while (this._nextNoteTime < this._ctx.currentTime + lookahead) {
-      const step = this._steps[this._schedulerStep];
-      if (step.active) this._triggerNote(step.note, this._nextNoteTime, step.accent, this._stepDuration());
-
-      const uiDelay = Math.max(0, (this._nextNoteTime - this._ctx.currentTime) * 1000);
-      const s = this._schedulerStep;
-      setTimeout(() => this._highlightStep(s), uiDelay);
-
-      this._nextNoteTime += this._stepDuration();
-      this._schedulerStep = (this._schedulerStep + 1) % 16;
-    }
-    this._schedulerTimer = setTimeout(() => this._scheduler(), 25);
+  _loadBreak() {
+    if (!this._ctx || !this._break || !this._breakFileSelect) return;
+    const file = this._breakFileSelect.value;
+    if (file) this._break.load(`../data/audio/breaks/${file}`);
   }
 
   _play() {
     this._initAudio();
     if (this._ctx.state === "suspended") this._ctx.resume();
     this._playing = true;
-    this._schedulerStep = 0;
-    this._lastScheduledFreq = null;
-    this._nextNoteTime = this._ctx.currentTime + 0.05;
-    this._scheduler();
+    this._globalStep = 0;
+    this._acid.reset();
+    this._seq.bpm = this._p.bpm;
+    this._seq.start();
     this._playBtn.textContent = "◼ Stop";
   }
 
   _stop() {
     this._playing = false;
-    clearTimeout(this._schedulerTimer);
+    this._seq?.stop();
     this._highlightStep(-1);
     this._playBtn.textContent = "▶ Play";
   }
@@ -287,6 +288,7 @@ class WebAudioAcid extends DemoBase {
     controls.appendChild(this._makeSlider("Attack", "attack", 0.001, 0.3, 0.001, this._p.attack));
     controls.appendChild(this._makeSlider("Distortion", "distortion", 0, 1, 0.01, this._p.distortion));
     controls.appendChild(this._makeSlider("Portamento", "portamento", 0, 0.5, 0.001, this._p.portamento));
+    controls.appendChild(this._makeSlider("Reverb", "reverbWet", 0, 1, 0.01, this._p.reverbWet));
     controls.appendChild(this._makeSlider("Volume", "volume", 0, 1, 0.01, this._p.volume));
 
     const waveRow = document.createElement("div");
@@ -298,6 +300,7 @@ class WebAudioAcid extends DemoBase {
       btn.className = `acid-wave-btn${type === this._p.waveform ? " active" : ""}`;
       btn.addEventListener("click", () => {
         this._p.waveform = type;
+        if (this._acid) this._acid.oscType = type;
         waveRow.querySelectorAll(".acid-wave-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
       });
@@ -310,9 +313,127 @@ class WebAudioAcid extends DemoBase {
     delayRow.appendChild(
       Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "Delay" }),
     );
-    delayRow.appendChild(this._makeSlider("Time", "delayTime", 0.01, 1, 0.001, this._p.delayTime));
+
+    // Tempo-synced interval select
+    const delayIntervalWrap = document.createElement("div");
+    delayIntervalWrap.className = "acid-ctrl";
+    delayIntervalWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Interval" }));
+    const delayIntervalSelect = document.createElement("select");
+    delayIntervalSelect.className = "acid-select";
+    DELAY_INTERVALS.forEach(({ label, beats }) => {
+      const opt = document.createElement("option");
+      opt.value = beats;
+      opt.textContent = label;
+      if (beats === this._p.delayInterval) opt.selected = true;
+      delayIntervalSelect.appendChild(opt);
+    });
+    delayIntervalSelect.addEventListener("change", () => {
+      this._p.delayInterval = parseFloat(delayIntervalSelect.value);
+      if (this._delayNode) this._delayNode.delayTime.value = this._computeDelayTime();
+    });
+    delayIntervalWrap.appendChild(delayIntervalSelect);
+    delayRow.appendChild(delayIntervalWrap);
+
     delayRow.appendChild(this._makeSlider("Feedback", "delayFeedback", 0, 0.9, 0.01, this._p.delayFeedback));
     delayRow.appendChild(this._makeSlider("Mix", "delayMix", 0, 1, 0.01, this._p.delayMix));
+
+    // Break player controls
+    const breakRow = this.injectHTML(`<div class="acid-controls"></div>`);
+    breakRow.appendChild(
+      Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "Break Player" }),
+    );
+
+    // File select
+    const fileWrap = document.createElement("div");
+    fileWrap.className = "acid-ctrl acid-ctrl-wide";
+    fileWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Loop" }));
+    this._breakFileSelect = document.createElement("select");
+    this._breakFileSelect.className = "acid-select";
+    BREAK_FILES.forEach(({ label, file }) => {
+      const opt = document.createElement("option");
+      opt.value = file;
+      opt.textContent = label;
+      this._breakFileSelect.appendChild(opt);
+    });
+    this._breakFileSelect.addEventListener("change", () => {
+      this._p.breakFile = this._breakFileSelect.value;
+      this._loadBreak();
+    });
+    fileWrap.appendChild(this._breakFileSelect);
+    breakRow.appendChild(fileWrap);
+
+    // Speed multiplier select
+    const speedWrap = document.createElement("div");
+    speedWrap.className = "acid-ctrl";
+    speedWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Speed" }));
+    const speedSelect = document.createElement("select");
+    speedSelect.className = "acid-select";
+    SPEED_MULTIPLIERS.forEach(({ label, value }) => {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      if (value === this._p.breakSpeedMultiplier) opt.selected = true;
+      speedSelect.appendChild(opt);
+    });
+    speedSelect.addEventListener("change", () => {
+      const v = parseFloat(speedSelect.value);
+      this._p.breakSpeedMultiplier = v;
+      if (this._break) this._break.speedMultiplier = v;
+    });
+    speedWrap.appendChild(speedSelect);
+    breakRow.appendChild(speedWrap);
+
+    // Subdivision select — how many on-beat jump slots in the loop
+    const subdivWrap = document.createElement("div");
+    subdivWrap.className = "acid-ctrl";
+    subdivWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Jump Grid" }));
+    const subdivSelect = document.createElement("select");
+    subdivSelect.className = "acid-select";
+    [4, 8, 16].forEach((v) => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = `÷${v}`;
+      if (v === this._p.breakSubdivision) opt.selected = true;
+      subdivSelect.appendChild(opt);
+    });
+    subdivSelect.addEventListener("change", () => {
+      const v = parseInt(subdivSelect.value);
+      this._p.breakSubdivision = v;
+      if (this._break) this._break.subdivision = v;
+    });
+    subdivWrap.appendChild(subdivSelect);
+    breakRow.appendChild(subdivWrap);
+
+    // Return steps select — how many steps before snapping back to nominal
+    const returnWrap = document.createElement("div");
+    returnWrap.className = "acid-ctrl";
+    returnWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Return" }));
+    const returnSelect = document.createElement("select");
+    returnSelect.className = "acid-select";
+    [
+      [1, "1 step"],
+      [2, "2 steps"],
+      [4, "4 steps"],
+      [8, "8 steps"],
+      [16, "16 steps"],
+    ].forEach(([v, lbl]) => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = lbl;
+      if (v === this._p.breakReturnSteps) opt.selected = true;
+      returnSelect.appendChild(opt);
+    });
+    returnSelect.addEventListener("change", () => {
+      const v = parseInt(returnSelect.value);
+      this._p.breakReturnSteps = v;
+      if (this._break) this._break.returnSteps = v;
+    });
+    returnWrap.appendChild(returnSelect);
+    breakRow.appendChild(returnWrap);
+
+    breakRow.appendChild(this._makeSlider("Rand Chance", "breakRandomChance", 0, 1, 0.01, this._p.breakRandomChance));
+    breakRow.appendChild(this._makeSlider("Reverse", "breakReverseChance", 0, 0.25, 0.01, this._p.breakReverseChance));
+    breakRow.appendChild(this._makeSlider("Break Vol", "breakVolume", 0, 1, 0.01, this._p.breakVolume));
 
     // Randomizer controls
     const randRow = this.injectHTML(`<div class="acid-rand-row"></div>`);
@@ -362,9 +483,9 @@ class WebAudioAcid extends DemoBase {
       onBtn.className = `acid-step-on${step.active ? " on" : ""}`;
       onBtn.textContent = step.active ? "●" : "○";
       onBtn.addEventListener("click", () => {
-        step.active = !step.active;
-        onBtn.className = `acid-step-on${step.active ? " on" : ""}`;
-        onBtn.textContent = step.active ? "●" : "○";
+        this._steps[i].active = !this._steps[i].active;
+        onBtn.className = `acid-step-on${this._steps[i].active ? " on" : ""}`;
+        onBtn.textContent = this._steps[i].active ? "●" : "○";
       });
       el.appendChild(onBtn);
       this._stepOnBtns.push(onBtn);
@@ -379,7 +500,7 @@ class WebAudioAcid extends DemoBase {
         noteSelect.appendChild(opt);
       });
       noteSelect.addEventListener("change", () => {
-        step.note = parseInt(noteSelect.value);
+        this._steps[i].note = parseInt(noteSelect.value);
       });
       el.appendChild(noteSelect);
       this._stepNoteSelects.push(noteSelect);
@@ -391,7 +512,7 @@ class WebAudioAcid extends DemoBase {
       accentChk.type = "checkbox";
       accentChk.checked = step.accent;
       accentChk.addEventListener("change", () => {
-        step.accent = accentChk.checked;
+        this._steps[i].accent = accentChk.checked;
       });
       accentLabel.appendChild(accentChk);
       accentLabel.appendChild(document.createTextNode("Acc"));
@@ -432,11 +553,30 @@ class WebAudioAcid extends DemoBase {
       const v = parseFloat(slider.value);
       this._p[param] = v;
       valSpan.textContent = step < 0.1 ? v.toFixed(3) : step < 1 ? v.toFixed(2) : Math.round(v);
-      if (param === "volume" && this._masterGain) this._masterGain.gain.value = v;
-      if (param === "distortion") this._updateDistortionCurve();
-      if (param === "delayTime" && this._delayNode) this._delayNode.delayTime.value = v;
+
+      // Live-update audio nodes / instruments
+      if (param === "bpm") {
+        if (this._seq) this._seq.bpm = v;
+        if (this._delayNode) this._delayNode.delayTime.value = this._computeDelayTime();
+      }
+      if (param === "volume" && this._acid) this._acid.volume = v;
+      if (param === "reverbWet" && this._acidReverb) this._acidReverb.wet = v;
       if (param === "delayFeedback" && this._delayFeedback) this._delayFeedback.gain.value = v;
       if (param === "delayMix" && this._delayWet) this._delayWet.gain.value = v;
+      if (this._acid) {
+        if (param === "cutoff") this._acid.cutoff = v;
+        if (param === "resonance") this._acid.resonance = v;
+        if (param === "envMod") this._acid.envMod = v;
+        if (param === "decay") this._acid.decay = v;
+        if (param === "attack") this._acid.attack = v;
+        if (param === "distortion") this._acid.distortion = v;
+        if (param === "portamento") this._acid.portamento = v;
+      }
+      if (this._break) {
+        if (param === "breakRandomChance") this._break.randomChance = v;
+        if (param === "breakReverseChance") this._break.reverseChance = v;
+        if (param === "breakVolume") this._break.volume = v;
+      }
     });
 
     wrap.appendChild(lbl);
@@ -501,6 +641,9 @@ class WebAudioAcid extends DemoBase {
         flex-direction: column;
         gap: 4px;
         min-width: 110px;
+      }
+      .acid-ctrl-wide {
+        min-width: 220px;
       }
       .acid-ctrl label {
         font-size: 0.72em;
