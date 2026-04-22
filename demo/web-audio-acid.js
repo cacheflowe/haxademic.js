@@ -6,6 +6,7 @@ import WebAudioSynthZzfx from "../src/web-audio/web-audio-synth-zzfx.js";
 import WebAudioBreakPlayer from "../src/web-audio-break-player.js";
 import WebAudioFxUnit from "../src/web-audio/web-audio-fx-unit.js";
 import WebAudioWaveform from "../src/web-audio/web-audio-waveform.js";
+import WebAudioSynthFM from "../src/web-audio/web-audio-synth-fm.js";
 
 const SCALES = {
   Minor: [0, 2, 3, 5, 7, 8, 10],
@@ -15,6 +16,18 @@ const SCALES = {
   Dorian: [0, 2, 3, 5, 7, 9, 10],
   Phrygian: [0, 1, 3, 5, 7, 8, 10],
   Blues: [0, 3, 5, 6, 7, 10],
+};
+
+// DX-7-inspired FM presets — each key maps to the fmXxx param names in _p
+const FM_PRESETS = {
+  "E.Piano":  { fmCarrierRatio: 1,   fmModRatio: 2,   fmModIndex: 2.5, fmModDecay: 0.20, fmAttack: 0.005, fmDecay: 0.30, fmSustain: 0.15, fmRelease: 0.5,  fmFilterFreq: 8000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.4  },
+  "Bell":     { fmCarrierRatio: 1,   fmModRatio: 3.5, fmModIndex: 5,   fmModDecay: 0.06, fmAttack: 0.001, fmDecay: 1.20, fmSustain: 0.0,  fmRelease: 2.5,  fmFilterFreq: 10000,fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.35 },
+  "Vibes":    { fmCarrierRatio: 1,   fmModRatio: 4,   fmModIndex: 1.5, fmModDecay: 0.08, fmAttack: 0.001, fmDecay: 0.30, fmSustain: 0.0,  fmRelease: 0.6,  fmFilterFreq: 6000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.5  },
+  "Organ":    { fmCarrierRatio: 1,   fmModRatio: 1,   fmModIndex: 1.5, fmModDecay: 1.00, fmAttack: 0.015, fmDecay: 0.08, fmSustain: 0.9,  fmRelease: 0.06, fmFilterFreq: 5000, fmFilterQ: 1,   fmDetune: 5,  fmVolume: 0.35 },
+  "Pad":      { fmCarrierRatio: 1,   fmModRatio: 2,   fmModIndex: 0.8, fmModDecay: 2.00, fmAttack: 0.40,  fmDecay: 0.60, fmSustain: 0.7,  fmRelease: 2.5,  fmFilterFreq: 2500, fmFilterQ: 2,   fmDetune: 8,  fmVolume: 0.3  },
+  "Pluck":    { fmCarrierRatio: 1,   fmModRatio: 7,   fmModIndex: 7,   fmModDecay: 0.04, fmAttack: 0.001, fmDecay: 0.12, fmSustain: 0.0,  fmRelease: 0.15, fmFilterFreq: 5000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.55 },
+  "Brass":    { fmCarrierRatio: 1,   fmModRatio: 1,   fmModIndex: 3,   fmModDecay: 0.15, fmAttack: 0.08,  fmDecay: 0.20, fmSustain: 0.6,  fmRelease: 0.3,  fmFilterFreq: 4000, fmFilterQ: 2,   fmDetune: 0,  fmVolume: 0.4  },
+  "Kalimba":  { fmCarrierRatio: 1,   fmModRatio: 5,   fmModIndex: 2,   fmModDecay: 0.05, fmAttack: 0.001, fmDecay: 0.20, fmSustain: 0.0,  fmRelease: 0.35, fmFilterFreq: 8000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.5  },
 };
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -61,11 +74,15 @@ class WebAudioAcid extends DemoBase {
     this._808Waveform = null;
     this._breakWaveform = null;
     this._zzfxWaveform = null;
+    this._fmWaveform = null;
     this._seq = null;
     this._zzfxLastStep = -Infinity;
     this._pendingBreakSegment = -1;
     this._globalStep = 0;
     this._playing = false;
+    // FM chord synth
+    this._fmSynth = null;
+    this._fmFx = null;
 
     this._p = {
       bpm: 128,
@@ -101,6 +118,20 @@ class WebAudioAcid extends DemoBase {
       zzfxLpfFreq: 1200,
       zzfxHpfFreq: 80,
       zzfxLpfResonance: 1,
+      // FM Chord Synth
+      fmCarrierRatio: 1,
+      fmModRatio: 2,
+      fmModIndex: 2,
+      fmModDecay: 0.25,
+      fmAttack: 0.02,
+      fmDecay: 0.4,
+      fmSustain: 0.3,
+      fmRelease: 0.6,
+      fmFilterFreq: 5000,
+      fmFilterQ: 1,
+      fmDetune: 0,
+      fmVolume: 0.4,
+      fmChordSize: 3,
     };
 
     this._steps = this._defaultPattern();
@@ -114,6 +145,13 @@ class WebAudioAcid extends DemoBase {
     this._808NoteSelects = [];
     this._breakFileSelect = null;
     this._pendingAcidNote = null;
+    // FM chord sequencer state
+    this._chordSteps = this._defaultChordPattern();
+    this._chordStepEls = [];
+    this._chordOnBtns = [];
+    this._chordNoteSelects = [];
+    this._fmSliderInputs = {};
+    this._fmPresetSelect = null;
 
     this.buildUI();
     this.addCSS();
@@ -218,6 +256,35 @@ class WebAudioAcid extends DemoBase {
     this._zzfx.connect(zzfxAnalyser);
     this._zzfxWaveform.init(zzfxAnalyser, "#c0f");
 
+    // FM Chord Synth → its fx unit → master
+    this._fmSynth = new WebAudioSynthFM(this._ctx, {
+      carrierRatio: this._p.fmCarrierRatio,
+      modRatio:     this._p.fmModRatio,
+      modIndex:     this._p.fmModIndex,
+      modDecay:     this._p.fmModDecay,
+      attack:       this._p.fmAttack,
+      decay:        this._p.fmDecay,
+      sustain:      this._p.fmSustain,
+      release:      this._p.fmRelease,
+      filterFreq:   this._p.fmFilterFreq,
+      filterQ:      this._p.fmFilterQ,
+      detune:       this._p.fmDetune,
+      volume:       this._p.fmVolume,
+    });
+    this._fmFx.init(this._ctx, {
+      title: "FM FX",
+      bpm: this._p.bpm,
+      reverbWet: 0.2,
+      delayInterval: 0.5,
+      delayFeedback: 0.4,
+      delayMix: 0.1,
+    });
+    this._fmSynth.connect(this._fmFx);
+    this._fmFx.connect(this._masterGain);
+    const fmAnalyser = this._ctx.createAnalyser();
+    this._fmSynth.connect(fmAnalyser);
+    this._fmWaveform.init(fmAnalyser, "#4af");
+
     // Sequencer
     this._seq = new WebAudioSequencer(this._ctx, {
       bpm: this._p.bpm,
@@ -256,6 +323,11 @@ class WebAudioAcid extends DemoBase {
         this._zzfx.trigger(time);
         this._zzfxLastStep = this._globalStep;
       }
+      // FM Chord — trigger when step is active, using that step's root note
+      if (this._chordSteps[step].active) {
+        const chord = this._buildChordFromScale(this._chordSteps[step].note, this._scaleSelect.value, this._p.fmChordSize);
+        this._fmSynth.trigger(chord, this._seq.stepDurationSec(), time);
+      }
 
       const uiDelay = Math.max(0, (time - this._ctx.currentTime) * 1000);
       setTimeout(() => this._highlightStep(step), uiDelay);
@@ -292,6 +364,7 @@ class WebAudioAcid extends DemoBase {
   _highlightStep(i) {
     this._stepEls.forEach((el, idx) => el.classList.toggle("active-step", idx === i));
     this._808StepEls.forEach((el, idx) => el.classList.toggle("bass808-active-step", idx === i));
+    this._chordStepEls.forEach((el, idx) => el.classList.toggle("chord-fm-active-step", idx === i));
   }
 
   // ---- Randomizer ----
@@ -348,6 +421,90 @@ class WebAudioAcid extends DemoBase {
     this._pendingAcidNote = notes[Math.floor(Math.random() * notes.length)];
   }
 
+  _defaultChordPattern() {
+    // Just downbeats — very sparse so chords don't crowd the mix
+    const active = new Set([0, 8]);
+    return Array.from({ length: 16 }, (_, i) => ({ active: active.has(i), note: 29 }));
+  }
+
+  _buildChordFromScale(rootMidi, scaleName, size) {
+    const intervals = SCALES[scaleName];
+    const chordRoot = rootMidi + 24; // 2 octaves above bass root → piano/chord range
+    const chord = [];
+    for (let i = 0; i < size; i++) {
+      const degreeIdx = (i * 2) % intervals.length;
+      const octaveOffset = Math.floor((i * 2) / intervals.length) * 12;
+      chord.push(chordRoot + intervals[degreeIdx] + octaveOffset);
+    }
+    return chord;
+  }
+
+  _triggerJamChord() {
+    if (!this._fmSynth || !this._ctx) return;
+    const root = parseInt(this._rootSelect.value);
+    const chord = this._buildChordFromScale(root, this._scaleSelect.value, this._p.fmChordSize);
+    this._fmSynth.trigger(chord, this._seq?.stepDurationSec() ?? 0.25, this._ctx.currentTime);
+  }
+
+  _applyFmPreset(presetName) {
+    const preset = FM_PRESETS[presetName];
+    if (!preset) return;
+    Object.entries(preset).forEach(([param, val]) => {
+      this._p[param] = val;
+      const input = this._fmSliderInputs[param];
+      if (input) {
+        input.value = val;
+        const step = parseFloat(input.step);
+        const span = input.closest(".acid-ctrl")?.querySelector(".acid-ctrl-val");
+        if (span) span.textContent = step < 0.1 ? val.toFixed(3) : step < 1 ? val.toFixed(2) : Math.round(val);
+      }
+    });
+    if (this._fmSynth) {
+      const s = this._fmSynth;
+      if (preset.fmCarrierRatio != null) s.carrierRatio = preset.fmCarrierRatio;
+      if (preset.fmModRatio     != null) s.modRatio     = preset.fmModRatio;
+      if (preset.fmModIndex     != null) s.modIndex     = preset.fmModIndex;
+      if (preset.fmModDecay     != null) s.modDecay     = preset.fmModDecay;
+      if (preset.fmAttack       != null) s.attack       = preset.fmAttack;
+      if (preset.fmDecay        != null) s.decay        = preset.fmDecay;
+      if (preset.fmSustain      != null) s.sustain      = preset.fmSustain;
+      if (preset.fmRelease      != null) s.release      = preset.fmRelease;
+      if (preset.fmFilterFreq   != null) s.filterFreq   = preset.fmFilterFreq;
+      if (preset.fmFilterQ      != null) s.filterQ      = preset.fmFilterQ;
+      if (preset.fmDetune       != null) s.detune       = preset.fmDetune;
+      if (preset.fmVolume       != null) s.volume       = preset.fmVolume;
+    }
+  }
+
+  _refreshChordSeqUI() {
+    this._chordSteps.forEach((step, i) => {
+      const btn = this._chordOnBtns[i];
+      btn.className = `chord-fm-step-on${step.active ? " on" : ""}`;
+      btn.textContent = step.active ? "●" : "○";
+      if (this._chordNoteSelects[i]) this._chordNoteSelects[i].value = step.note;
+    });
+  }
+
+  _randomizeFm() {
+    // Random preset
+    const presetNames = Object.keys(FM_PRESETS);
+    const presetName = presetNames[Math.floor(Math.random() * presetNames.length)];
+    this._applyFmPreset(presetName);
+    if (this._fmPresetSelect) this._fmPresetSelect.value = presetName;
+
+    // Random chord steps: sparse (1–3 active), notes from current scale
+    const root = parseInt(this._rootSelect.value);
+    const scaleNotes = this._buildScaleNotes(root, this._scaleSelect.value);
+    const numActive = 1 + Math.floor(Math.random() * 3);
+    const activeSet = new Set([0]); // always keep beat 1
+    while (activeSet.size < numActive) activeSet.add(Math.floor(Math.random() * 16));
+    this._chordSteps = this._chordSteps.map((_, i) => ({
+      active: activeSet.has(i),
+      note: scaleNotes[Math.floor(Math.random() * scaleNotes.length)],
+    }));
+    this._refreshChordSeqUI();
+  }
+
   _setupKeyboardJam() {
     document.addEventListener("keydown", (e) => {
       // Don't hijack key presses while typing in inputs / selects
@@ -370,6 +527,9 @@ class WebAudioAcid extends DemoBase {
         case "b":
           this._queueRandomAcidNote();
           break;
+        case "n":
+          this._triggerJamChord();
+          break;
       }
     });
   }
@@ -385,6 +545,40 @@ class WebAudioAcid extends DemoBase {
     this._playBtn.addEventListener("click", () => (this._playing ? this._stop() : this._play()));
     transport.appendChild(this._playBtn);
     transport.appendChild(this._makeSlider("BPM", "bpm", 60, 200, 1, this._p.bpm));
+
+    // Global scale selects — shared by all instruments (acid randomizer, chord synth, etc.)
+    this._rootSelect = document.createElement("select");
+    this._rootSelect.className = "acid-select";
+    for (let midi = 24; midi <= 35; midi++) {
+      const opt = document.createElement("option");
+      opt.value = midi;
+      opt.textContent = NOTE_NAMES[midi % 12];
+      if (midi === 29) opt.selected = true;
+      this._rootSelect.appendChild(opt);
+    }
+    this._scaleSelect = document.createElement("select");
+    this._scaleSelect.className = "acid-select";
+    Object.keys(SCALES).forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      this._scaleSelect.appendChild(opt);
+    });
+    this._rootSelect.addEventListener("change", () => this._updateAllNoteSelects());
+    this._scaleSelect.addEventListener("change", () => this._updateAllNoteSelects());
+    const scaleLabel = Object.assign(document.createElement("div"), {
+      className: "transport-scale-label",
+      textContent: "Key / Scale",
+    });
+    const scaleWrap = document.createElement("div");
+    scaleWrap.className = "transport-scale-wrap";
+    scaleWrap.appendChild(scaleLabel);
+    const scaleSelects = document.createElement("div");
+    scaleSelects.className = "transport-scale-selects";
+    scaleSelects.appendChild(this._rootSelect);
+    scaleSelects.appendChild(this._scaleSelect);
+    scaleWrap.appendChild(scaleSelects);
+    transport.appendChild(scaleWrap);
 
     // ---- Break group ----
     const breakGroup = this.injectHTML(`<div class="instrument-group break-group"></div>`);
@@ -530,7 +724,7 @@ class WebAudioAcid extends DemoBase {
 
     const seq808 = document.createElement("div");
     seq808.className = "bass808-seq";
-    const note808Opts = this._bass808NoteOptions();
+    const note808Opts = this._scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 48);
     this._808Steps.forEach((step, i) => {
       const el = document.createElement("div");
       el.className = "bass808-step";
@@ -576,6 +770,145 @@ class WebAudioAcid extends DemoBase {
     g808.appendChild(seq808);
     g808.appendChild(this._808Fx);
     g808.appendChild(this._808Waveform);
+
+    // ---- FM Chord group ----
+    const fmGroup = this.injectHTML(`<div class="instrument-group chord-fm-group"></div>`);
+    const fmRow = document.createElement("div");
+    fmRow.className = "acid-controls chord-fm-controls";
+    fmRow.appendChild(
+      Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "FM Chord Synth" }),
+    );
+    // Helper: append a slider and store its input element for preset updates
+    const fmSlider = (label, param, min, max, step) => {
+      const wrap = this._makeSlider(label, param, min, max, step, this._p[param]);
+      this._fmSliderInputs[param] = wrap.querySelector("input[type=range]");
+      fmRow.appendChild(wrap);
+    };
+    fmSlider("Carrier R",  "fmCarrierRatio", 0.5, 4,     0.01);
+    fmSlider("Mod Ratio",  "fmModRatio",     0.5, 8,     0.01);
+    fmSlider("Mod Index",  "fmModIndex",     0,   10,    0.1);
+    fmSlider("Mod Decay",  "fmModDecay",     0.01, 2,    0.01);
+    fmSlider("Attack",     "fmAttack",       0.001, 1,   0.001);
+    fmSlider("Decay",      "fmDecay",        0.01, 2,    0.01);
+    fmSlider("Sustain",    "fmSustain",      0,   1,     0.01);
+    fmSlider("Release",    "fmRelease",      0.01, 3,    0.01);
+    fmSlider("Filter",     "fmFilterFreq",   100, 12000, 1);
+    fmSlider("Filter Q",   "fmFilterQ",      0.5, 20,    0.1);
+    fmSlider("Detune",     "fmDetune",       -50, 50,    1);
+    fmSlider("Vol",        "fmVolume",       0,   1,     0.01);
+
+    const chordSizeWrap = document.createElement("div");
+    chordSizeWrap.className = "acid-ctrl";
+    chordSizeWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Chord Size" }));
+    const chordSizeSelect = document.createElement("select");
+    chordSizeSelect.className = "acid-select";
+    [2, 3, 4].forEach((n) => {
+      const opt = document.createElement("option");
+      opt.value = n;
+      opt.textContent = `${n} notes`;
+      if (n === this._p.fmChordSize) opt.selected = true;
+      chordSizeSelect.appendChild(opt);
+    });
+    chordSizeSelect.addEventListener("change", () => {
+      this._p.fmChordSize = parseInt(chordSizeSelect.value);
+    });
+    chordSizeWrap.appendChild(chordSizeSelect);
+    fmRow.appendChild(chordSizeWrap);
+
+    // FM chord step sequencer (on/off + root note — chord built from note + global scale)
+    const seqFm = document.createElement("div");
+    seqFm.className = "chord-fm-seq";
+    const chordNoteOpts = this._scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 48);
+    this._chordSteps.forEach((step, i) => {
+      const el = document.createElement("div");
+      el.className = "chord-fm-step";
+
+      const num = document.createElement("div");
+      num.className = "acid-step-num";
+      num.textContent = i + 1;
+      el.appendChild(num);
+
+      const onBtn = document.createElement("button");
+      onBtn.className = `chord-fm-step-on${step.active ? " on" : ""}`;
+      onBtn.textContent = step.active ? "●" : "○";
+      onBtn.addEventListener("click", () => {
+        this._chordSteps[i].active = !this._chordSteps[i].active;
+        onBtn.className = `chord-fm-step-on${this._chordSteps[i].active ? " on" : ""}`;
+        onBtn.textContent = this._chordSteps[i].active ? "●" : "○";
+      });
+      el.appendChild(onBtn);
+      this._chordOnBtns.push(onBtn);
+
+      const noteSelect = document.createElement("select");
+      noteSelect.className = "acid-step-note";
+      chordNoteOpts.forEach(([name, midi]) => {
+        const opt = document.createElement("option");
+        opt.value = midi;
+        opt.textContent = name;
+        if (midi === step.note) opt.selected = true;
+        noteSelect.appendChild(opt);
+      });
+      noteSelect.addEventListener("change", () => {
+        this._chordSteps[i].note = parseInt(noteSelect.value);
+      });
+      el.appendChild(noteSelect);
+      this._chordNoteSelects.push(noteSelect);
+
+      seqFm.appendChild(el);
+      this._chordStepEls.push(el);
+    });
+
+    const fmJamRow = document.createElement("div");
+    fmJamRow.className = "acid-rand-row";
+
+    // Preset select
+    const presetNames = Object.keys(FM_PRESETS);
+    this._fmPresetSelect = document.createElement("select");
+    this._fmPresetSelect.className = "acid-select";
+    presetNames.forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      this._fmPresetSelect.appendChild(opt);
+    });
+    this._fmPresetSelect.addEventListener("change", () => this._applyFmPreset(this._fmPresetSelect.value));
+    fmJamRow.appendChild(this._fmPresetSelect);
+
+    // Random preset button
+    const fmRandBtn = document.createElement("button");
+    fmRandBtn.textContent = "⚄ Preset";
+    fmRandBtn.className = "acid-rand-btn chord-fm-rand-btn";
+    fmRandBtn.addEventListener("click", () => {
+      const idx = Math.floor(Math.random() * presetNames.length);
+      this._fmPresetSelect.value = presetNames[idx];
+      this._applyFmPreset(presetNames[idx]);
+    });
+    fmJamRow.appendChild(fmRandBtn);
+
+    // Full randomize button — preset + sequencer positions + notes
+    const fmFullRandBtn = document.createElement("button");
+    fmFullRandBtn.textContent = "⚄ Randomize";
+    fmFullRandBtn.className = "acid-rand-btn chord-fm-rand-btn";
+    fmFullRandBtn.addEventListener("click", () => this._randomizeFm());
+    fmJamRow.appendChild(fmFullRandBtn);
+
+    const fmChordBtn = document.createElement("button");
+    fmChordBtn.textContent = "♫ Chord [N]";
+    fmChordBtn.className = "acid-rand-btn chord-fm-rand-btn";
+    fmChordBtn.addEventListener("click", () => {
+      this._initAudio();
+      if (this._ctx.state === "suspended") this._ctx.resume();
+      this._triggerJamChord();
+    });
+    fmJamRow.appendChild(fmChordBtn);
+
+    this._fmFx = document.createElement("web-audio-fx-unit");
+    this._fmWaveform = document.createElement("web-audio-waveform");
+    fmGroup.appendChild(fmRow);
+    fmGroup.appendChild(seqFm);
+    fmGroup.appendChild(fmJamRow);
+    fmGroup.appendChild(this._fmFx);
+    fmGroup.appendChild(this._fmWaveform);
 
     // ---- ZzFX group ----
     const zzfxGroup = this.injectHTML(`<div class="instrument-group zzfx-group"></div>`);
@@ -656,23 +989,6 @@ class WebAudioAcid extends DemoBase {
     // Randomizer
     const randRow = document.createElement("div");
     randRow.className = "acid-rand-row";
-    this._rootSelect = document.createElement("select");
-    this._rootSelect.className = "acid-select";
-    for (let midi = 24; midi <= 35; midi++) {
-      const opt = document.createElement("option");
-      opt.value = midi;
-      opt.textContent = NOTE_NAMES[midi % 12];
-      if (midi === 29) opt.selected = true;
-      this._rootSelect.appendChild(opt);
-    }
-    this._scaleSelect = document.createElement("select");
-    this._scaleSelect.className = "acid-select";
-    Object.keys(SCALES).forEach((name) => {
-      const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      this._scaleSelect.appendChild(opt);
-    });
     const randBtn = document.createElement("button");
     randBtn.textContent = "⚄ Randomize";
     randBtn.className = "acid-rand-btn";
@@ -683,13 +999,11 @@ class WebAudioAcid extends DemoBase {
     noteBtn.addEventListener("click", () => this._queueRandomAcidNote());
     randRow.appendChild(randBtn);
     randRow.appendChild(noteBtn);
-    randRow.appendChild(this._rootSelect);
-    randRow.appendChild(this._scaleSelect);
 
     // 303 step sequencer
     const seq = document.createElement("div");
     seq.className = "acid-seq";
-    const noteOpts = this._noteOptions();
+    const noteOpts = this._scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 60);
     this._steps.forEach((step, i) => {
       const el = document.createElement("div");
       el.className = "acid-step";
@@ -767,6 +1081,45 @@ class WebAudioAcid extends DemoBase {
     return opts;
   }
 
+  _scaleNoteOptions(rootMidi, scaleName, minMidi, maxMidi) {
+    const intervals = new Set(SCALES[scaleName]);
+    const opts = [];
+    for (let midi = minMidi; midi <= maxMidi; midi++) {
+      if (intervals.has(((midi - rootMidi) % 12 + 12) % 12)) {
+        opts.push([`${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`, midi]);
+      }
+    }
+    return opts;
+  }
+
+  _updateAllNoteSelects() {
+    const root = parseInt(this._rootSelect.value);
+    const scale = this._scaleSelect.value;
+    const acidOpts  = this._scaleNoteOptions(root, scale, 24, 60);
+    const bassOpts  = this._scaleNoteOptions(root, scale, 24, 48);
+    const chordOpts = this._scaleNoteOptions(root, scale, 24, 48);
+
+    const repopulate = (select, opts, stepArr, idx) => {
+      const prev = parseInt(select.value);
+      select.innerHTML = "";
+      opts.forEach(([name, midi]) => {
+        const opt = document.createElement("option");
+        opt.value = midi;
+        opt.textContent = name;
+        select.appendChild(opt);
+      });
+      // Snap to nearest available note
+      const vals = opts.map(([, m]) => m);
+      const nearest = vals.reduce((a, b) => (Math.abs(b - prev) < Math.abs(a - prev) ? b : a), vals[0]);
+      select.value = nearest;
+      if (stepArr) stepArr[idx].note = nearest;
+    };
+
+    this._stepNoteSelects.forEach((sel, i) => repopulate(sel, acidOpts,  this._steps,       i));
+    this._808NoteSelects.forEach( (sel, i) => repopulate(sel, bassOpts,  this._808Steps,    i));
+    this._chordNoteSelects.forEach((sel, i) => repopulate(sel, chordOpts, this._chordSteps, i));
+  }
+
   _makeSlider(label, param, min, max, step, value) {
     const wrap = document.createElement("div");
     wrap.className = "acid-ctrl";
@@ -795,6 +1148,7 @@ class WebAudioAcid extends DemoBase {
         if (this._808Fx) this._808Fx.bpm = v;
         if (this._breakFx) this._breakFx.bpm = v;
         if (this._zzfxFx) this._zzfxFx.bpm = v;
+        if (this._fmFx) this._fmFx.bpm = v;
       }
       if (param === "volume" && this._acid) this._acid.volume = v;
       if (this._acid) {
@@ -826,6 +1180,20 @@ class WebAudioAcid extends DemoBase {
         if (param === "zzfxLpfFreq") this._zzfx.lpfFreq = v;
         if (param === "zzfxHpfFreq") this._zzfx.hpfFreq = v;
         if (param === "zzfxLpfResonance") this._zzfx.lpfResonance = v;
+      }
+      if (this._fmSynth) {
+        if (param === "fmCarrierRatio") this._fmSynth.carrierRatio = v;
+        if (param === "fmModRatio") this._fmSynth.modRatio = v;
+        if (param === "fmModIndex") this._fmSynth.modIndex = v;
+        if (param === "fmModDecay") this._fmSynth.modDecay = v;
+        if (param === "fmAttack") this._fmSynth.attack = v;
+        if (param === "fmDecay") this._fmSynth.decay = v;
+        if (param === "fmSustain") this._fmSynth.sustain = v;
+        if (param === "fmRelease") this._fmSynth.release = v;
+        if (param === "fmFilterFreq") this._fmSynth.filterFreq = v;
+        if (param === "fmFilterQ") this._fmSynth.filterQ = v;
+        if (param === "fmDetune") this._fmSynth.detune = v;
+        if (param === "fmVolume") this._fmSynth.volume = v;
       }
     });
 
@@ -872,6 +1240,7 @@ class WebAudioAcid extends DemoBase {
       /* Per-instrument accent colors (used by fx unit via --fx-accent) */
       .break-group  { --fx-accent: #0cc; }
       .bass808-group { --fx-accent: #fa0; }
+      .chord-fm-group { --fx-accent: #4af; }
       .zzfx-group   { --fx-accent: #c0f; }
       .acid-group   { --fx-accent: #0f0; }
 
@@ -894,6 +1263,23 @@ class WebAudioAcid extends DemoBase {
         white-space: nowrap;
       }
       .acid-play:hover { background: #0f0; color: #000; }
+
+      /* ---- Transport scale wrap ---- */
+      .transport-scale-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .transport-scale-label {
+        font-size: 0.65em;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .transport-scale-selects {
+        display: flex;
+        gap: 6px;
+      }
 
       /* ---- Control panels ---- */
       .acid-controls {
@@ -932,6 +1318,55 @@ class WebAudioAcid extends DemoBase {
       .zzfx-controls .acid-section-title { color: #5a0090; }
       .zzfx-controls .acid-ctrl-val { color: #c0f; }
       .zzfx-controls input[type=range] { accent-color: #c0f; }
+
+      /* FM Chord tint */
+      .chord-fm-controls { border-color: #001a2a; }
+      .chord-fm-controls .acid-section-title { color: #004466; }
+      .chord-fm-controls .acid-ctrl-val { color: #4af; }
+      .chord-fm-controls input[type=range] { accent-color: #4af; }
+
+      /* FM chord step sequencer */
+      .chord-fm-seq {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 14px;
+        background: #0a1520;
+        border-top: 1px solid #0f1e30;
+      }
+      .chord-fm-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 6px;
+        background: #0c1a25;
+        border: 1px solid #1a2a35;
+        border-radius: 5px;
+        width: 72px;
+        transition: border-color 0.05s, background 0.05s;
+      }
+      .chord-fm-active-step { border-color: #4af; background: #0a1a2e; }
+      .chord-fm-step-on {
+        background: none;
+        border: none;
+        font-size: 1.3em;
+        color: #333;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        font-family: monospace;
+      }
+      .chord-fm-step-on.on { color: #4af; }
+      .chord-fm-step-on:hover { color: #39d; }
+
+      /* FM chord jam button */
+      .chord-fm-rand-btn {
+        background: #001525;
+        color: #4af;
+        border-color: #4af;
+      }
+      .chord-fm-rand-btn:hover { background: #4af; color: #000; }
 
       /* ---- Controls ---- */
       .acid-ctrl {
@@ -1132,6 +1567,7 @@ class WebAudioAcid extends DemoBase {
       }
       .break-group  web-audio-waveform { border-color: #002020; }
       .bass808-group web-audio-waveform { border-color: #1a0f00; }
+      .chord-fm-group web-audio-waveform { border-color: #001a2a; }
       .zzfx-group   web-audio-waveform { border-color: #100020; }
       .acid-group   web-audio-waveform { border-color: #001500; }
     `);
