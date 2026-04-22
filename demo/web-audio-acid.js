@@ -1,9 +1,11 @@
 import DemoBase from "./demo--base-element.js";
 import WebAudioSequencer from "../src/web-audio/web-audio-sequencer.js";
 import WebAudioSynthAcid from "../src/web-audio/web-audio-synth-acid.js";
-import WebAudioFxReverb from "../src/web-audio/web-audio-fx-reverb.js";
-import WebAudioBreakPlayer from "../src/web-audio-break-player.js";
 import WebAudioSynth808 from "../src/web-audio/web-audio-synth-808.js";
+import WebAudioSynthZzfx from "../src/web-audio/web-audio-synth-zzfx.js";
+import WebAudioBreakPlayer from "../src/web-audio-break-player.js";
+import WebAudioFxUnit from "../src/web-audio/web-audio-fx-unit.js";
+import WebAudioWaveform from "../src/web-audio/web-audio-waveform.js";
 
 const SCALES = {
   Minor: [0, 2, 3, 5, 7, 8, 10],
@@ -17,7 +19,6 @@ const SCALES = {
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-// Rhythmic probability per 16th-note step — downbeats and upbeats weighted for acid density
 const STEP_WEIGHTS = [0.95, 0.35, 0.65, 0.25, 0.8, 0.3, 0.6, 0.7, 0.85, 0.35, 0.65, 0.25, 0.75, 0.4, 0.65, 0.55];
 
 const BREAK_FILES = [
@@ -35,39 +36,40 @@ const SPEED_MULTIPLIERS = [
   { label: "×4", value: 4 },
 ];
 
-// Delay intervals as beat multiples (1 beat = 1 quarter note)
-const DELAY_INTERVALS = [
-  { label: "1/16", beats: 0.25 },
-  { label: "1/8", beats: 0.5 },
-  { label: "1/8·", beats: 0.75 },
-  { label: "1/4", beats: 1 },
-  { label: "1/4·", beats: 1.5 },
-  { label: "1/2", beats: 2 },
-];
-
 class WebAudioAcid extends DemoBase {
   static meta = {
     title: "Web Audio Acid / TB-303",
     category: "Media",
-    description: "TB-303-style acid bass synthesizer with 16-step sequencer and break player",
+    description: "TB-303 acid bass + 808 + ZzFX SFX with 16-step sequencer and break player",
   };
 
   init() {
+    // Audio nodes
     this._ctx = null;
     this._masterGain = null;
-    this._delayNode = null;
-    this._delayFeedback = null;
-    this._delayWet = null;
-    this._acidReverb = null;
     this._acid = null;
-    this._break = null;
     this._808 = null;
+    this._break = null;
+    this._zzfx = null;
+    // FX units — elements created in buildUI(), audio-initialized in _initAudio()
+    this._acidFx = null;
+    this._808Fx = null;
+    this._breakFx = null;
+    this._zzfxFx = null;
+    // Waveform displays — created in buildUI(), init(analyser) called in _initAudio()
+    this._acidWaveform = null;
+    this._808Waveform = null;
+    this._breakWaveform = null;
+    this._zzfxWaveform = null;
     this._seq = null;
+    this._zzfxLastStep = -Infinity;
+    this._pendingBreakSegment = -1;
     this._globalStep = 0;
     this._playing = false;
 
     this._p = {
       bpm: 128,
+      // TB-303
       cutoff: 600,
       resonance: 18,
       envMod: 0.6,
@@ -75,23 +77,30 @@ class WebAudioAcid extends DemoBase {
       attack: 0.005,
       distortion: 0,
       portamento: 0,
-      reverbWet: 0.15,
-      delayInterval: 0.75,
-      delayFeedback: 0.35,
-      delayMix: 0,
       volume: 0.7,
       waveform: "sawtooth",
+      // 808
+      bass808Decay: 0.8,
+      bass808PitchSweep: 24,
+      bass808PitchDecay: 0.1,
+      bass808Distortion: 0,
+      bass808Volume: 0.8,
+      bass808Click: 0.4,
+      bass808SubMix: 0,
+      bass808Tone: 3000,
+      // Break
       breakSpeedMultiplier: 4,
       breakSubdivision: 4,
       breakReturnSteps: 1,
       breakRandomChance: 0.1,
       breakReverseChance: 0.04,
       breakVolume: 0.8,
-      bass808Decay: 0.8,
-      bass808PitchSweep: 24,
-      bass808PitchDecay: 0.1,
-      bass808Distortion: 0,
-      bass808Volume: 0.8,
+      // ZzFX
+      zzfxChance: 0.05,
+      zzfxVolume: 0.5,
+      zzfxLpfFreq: 1200,
+      zzfxHpfFreq: 80,
+      zzfxLpfResonance: 1,
     };
 
     this._steps = this._defaultPattern();
@@ -104,13 +113,15 @@ class WebAudioAcid extends DemoBase {
     this._808OnBtns = [];
     this._808NoteSelects = [];
     this._breakFileSelect = null;
+    this._pendingAcidNote = null;
 
     this.buildUI();
     this.addCSS();
+    this._setupKeyboardJam();
   }
 
   _defaultPattern() {
-    // F1-rooted acid pattern (shifted down 7 semitones from C)
+    // F1-rooted acid pattern
     const notes = [29, 29, 36, 29, 34, 29, 36, 41, 29, 36, 34, 29, 32, 34, 36, 29];
     const active = new Set([0, 2, 4, 6, 7, 9, 11, 12, 14]);
     const accent = new Set([0, 7, 12]);
@@ -118,7 +129,7 @@ class WebAudioAcid extends DemoBase {
   }
 
   _default808Pattern() {
-    // Kicks on beats 1 and 3 (steps 0 and 8 of a 16-step bar)
+    // Kicks on beats 1 and 3, F1 (MIDI 29)
     return Array.from({ length: 16 }, (_, i) => ({ active: i === 0 || i === 8, note: 29 }));
   }
 
@@ -132,19 +143,7 @@ class WebAudioAcid extends DemoBase {
     this._masterGain.gain.value = 1.0;
     this._masterGain.connect(this._ctx.destination);
 
-    // Delay network — acid feeds reverb (dry path) and delayNode (wet send)
-    this._delayNode = this._ctx.createDelay(2.0);
-    this._delayFeedback = this._ctx.createGain();
-    this._delayWet = this._ctx.createGain();
-    this._delayNode.delayTime.value = this._computeDelayTime();
-    this._delayFeedback.gain.value = this._p.delayFeedback;
-    this._delayWet.gain.value = this._p.delayMix;
-    this._delayNode.connect(this._delayFeedback);
-    this._delayFeedback.connect(this._delayNode);
-    this._delayNode.connect(this._delayWet);
-    this._delayWet.connect(this._masterGain);
-
-    // Acid synth → reverb → master (dry path); also → delay (wet send)
+    // TB-303 acid → its fx unit → master
     this._acid = new WebAudioSynthAcid(this._ctx, {
       cutoff: this._p.cutoff,
       resonance: this._p.resonance,
@@ -156,12 +155,39 @@ class WebAudioAcid extends DemoBase {
       volume: this._p.volume,
       oscType: this._p.waveform,
     });
-    this._acidReverb = new WebAudioFxReverb(this._ctx, { wet: this._p.reverbWet });
-    this._acid.connect(this._acidReverb);
-    this._acidReverb.connect(this._masterGain);
-    this._acid.connect(this._delayNode);
+    this._acidFx.init(this._ctx, {
+      title: "Acid FX",
+      bpm: this._p.bpm,
+      reverbWet: 0.15,
+      delayInterval: 0.75,
+      delayFeedback: 0.35,
+      delayMix: 0,
+    });
+    this._acid.connect(this._acidFx);
+    this._acidFx.connect(this._masterGain);
+    const acidAnalyser = this._ctx.createAnalyser();
+    this._acid.connect(acidAnalyser);
+    this._acidWaveform.init(acidAnalyser, "#0f0");
 
-    // Break player
+    // 808 → its fx unit → master
+    this._808 = new WebAudioSynth808(this._ctx, {
+      pitchSweepSemitones: this._p.bass808PitchSweep,
+      pitchDecay: this._p.bass808PitchDecay,
+      decay: this._p.bass808Decay,
+      distortion: this._p.bass808Distortion,
+      volume: this._p.bass808Volume,
+      click: this._p.bass808Click,
+      subOscMix: this._p.bass808SubMix,
+      tone: this._p.bass808Tone,
+    });
+    this._808Fx.init(this._ctx, { title: "808 FX", bpm: this._p.bpm });
+    this._808.connect(this._808Fx);
+    this._808Fx.connect(this._masterGain);
+    const analyser808 = this._ctx.createAnalyser();
+    this._808.connect(analyser808);
+    this._808Waveform.init(analyser808, "#fa0");
+
+    // Break → its fx unit → master
     this._break = new WebAudioBreakPlayer(this._ctx, {
       speedMultiplier: this._p.breakSpeedMultiplier,
       subdivision: this._p.breakSubdivision,
@@ -170,18 +196,27 @@ class WebAudioAcid extends DemoBase {
       reverseChance: this._p.breakReverseChance,
       volume: this._p.breakVolume,
     });
-    this._break.connect(this._masterGain);
+    this._breakFx.init(this._ctx, { title: "Break FX", bpm: this._p.bpm });
+    this._break.connect(this._breakFx);
+    this._breakFx.connect(this._masterGain);
+    const breakAnalyser = this._ctx.createAnalyser();
+    this._break.connect(breakAnalyser);
+    this._breakWaveform.init(breakAnalyser, "#0cc");
     this._loadBreak();
 
-    // 808 bass synth
-    this._808 = new WebAudioSynth808(this._ctx, {
-      pitchSweepSemitones: this._p.bass808PitchSweep,
-      pitchDecay: this._p.bass808PitchDecay,
-      decay: this._p.bass808Decay,
-      distortion: this._p.bass808Distortion,
-      volume: this._p.bass808Volume,
+    // ZzFX → its fx unit → master
+    this._zzfx = new WebAudioSynthZzfx(this._ctx, {
+      volume: this._p.zzfxVolume,
+      lpfFreq: this._p.zzfxLpfFreq,
+      hpfFreq: this._p.zzfxHpfFreq,
+      lpfResonance: this._p.zzfxLpfResonance,
     });
-    this._808.connect(this._masterGain);
+    this._zzfxFx.init(this._ctx, { title: "SFX FX", bpm: this._p.bpm });
+    this._zzfx.connect(this._zzfxFx);
+    this._zzfxFx.connect(this._masterGain);
+    const zzfxAnalyser = this._ctx.createAnalyser();
+    this._zzfx.connect(zzfxAnalyser);
+    this._zzfxWaveform.init(zzfxAnalyser, "#c0f");
 
     // Sequencer
     this._seq = new WebAudioSequencer(this._ctx, {
@@ -190,39 +225,49 @@ class WebAudioAcid extends DemoBase {
       subdivision: 16,
     });
     this._seq.onStep((step, time) => {
-      // Acid
+      // TB-303
       const acidStep = this._steps[step];
       if (acidStep.active) {
         this._acid.trigger(acidStep.note, this._seq.stepDurationSec(), acidStep.accent, time);
       }
-
-      // 808 bass
+      // Manual acid note queued by [B] key / button
+      if (this._pendingAcidNote !== null) {
+        this._acid.trigger(this._pendingAcidNote, this._seq.stepDurationSec(), false, time);
+        this._pendingAcidNote = null;
+      }
+      // 808
       const bass808Step = this._808Steps[step];
-      if (bass808Step.active && this._808) {
+      if (bass808Step.active) {
         this._808.trigger(bass808Step.note, this._seq.stepDurationSec(), time);
       }
-
-      // Break — call every step, player handles loop-boundary logic internally
+      // Break — manual segment queued by jam buttons takes priority
       if (this._break.loaded) {
-        this._break.trigger(this._globalStep, this._p.bpm, time);
+        if (this._pendingBreakSegment >= 0) {
+          this._break.jumpToSegment(this._pendingBreakSegment, 3, this._p.bpm, time);
+          this._pendingBreakSegment = -1;
+        } else {
+          this._break.trigger(this._globalStep, this._p.bpm, time);
+        }
+      }
+      // ZzFX — occasional random squelch, 2-measure cooldown between hits
+      const zzfxReady = this._globalStep - this._zzfxLastStep >= 32;
+      if (zzfxReady && Math.random() < this._p.zzfxChance) {
+        this._zzfx.randomize();
+        this._zzfx.trigger(time);
+        this._zzfxLastStep = this._globalStep;
       }
 
-      // UI step highlight
       const uiDelay = Math.max(0, (time - this._ctx.currentTime) * 1000);
       setTimeout(() => this._highlightStep(step), uiDelay);
-
       this._globalStep++;
     });
-  }
-
-  _computeDelayTime() {
-    return (60 / this._p.bpm) * this._p.delayInterval;
   }
 
   _loadBreak() {
     if (!this._ctx || !this._break || !this._breakFileSelect) return;
     const file = this._breakFileSelect.value;
     if (file) this._break.load(`../data/audio/breaks/${file}`);
+    else this._break.stop();
   }
 
   _play() {
@@ -239,6 +284,7 @@ class WebAudioAcid extends DemoBase {
   _stop() {
     this._playing = false;
     this._seq?.stop();
+    this._break?.stop();
     this._highlightStep(-1);
     this._playBtn.textContent = "▶ Play";
   }
@@ -265,8 +311,6 @@ class WebAudioAcid extends DemoBase {
   _randomize() {
     const root = parseInt(this._rootSelect.value);
     const notes = this._buildScaleNotes(root, this._scaleSelect.value);
-
-    // Bias the pool toward lower notes and the root
     const pool = notes.flatMap((n) => {
       const octaveAbove = Math.floor((n - root) / 12);
       const weight = Math.max(1, 4 - octaveAbove * 2) + (n === root || n === root + 12 ? 2 : 0);
@@ -276,7 +320,6 @@ class WebAudioAcid extends DemoBase {
     let prevNote = root;
     this._steps = this._steps.map((_, i) => {
       const active = Math.random() < STEP_WEIGHTS[i];
-      // Prefer notes within a 7-semitone range of the previous note for melodic flow
       const nearby = pool.filter((n) => Math.abs(n - prevNote) <= 7);
       const src = nearby.length >= 3 ? nearby : pool;
       const note = src[Math.floor(Math.random() * src.length)];
@@ -284,10 +327,7 @@ class WebAudioAcid extends DemoBase {
       const accent = [0, 4, 8, 12].includes(i) && Math.random() < 0.4;
       return { active, note, accent };
     });
-
-    // Step 0 always fires on root
     this._steps[0] = { active: true, note: root, accent: Math.random() < 0.5 };
-
     this._refreshSeqUI();
   }
 
@@ -298,6 +338,39 @@ class WebAudioAcid extends DemoBase {
       btn.textContent = step.active ? "●" : "○";
       this._stepNoteSelects[i].value = step.note;
       this._stepAccentChks[i].checked = step.accent;
+    });
+  }
+
+  _queueRandomAcidNote() {
+    const root = parseInt(this._rootSelect?.value ?? 29);
+    const notes = this._buildScaleNotes(root, this._scaleSelect?.value ?? "Minor");
+    if (!notes.length) return;
+    this._pendingAcidNote = notes[Math.floor(Math.random() * notes.length)];
+  }
+
+  _setupKeyboardJam() {
+    document.addEventListener("keydown", (e) => {
+      // Don't hijack key presses while typing in inputs / selects
+      if (["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName)) return;
+      switch (e.key.toLowerCase()) {
+        case "z":
+          this._pendingBreakSegment = 0;
+          break;
+        case "x":
+          this._pendingBreakSegment = 1;
+          break;
+        case "c":
+          this._pendingBreakSegment = 2;
+          break;
+        case "v":
+          if (!this._zzfx) return;
+          this._zzfx.randomize();
+          this._zzfx.trigger(this._ctx.currentTime);
+          break;
+        case "b":
+          this._queueRandomAcidNote();
+          break;
+      }
     });
   }
 
@@ -313,8 +386,10 @@ class WebAudioAcid extends DemoBase {
     transport.appendChild(this._playBtn);
     transport.appendChild(this._makeSlider("BPM", "bpm", 60, 200, 1, this._p.bpm));
 
-    // ---- Break player ----
-    const breakRow = this.injectHTML(`<div class="acid-controls break-controls"></div>`);
+    // ---- Break group ----
+    const breakGroup = this.injectHTML(`<div class="instrument-group break-group"></div>`);
+    const breakRow = document.createElement("div");
+    breakRow.className = "acid-controls break-controls";
     breakRow.appendChild(
       Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "Break Player" }),
     );
@@ -405,10 +480,40 @@ class WebAudioAcid extends DemoBase {
 
     breakRow.appendChild(this._makeSlider("Rand Chance", "breakRandomChance", 0, 1, 0.01, this._p.breakRandomChance));
     breakRow.appendChild(this._makeSlider("Reverse", "breakReverseChance", 0, 0.25, 0.01, this._p.breakReverseChance));
-    breakRow.appendChild(this._makeSlider("Break Vol", "breakVolume", 0, 1, 0.01, this._p.breakVolume));
+    breakRow.appendChild(this._makeSlider("Vol", "breakVolume", 0, 1, 0.01, this._p.breakVolume));
 
-    // ---- 808 bass ----
-    const bass808Row = this.injectHTML(`<div class="acid-controls bass808-controls"></div>`);
+    // Jam buttons — queue a segment jump for the next sequencer step
+    const jamWrap = document.createElement("div");
+    jamWrap.className = "acid-ctrl break-jam-ctrl";
+    jamWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Jam" }));
+    const jamBtns = document.createElement("div");
+    jamBtns.className = "break-jam-btns";
+    [
+      ["K", 0, "Z"],
+      ["H", 1, "X"],
+      ["S", 2, "C"],
+    ].forEach(([label, seg, key]) => {
+      const btn = document.createElement("button");
+      btn.textContent = `${label} [${key}]`;
+      btn.className = "break-jam-btn";
+      btn.addEventListener("mousedown", () => {
+        this._pendingBreakSegment = seg;
+      });
+      jamBtns.appendChild(btn);
+    });
+    jamWrap.appendChild(jamBtns);
+    breakRow.appendChild(jamWrap);
+
+    this._breakFx = document.createElement("web-audio-fx-unit");
+    this._breakWaveform = document.createElement("web-audio-waveform");
+    breakGroup.appendChild(breakRow);
+    breakGroup.appendChild(this._breakFx);
+    breakGroup.appendChild(this._breakWaveform);
+
+    // ---- 808 group ----
+    const g808 = this.injectHTML(`<div class="instrument-group bass808-group"></div>`);
+    const bass808Row = document.createElement("div");
+    bass808Row.className = "acid-controls bass808-controls";
     bass808Row.appendChild(
       Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "808 Bass" }),
     );
@@ -418,9 +523,13 @@ class WebAudioAcid extends DemoBase {
       this._makeSlider("Pitch Decay", "bass808PitchDecay", 0.01, 1, 0.01, this._p.bass808PitchDecay),
     );
     bass808Row.appendChild(this._makeSlider("Distortion", "bass808Distortion", 0, 1, 0.01, this._p.bass808Distortion));
-    bass808Row.appendChild(this._makeSlider("808 Vol", "bass808Volume", 0, 1, 0.01, this._p.bass808Volume));
+    bass808Row.appendChild(this._makeSlider("Vol", "bass808Volume", 0, 1, 0.01, this._p.bass808Volume));
+    bass808Row.appendChild(this._makeSlider("Click", "bass808Click", 0, 1, 0.01, this._p.bass808Click));
+    bass808Row.appendChild(this._makeSlider("Sub Mix", "bass808SubMix", 0, 1, 0.01, this._p.bass808SubMix));
+    bass808Row.appendChild(this._makeSlider("Tone", "bass808Tone", 50, 8000, 1, this._p.bass808Tone));
 
-    const seq808 = this.injectHTML(`<div class="bass808-seq"></div>`);
+    const seq808 = document.createElement("div");
+    seq808.className = "bass808-seq";
     const note808Opts = this._bass808NoteOptions();
     this._808Steps.forEach((step, i) => {
       const el = document.createElement("div");
@@ -461,8 +570,57 @@ class WebAudioAcid extends DemoBase {
       this._808StepEls.push(el);
     });
 
-    // ---- Acid / TB-303 ----
-    const controls = this.injectHTML(`<div class="acid-controls"></div>`);
+    this._808Fx = document.createElement("web-audio-fx-unit");
+    this._808Waveform = document.createElement("web-audio-waveform");
+    g808.appendChild(bass808Row);
+    g808.appendChild(seq808);
+    g808.appendChild(this._808Fx);
+    g808.appendChild(this._808Waveform);
+
+    // ---- ZzFX group ----
+    const zzfxGroup = this.injectHTML(`<div class="instrument-group zzfx-group"></div>`);
+    const zzfxRow = document.createElement("div");
+    zzfxRow.className = "acid-controls zzfx-controls";
+    zzfxRow.appendChild(
+      Object.assign(document.createElement("div"), {
+        className: "acid-section-title",
+        textContent: "ZzFX Sound Effects",
+      }),
+    );
+
+    const zzfxRandBtn = document.createElement("button");
+    zzfxRandBtn.textContent = "⚄ New SFX";
+    zzfxRandBtn.className = "acid-rand-btn zzfx-rand-btn";
+    zzfxRandBtn.addEventListener("click", () => this._zzfx?.randomize());
+    zzfxRow.appendChild(zzfxRandBtn);
+
+    const zzfxTriggerBtn = document.createElement("button");
+    zzfxTriggerBtn.textContent = "▶ Play [V]";
+    zzfxTriggerBtn.className = "acid-rand-btn zzfx-rand-btn";
+    zzfxTriggerBtn.addEventListener("click", () => {
+      this._initAudio();
+      if (this._ctx.state === "suspended") this._ctx.resume();
+      this._zzfx.randomize();
+      this._zzfx.trigger(this._ctx.currentTime);
+    });
+    zzfxRow.appendChild(zzfxTriggerBtn);
+
+    zzfxRow.appendChild(this._makeSlider("Chance", "zzfxChance", 0, 0.5, 0.01, this._p.zzfxChance));
+    zzfxRow.appendChild(this._makeSlider("Vol", "zzfxVolume", 0, 1, 0.01, this._p.zzfxVolume));
+    zzfxRow.appendChild(this._makeSlider("LPF", "zzfxLpfFreq", 80, 8000, 1, this._p.zzfxLpfFreq));
+    zzfxRow.appendChild(this._makeSlider("HPF", "zzfxHpfFreq", 20, 2000, 1, this._p.zzfxHpfFreq));
+    zzfxRow.appendChild(this._makeSlider("Resonance", "zzfxLpfResonance", 0.5, 15, 0.1, this._p.zzfxLpfResonance));
+
+    this._zzfxFx = document.createElement("web-audio-fx-unit");
+    this._zzfxWaveform = document.createElement("web-audio-waveform");
+    zzfxGroup.appendChild(zzfxRow);
+    zzfxGroup.appendChild(this._zzfxFx);
+    zzfxGroup.appendChild(this._zzfxWaveform);
+
+    // ---- Acid / TB-303 group ----
+    const acidGroup = this.injectHTML(`<div class="instrument-group acid-group"></div>`);
+    const controls = document.createElement("div");
+    controls.className = "acid-controls";
     controls.appendChild(
       Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "TB-303 Acid" }),
     );
@@ -491,37 +649,13 @@ class WebAudioAcid extends DemoBase {
     controls.appendChild(this._makeSlider("Attack", "attack", 0.001, 0.3, 0.001, this._p.attack));
     controls.appendChild(this._makeSlider("Distortion", "distortion", 0, 1, 0.01, this._p.distortion));
     controls.appendChild(this._makeSlider("Portamento", "portamento", 0, 0.5, 0.001, this._p.portamento));
-    controls.appendChild(this._makeSlider("Volume", "volume", 0, 1, 0.01, this._p.volume));
+    controls.appendChild(this._makeSlider("Vol", "volume", 0, 1, 0.01, this._p.volume));
 
-    // FX — reverb + delay (in the acid group)
-    const delayRow = this.injectHTML(`<div class="acid-controls"></div>`);
-    delayRow.appendChild(
-      Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "FX" }),
-    );
-    delayRow.appendChild(this._makeSlider("Reverb", "reverbWet", 0, 1, 0.01, this._p.reverbWet));
-    const delayIntervalWrap = document.createElement("div");
-    delayIntervalWrap.className = "acid-ctrl";
-    delayIntervalWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Interval" }));
-    const delayIntervalSelect = document.createElement("select");
-    delayIntervalSelect.className = "acid-select";
-    DELAY_INTERVALS.forEach(({ label, beats }) => {
-      const opt = document.createElement("option");
-      opt.value = beats;
-      opt.textContent = label;
-      if (beats === this._p.delayInterval) opt.selected = true;
-      delayIntervalSelect.appendChild(opt);
-    });
-    delayIntervalSelect.addEventListener("change", () => {
-      this._p.delayInterval = parseFloat(delayIntervalSelect.value);
-      if (this._delayNode) this._delayNode.delayTime.value = this._computeDelayTime();
-    });
-    delayIntervalWrap.appendChild(delayIntervalSelect);
-    delayRow.appendChild(delayIntervalWrap);
-    delayRow.appendChild(this._makeSlider("Feedback", "delayFeedback", 0, 0.9, 0.01, this._p.delayFeedback));
-    delayRow.appendChild(this._makeSlider("Mix", "delayMix", 0, 1, 0.01, this._p.delayMix));
+    this._acidFx = document.createElement("web-audio-fx-unit");
 
     // Randomizer
-    const randRow = this.injectHTML(`<div class="acid-rand-row"></div>`);
+    const randRow = document.createElement("div");
+    randRow.className = "acid-rand-row";
     this._rootSelect = document.createElement("select");
     this._rootSelect.className = "acid-select";
     for (let midi = 24; midi <= 35; midi++) {
@@ -543,12 +677,18 @@ class WebAudioAcid extends DemoBase {
     randBtn.textContent = "⚄ Randomize";
     randBtn.className = "acid-rand-btn";
     randBtn.addEventListener("click", () => this._randomize());
+    const noteBtn = document.createElement("button");
+    noteBtn.textContent = "♩ Note [B]";
+    noteBtn.className = "acid-rand-btn";
+    noteBtn.addEventListener("click", () => this._queueRandomAcidNote());
     randRow.appendChild(randBtn);
+    randRow.appendChild(noteBtn);
     randRow.appendChild(this._rootSelect);
     randRow.appendChild(this._scaleSelect);
 
     // 303 step sequencer
-    const seq = this.injectHTML(`<div class="acid-seq"></div>`);
+    const seq = document.createElement("div");
+    seq.className = "acid-seq";
     const noteOpts = this._noteOptions();
     this._steps.forEach((step, i) => {
       const el = document.createElement("div");
@@ -602,6 +742,13 @@ class WebAudioAcid extends DemoBase {
       seq.appendChild(el);
       this._stepEls.push(el);
     });
+
+    this._acidWaveform = document.createElement("web-audio-waveform");
+    acidGroup.appendChild(controls);
+    acidGroup.appendChild(this._acidFx);
+    acidGroup.appendChild(randRow);
+    acidGroup.appendChild(seq);
+    acidGroup.appendChild(this._acidWaveform);
   }
 
   _noteOptions() {
@@ -642,15 +789,14 @@ class WebAudioAcid extends DemoBase {
       this._p[param] = v;
       valSpan.textContent = step < 0.1 ? v.toFixed(3) : step < 1 ? v.toFixed(2) : Math.round(v);
 
-      // Live-update audio nodes / instruments
       if (param === "bpm") {
         if (this._seq) this._seq.bpm = v;
-        if (this._delayNode) this._delayNode.delayTime.value = this._computeDelayTime();
+        if (this._acidFx) this._acidFx.bpm = v;
+        if (this._808Fx) this._808Fx.bpm = v;
+        if (this._breakFx) this._breakFx.bpm = v;
+        if (this._zzfxFx) this._zzfxFx.bpm = v;
       }
       if (param === "volume" && this._acid) this._acid.volume = v;
-      if (param === "reverbWet" && this._acidReverb) this._acidReverb.wet = v;
-      if (param === "delayFeedback" && this._delayFeedback) this._delayFeedback.gain.value = v;
-      if (param === "delayMix" && this._delayWet) this._delayWet.gain.value = v;
       if (this._acid) {
         if (param === "cutoff") this._acid.cutoff = v;
         if (param === "resonance") this._acid.resonance = v;
@@ -660,17 +806,26 @@ class WebAudioAcid extends DemoBase {
         if (param === "distortion") this._acid.distortion = v;
         if (param === "portamento") this._acid.portamento = v;
       }
-      if (this._break) {
-        if (param === "breakRandomChance") this._break.randomChance = v;
-        if (param === "breakReverseChance") this._break.reverseChance = v;
-        if (param === "breakVolume") this._break.volume = v;
-      }
       if (this._808) {
         if (param === "bass808Decay") this._808.decay = v;
         if (param === "bass808PitchSweep") this._808.pitchSweepSemitones = v;
         if (param === "bass808PitchDecay") this._808.pitchDecay = v;
         if (param === "bass808Distortion") this._808.distortion = v;
         if (param === "bass808Volume") this._808.volume = v;
+        if (param === "bass808Click") this._808.click = v;
+        if (param === "bass808SubMix") this._808.subOscMix = v;
+        if (param === "bass808Tone") this._808.tone = v;
+      }
+      if (this._break) {
+        if (param === "breakRandomChance") this._break.randomChance = v;
+        if (param === "breakReverseChance") this._break.reverseChance = v;
+        if (param === "breakVolume") this._break.volume = v;
+      }
+      if (this._zzfx) {
+        if (param === "zzfxVolume") this._zzfx.volume = v;
+        if (param === "zzfxLpfFreq") this._zzfx.lpfFreq = v;
+        if (param === "zzfxHpfFreq") this._zzfx.hpfFreq = v;
+        if (param === "zzfxLpfResonance") this._zzfx.lpfResonance = v;
       }
     });
 
@@ -681,6 +836,11 @@ class WebAudioAcid extends DemoBase {
 
   addCSS() {
     this.injectCSS(`
+      /* Prevent double-tap zoom on touch devices */
+      * {
+        touch-action: manipulation;
+      }
+        
       web-audio-acid {
         display: block;
         font-family: monospace;
@@ -690,13 +850,38 @@ class WebAudioAcid extends DemoBase {
         border-radius: 6px;
       }
 
+      /* ---- Instrument groups ---- */
+      .instrument-group {
+        border: 1px solid #222;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 12px;
+      }
+      .instrument-group .acid-controls {
+        border: none;
+        border-radius: 0;
+        margin-bottom: 0;
+      }
+      .instrument-group .bass808-seq {
+        margin-bottom: 0;
+        padding: 8px 10px;
+        background: #1a1200;
+        border-top: 1px solid #2a1a00;
+      }
+
+      /* Per-instrument accent colors (used by fx unit via --fx-accent) */
+      .break-group  { --fx-accent: #0cc; }
+      .bass808-group { --fx-accent: #fa0; }
+      .zzfx-group   { --fx-accent: #c0f; }
+      .acid-group   { --fx-accent: #0f0; }
+
+      /* ---- Transport ---- */
       .acid-transport {
         display: flex;
         align-items: center;
         gap: 16px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
       }
-
       .acid-play {
         padding: 8px 20px;
         font-family: monospace;
@@ -710,18 +895,17 @@ class WebAudioAcid extends DemoBase {
       }
       .acid-play:hover { background: #0f0; color: #000; }
 
+      /* ---- Control panels ---- */
       .acid-controls {
         display: flex;
         flex-wrap: wrap;
         align-items: flex-start;
         gap: 12px 20px;
-        margin-bottom: 12px;
         background: #1a1a1a;
         padding: 14px;
         border-radius: 6px;
         border: 1px solid #2a2a2a;
       }
-
       .acid-section-title {
         width: 100%;
         font-size: 0.7em;
@@ -731,20 +915,32 @@ class WebAudioAcid extends DemoBase {
         margin-bottom: -4px;
       }
 
-      .break-controls { border-color: #002a2a; }
+      /* Break tint */
+      .break-controls  { border-color: #002a2a; }
       .break-controls .acid-section-title { color: #005555; }
       .break-controls .acid-ctrl-val { color: #0cc; }
       .break-controls input[type=range] { accent-color: #0cc; }
 
+      /* 808 tint */
+      .bass808-controls { border-color: #2a1a00; }
+      .bass808-controls .acid-section-title { color: #664400; }
+      .bass808-controls .acid-ctrl-val { color: #fa0; }
+      .bass808-controls input[type=range] { accent-color: #fa0; }
+
+      /* ZzFX tint */
+      .zzfx-controls { border-color: #1e003a; }
+      .zzfx-controls .acid-section-title { color: #5a0090; }
+      .zzfx-controls .acid-ctrl-val { color: #c0f; }
+      .zzfx-controls input[type=range] { accent-color: #c0f; }
+
+      /* ---- Controls ---- */
       .acid-ctrl {
         display: flex;
         flex-direction: column;
         gap: 4px;
         min-width: 110px;
       }
-      .acid-ctrl-wide {
-        min-width: 220px;
-      }
+      .acid-ctrl-wide { min-width: 220px; }
       .acid-ctrl label {
         font-size: 0.72em;
         color: #888;
@@ -752,10 +948,7 @@ class WebAudioAcid extends DemoBase {
         letter-spacing: 0.05em;
       }
       .acid-ctrl-val { color: #0f0; }
-      .acid-ctrl input[type=range] {
-        accent-color: #0f0;
-        width: 100%;
-      }
+      .acid-ctrl input[type=range] { accent-color: #0f0; width: 100%; }
 
       .acid-wave-row {
         display: flex;
@@ -783,9 +976,10 @@ class WebAudioAcid extends DemoBase {
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 12px;
+        padding: 10px 14px;
+        background: #141414;
+        border-top: 1px solid #1e1e1e;
       }
-
       .acid-rand-btn {
         font-family: monospace;
         font-size: 0.9em;
@@ -798,6 +992,12 @@ class WebAudioAcid extends DemoBase {
         white-space: nowrap;
       }
       .acid-rand-btn:hover { background: #fa0; color: #000; }
+      .zzfx-rand-btn {
+        background: #130020;
+        color: #c0f;
+        border-color: #c0f;
+      }
+      .zzfx-rand-btn:hover { background: #c0f; color: #000; }
 
       .acid-select {
         font-family: monospace;
@@ -811,13 +1011,15 @@ class WebAudioAcid extends DemoBase {
         margin: 0;
       }
 
+      /* ---- 303 Step sequencer ---- */
       .acid-seq {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 4px;
+        padding: 10px 14px;
+        background: #141414;
+        border-top: 1px solid #1e1e1e;
       }
-
       .acid-step {
         display: flex;
         flex-direction: column;
@@ -830,11 +1032,7 @@ class WebAudioAcid extends DemoBase {
         width: 72px;
         transition: border-color 0.05s, background 0.05s;
       }
-      .acid-step.active-step {
-        border-color: #0f0;
-        background: #0b1a0b;
-      }
-
+      .acid-step.active-step { border-color: #0f0; background: #0b1a0b; }
       .acid-step-num {
         font-size: 0.65em;
         color: #444;
@@ -852,7 +1050,6 @@ class WebAudioAcid extends DemoBase {
       }
       .acid-step-on.on { color: #0f0; }
       .acid-step-on:hover { color: #0a0; }
-
       .acid-step-note {
         width: 100%;
         font-size: 0.7em;
@@ -863,7 +1060,6 @@ class WebAudioAcid extends DemoBase {
         border-radius: 3px;
         padding: 2px;
       }
-
       .acid-step-accent {
         display: flex;
         align-items: center;
@@ -875,19 +1071,12 @@ class WebAudioAcid extends DemoBase {
       }
       .acid-step-accent input { accent-color: #fa0; cursor: pointer; }
 
-      .bass808-controls { border-color: #2a1a00; }
-      .bass808-controls .acid-section-title { color: #664400; }
-      .bass808-controls .acid-ctrl-val { color: #fa0; }
-      .bass808-controls input[type=range] { accent-color: #fa0; }
-
+      /* ---- 808 Step sequencer ---- */
       .bass808-seq {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 4px;
-        margin-bottom: 12px;
       }
-
       .bass808-step {
         display: flex;
         flex-direction: column;
@@ -900,11 +1089,7 @@ class WebAudioAcid extends DemoBase {
         width: 72px;
         transition: border-color 0.05s, background 0.05s;
       }
-      .bass808-active-step {
-        border-color: #fa0;
-        background: #2a1800;
-      }
-
+      .bass808-active-step { border-color: #fa0; background: #2a1800; }
       .bass808-step-on {
         background: none;
         border: none;
@@ -917,6 +1102,38 @@ class WebAudioAcid extends DemoBase {
       }
       .bass808-step-on.on { color: #fa0; }
       .bass808-step-on:hover { color: #c80; }
+
+      /* ---- Break jam buttons ---- */
+      .break-jam-ctrl { min-width: unset; }
+      .break-jam-btns {
+        display: flex;
+        gap: 5px;
+      }
+      .break-jam-btn {
+        font-family: monospace;
+        font-size: 1em;
+        font-weight: bold;
+        padding: 5px 10px;
+        background: #001a1a;
+        color: #0cc;
+        border: 1px solid #0cc;
+        border-radius: 4px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .break-jam-btn:hover { background: #0cc; color: #000; }
+      .break-jam-btn:active { background: #0ee; color: #000; }
+
+      /* ---- Waveform displays ---- */
+      web-audio-waveform {
+        height: 44px;
+        background: #060606;
+        border-top: 1px solid #151515;
+      }
+      .break-group  web-audio-waveform { border-color: #002020; }
+      .bass808-group web-audio-waveform { border-color: #1a0f00; }
+      .zzfx-group   web-audio-waveform { border-color: #100020; }
+      .acid-group   web-audio-waveform { border-color: #001500; }
     `);
   }
 

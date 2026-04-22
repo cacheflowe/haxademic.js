@@ -191,6 +191,23 @@ export default class WebAudioBreakPlayer {
     };
   }
 
+  /**
+   * Jump immediately to a fixed segment of the buffer (e.g. kick / hat / snare positions).
+   * Cancels any pending return-from-jump so the loop continues from this new position.
+   *
+   * @param {number} segIndex    0-based segment index (0 = start, 1 = 1/3, 2 = 2/3 for numSegments=3)
+   * @param {number} numSegments Number of equal segments to divide the buffer into
+   * @param {number} bpm         Current tempo
+   * @param {number} atTime      Scheduled AudioContext time
+   */
+  jumpToSegment(segIndex, numSegments, bpm, atTime) {
+    if (!this._buffer) return;
+    const playbackRate = (bpm / this._originalBpm) * this.speedMultiplier;
+    const offset = (segIndex / numSegments) * this._buffer.duration;
+    this._startSource(offset, atTime, playbackRate, false);
+    this._returnAtStep = -1;
+  }
+
   stop(atTime) {
     if (this._source) {
       try {
