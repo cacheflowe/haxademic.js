@@ -20,8 +20,34 @@
  *   const fm = new WebAudioSynthFM(ctx, { modRatio: 3.5, modIndex: 4 });
  *   fm.connect(fxUnit);
  *   fm.trigger([48, 52, 55], stepDurSec, atTime);  // C major triad
+ *
+ * Presets:
+ *   fm.applyPreset("Bell");
+ *   // or: new WebAudioSynthFM(ctx, WebAudioSynthFM.PRESETS["Bell"]);
  */
 export default class WebAudioSynthFM {
+
+  /** Maps unprefixed preset keys to "fm"-prefixed param names used in demo UIs. */
+  static PARAM_KEY_MAP = {
+    carrierRatio: "fmCarrierRatio", modRatio: "fmModRatio", modIndex: "fmModIndex",
+    modDecay: "fmModDecay", attack: "fmAttack", decay: "fmDecay",
+    sustain: "fmSustain", release: "fmRelease", filterFreq: "fmFilterFreq",
+    filterQ: "fmFilterQ", detune: "fmDetune", volume: "fmVolume",
+  };
+
+  // ---- DX-7-inspired presets ----
+
+  static PRESETS = {
+    "E.Piano": { carrierRatio: 1, modRatio: 2,   modIndex: 2.5, modDecay: 0.20, attack: 0.005, decay: 0.30, sustain: 0.15, release: 0.5,  filterFreq: 8000,  filterQ: 1, detune: 0, volume: 0.4  },
+    "Bell":    { carrierRatio: 1, modRatio: 3.5, modIndex: 5,   modDecay: 0.06, attack: 0.001, decay: 1.20, sustain: 0.0,  release: 2.5,  filterFreq: 10000, filterQ: 1, detune: 0, volume: 0.35 },
+    "Vibes":   { carrierRatio: 1, modRatio: 4,   modIndex: 1.5, modDecay: 0.08, attack: 0.001, decay: 0.30, sustain: 0.0,  release: 0.6,  filterFreq: 6000,  filterQ: 1, detune: 0, volume: 0.5  },
+    "Organ":   { carrierRatio: 1, modRatio: 1,   modIndex: 1.5, modDecay: 1.00, attack: 0.015, decay: 0.08, sustain: 0.9,  release: 0.06, filterFreq: 5000,  filterQ: 1, detune: 5, volume: 0.35 },
+    "Pad":     { carrierRatio: 1, modRatio: 2,   modIndex: 0.8, modDecay: 2.00, attack: 0.40,  decay: 0.60, sustain: 0.7,  release: 2.5,  filterFreq: 2500,  filterQ: 2, detune: 8, volume: 0.3  },
+    "Pluck":   { carrierRatio: 1, modRatio: 7,   modIndex: 7,   modDecay: 0.04, attack: 0.001, decay: 0.12, sustain: 0.0,  release: 0.15, filterFreq: 5000,  filterQ: 1, detune: 0, volume: 0.55 },
+    "Brass":   { carrierRatio: 1, modRatio: 1,   modIndex: 3,   modDecay: 0.15, attack: 0.08,  decay: 0.20, sustain: 0.6,  release: 0.3,  filterFreq: 4000,  filterQ: 2, detune: 0, volume: 0.4  },
+    "Kalimba": { carrierRatio: 1, modRatio: 5,   modIndex: 2,   modDecay: 0.05, attack: 0.001, decay: 0.20, sustain: 0.0,  release: 0.35, filterFreq: 8000,  filterQ: 1, detune: 0, volume: 0.5  },
+  };
+
   /**
    * @param {AudioContext} ctx
    * @param {object}  [options]
@@ -95,6 +121,28 @@ export default class WebAudioSynthFM {
   connect(node) {
     this._out.connect(node.input ?? node);
     return this;
+  }
+
+  /**
+   * Apply a named preset, updating all synth parameters in place.
+   * @param {string} name  Key of WebAudioSynthFM.PRESETS
+   */
+  applyPreset(name) {
+    const p = WebAudioSynthFM.PRESETS[name];
+    if (!p) return;
+    if (p.carrierRatio != null) this.carrierRatio = p.carrierRatio;
+    if (p.modRatio     != null) this.modRatio     = p.modRatio;
+    if (p.modIndex     != null) this.modIndex     = p.modIndex;
+    if (p.modAttack    != null) this.modAttack     = p.modAttack;
+    if (p.modDecay     != null) this.modDecay      = p.modDecay;
+    if (p.attack       != null) this.attack        = p.attack;
+    if (p.decay        != null) this.decay         = p.decay;
+    if (p.sustain      != null) this.sustain       = p.sustain;
+    if (p.release      != null) this.release       = p.release;
+    if (p.filterFreq   != null) this.filterFreq    = p.filterFreq;
+    if (p.filterQ      != null) this.filterQ       = p.filterQ;
+    if (p.detune       != null) this.detune        = p.detune;
+    if (p.volume       != null) this.volume        = p.volume;
   }
 
   // ---- Helpers ----

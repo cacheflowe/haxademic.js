@@ -10,6 +10,13 @@
  *   pad.trigger([48, 51, 55], 1.0, 0.7, time); // C minor triad
  */
 export default class WebAudioSynthPad {
+  static PRESETS = {
+    Default: { oscType: "sine", attack: 0.5, decay: 0.4, sustain: 0.7, release: 2.0, volume: 1 },
+    Strings: { oscType: "sawtooth", attack: 0.8, decay: 0.5, sustain: 0.8, release: 2.5, volume: 0.7 },
+    Warm: { oscType: "triangle", attack: 0.3, decay: 0.3, sustain: 0.9, release: 1.5, volume: 0.9 },
+    Stab: { oscType: "sawtooth", attack: 0.01, decay: 0.2, sustain: 0.0, release: 0.4, volume: 0.9 },
+  };
+
   constructor(ctx, options = {}) {
     this.ctx = ctx;
     this.oscType = options.oscType ?? "sine";
@@ -20,6 +27,21 @@ export default class WebAudioSynthPad {
 
     this._out = ctx.createGain();
     this._out.gain.value = options.volume ?? 1;
+  }
+
+  /**
+   * Apply a named preset, updating all synth parameters in place.
+   * @param {string} name  Key of WebAudioSynthPad.PRESETS
+   */
+  applyPreset(name) {
+    const p = WebAudioSynthPad.PRESETS[name];
+    if (!p) return;
+    if (p.oscType != null) this.oscType = p.oscType;
+    if (p.attack  != null) this.attack  = p.attack;
+    if (p.decay   != null) this.decay   = p.decay;
+    if (p.sustain != null) this.sustain = p.sustain;
+    if (p.release != null) this.release = p.release;
+    if (p.volume  != null) this._out.gain.value = p.volume;
   }
 
   get input() {

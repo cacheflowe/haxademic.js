@@ -1,16 +1,21 @@
 /**
- * WebAudioWaveform — oscilloscope-style waveform display web component.
+ * WebAudioWaveform — audio visualizer web component (waveform + spectrogram).
  *
- * Reads time-domain data from an AnalyserNode and draws a waveform to a canvas
- * at ~60fps via requestAnimationFrame. Resizes responsively via ResizeObserver.
+ * Two display modes, toggled by clicking:
+ *   - "waveform"    — oscilloscope-style time-domain display (default)
+ *   - "spectrogram" — scrolling frequency waterfall
+ *
+ * Reads data from an AnalyserNode and draws to a canvas at ~60fps via
+ * requestAnimationFrame. Resizes responsively via ResizeObserver.
  *
  * Usage:
- *   const waveform = document.createElement("web-audio-waveform");
- *   parentEl.appendChild(waveform);
- *   // After AudioContext is available:
+ *   const vis = document.createElement("web-audio-waveform");
+ *   parentEl.appendChild(vis);
  *   const analyser = ctx.createAnalyser();
  *   someNode.connect(analyser);
- *   waveform.init(analyser, "#0f0");
+ *   vis.init(analyser, "#0f0");                  // default waveform mode
+ *   vis.init(analyser, "#0f0", { mode: "spectrogram" }); // start as spectrogram
+ *   vis.mode = "spectrogram";                    // toggle at runtime
  */
 export default class WebAudioWaveform extends HTMLElement {
   static #cssInjected = false;
@@ -18,12 +23,15 @@ export default class WebAudioWaveform extends HTMLElement {
   constructor() {
     super();
     this._analyser = null;
-    this._data = null;
+    this._data = null;     // time-domain buffer
+    this._freqData = null; // frequency buffer
     this._canvas = null;
     this._ctx2d = null;
     this._raf = null;
     this._color = "#00ff00";
+    this._colorRGB = [0, 255, 0]; // parsed RGB for spectrogram pixel fills
     this._ro = null;
+    this._mode = "waveform";
   }
 
   connectedCallback() {
@@ -32,6 +40,7 @@ export default class WebAudioWaveform extends HTMLElement {
     this.appendChild(this._canvas);
     this._ro = new ResizeObserver(() => this._onResize());
     this._ro.observe(this);
+    this.addEventListener("click", this._onClick);
   }
 
   disconnectedCallback() {
@@ -40,6 +49,7 @@ export default class WebAudioWaveform extends HTMLElement {
       cancelAnimationFrame(this._raf);
       this._raf = null;
     }
+    this.removeEventListener("click", this._onClick);
   }
 
   _onResize() {
@@ -48,15 +58,44 @@ export default class WebAudioWaveform extends HTMLElement {
     this._canvas.height = this.clientHeight;
   }
 
+  _onClick = () => {
+    this.mode = this._mode === "waveform" ? "spectrogram" : "waveform";
+  };
+
+  /** @param {"waveform"|"spectrogram"} m */
+  set mode(m) {
+    if (m === this._mode) return;
+    this._mode = m;
+    // Update analyser fftSize for the new mode
+    if (this._analyser) {
+      this._analyser.fftSize = m === "spectrogram" ? 2048 : 512;
+      this._data = new Uint8Array(this._analyser.frequencyBinCount);
+      this._freqData = new Uint8Array(this._analyser.frequencyBinCount);
+    }
+    // Clear canvas to avoid stale visuals
+    if (this._ctx2d && this._canvas) {
+      this._ctx2d.clearRect(0, 0, this._canvas.width, this._canvas.height);
+    }
+  }
+
+  get mode() {
+    return this._mode;
+  }
+
   /**
    * @param {AnalyserNode} analyserNode
    * @param {string} [color="#00ff00"]
+   * @param {object} [options]
+   * @param {"waveform"|"spectrogram"} [options.mode="waveform"]
    */
-  init(analyserNode, color = "#00ff00") {
+  init(analyserNode, color = "#00ff00", options = {}) {
     this._analyser = analyserNode;
-    this._analyser.fftSize = 512;
-    this._data = new Uint8Array(this._analyser.frequencyBinCount);
     this._color = color;
+    this._colorRGB = WebAudioWaveform._parseColor(color);
+    this._mode = options.mode ?? "waveform";
+    this._analyser.fftSize = this._mode === "spectrogram" ? 2048 : 512;
+    this._data = new Uint8Array(this._analyser.frequencyBinCount);
+    this._freqData = new Uint8Array(this._analyser.frequencyBinCount);
     this._startLoop();
   }
 
@@ -70,6 +109,11 @@ export default class WebAudioWaveform extends HTMLElement {
   }
 
   _draw() {
+    if (this._mode === "spectrogram") this._drawSpectrogram();
+    else this._drawWaveform();
+  }
+
+  _drawWaveform() {
     if (!this._analyser || !this._canvas) return;
     const w = this._canvas.width;
     const h = this._canvas.height;
@@ -93,12 +137,57 @@ export default class WebAudioWaveform extends HTMLElement {
     ctx.stroke();
   }
 
+  _drawSpectrogram() {
+    if (!this._analyser || !this._canvas) return;
+    const w = this._canvas.width;
+    const h = this._canvas.height;
+    if (w === 0 || h === 0) return;
+
+    this._analyser.getByteFrequencyData(this._freqData);
+
+    const ctx = this._ctx2d ?? (this._ctx2d = this._canvas.getContext("2d"));
+
+    // Scroll existing content 1px to the left
+    const existing = ctx.getImageData(1, 0, w - 1, h);
+    ctx.putImageData(existing, 0, 0);
+
+    // Draw new frequency column on the right edge
+    const [r, g, b] = this._colorRGB;
+    const len = this._freqData.length;
+    const col = ctx.createImageData(1, h);
+    const pixels = col.data;
+
+    for (let y = 0; y < h; y++) {
+      // Map canvas row to frequency bin (bottom = low, top = high)
+      const binIndex = Math.floor(((h - 1 - y) / (h - 1)) * (len - 1));
+      const intensity = this._freqData[binIndex] / 255;
+      const idx = y * 4;
+      pixels[idx] = Math.round(r * intensity);
+      pixels[idx + 1] = Math.round(g * intensity);
+      pixels[idx + 2] = Math.round(b * intensity);
+      pixels[idx + 3] = 255;
+    }
+
+    ctx.putImageData(col, w - 1, 0);
+  }
+
+  /**
+   * Parse a CSS hex color string to [r, g, b].
+   * @param {string} hex  e.g. "#0f0", "#00ff00", "#9090ff"
+   * @returns {number[]}
+   */
+  static _parseColor(hex) {
+    let c = hex.replace("#", "");
+    if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+    return [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)];
+  }
+
   static _injectCSS() {
     if (WebAudioWaveform.#cssInjected) return;
     WebAudioWaveform.#cssInjected = true;
     const s = document.createElement("style");
     s.textContent = `
-      web-audio-waveform { display: block; }
+      web-audio-waveform { display: block; cursor: pointer; }
       web-audio-waveform canvas { display: block; width: 100%; height: 100%; }
     `;
     document.head.appendChild(s);

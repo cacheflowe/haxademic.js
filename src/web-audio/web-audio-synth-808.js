@@ -17,6 +17,14 @@
  *   bass.trigger(36, stepDurSec, atTime); // C2
  */
 export default class WebAudioSynth808 {
+
+  static PRESETS = {
+    Default: { pitchSweepSemitones: 24, pitchDecay: 0.10, decay: 0.80, distortion: 0,   click: 0.4, subOscMix: 0,   tone: 3000, volume: 1.0 },
+    Boom:    { pitchSweepSemitones: 12, pitchDecay: 0.20, decay: 1.20, distortion: 0,   click: 0.2, subOscMix: 0.5, tone: 2000, volume: 0.9 },
+    Tight:   { pitchSweepSemitones: 24, pitchDecay: 0.06, decay: 0.40, distortion: 0,   click: 0.6, subOscMix: 0,   tone: 4000, volume: 1.0 },
+    Dirty:   { pitchSweepSemitones: 24, pitchDecay: 0.10, decay: 0.70, distortion: 0.5, click: 0.4, subOscMix: 0,   tone: 2500, volume: 0.85 },
+  };
+
   /**
    * @param {AudioContext} ctx
    * @param {object} [options]
@@ -91,6 +99,23 @@ export default class WebAudioSynth808 {
   connect(node) {
     this._out.connect(node.input ?? node);
     return this;
+  }
+
+  /**
+   * Apply a named preset, updating all synth parameters in place.
+   * @param {string} name  Key of WebAudioSynth808.PRESETS
+   */
+  applyPreset(name) {
+    const p = WebAudioSynth808.PRESETS[name];
+    if (!p) return;
+    if (p.pitchSweepSemitones != null) this.pitchSweepSemitones = p.pitchSweepSemitones;
+    if (p.pitchDecay          != null) this.pitchDecay          = p.pitchDecay;
+    if (p.decay               != null) this.decay               = p.decay;
+    if (p.distortion          != null) this.distortion          = p.distortion;
+    if (p.click               != null) this.click               = p.click;
+    if (p.subOscMix           != null) this.subOscMix           = p.subOscMix;
+    if (p.tone                != null) this.tone                = p.tone;
+    if (p.volume              != null) this.volume              = p.volume;
   }
 
   // ---- Helpers ----

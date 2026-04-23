@@ -11,6 +11,79 @@
  *   synth.connect(ctx.destination); // or plain AudioNode
  */
 export default class WebAudioSynthMono {
+  static PRESETS = {
+    Default: {
+      oscType: "sawtooth",
+      attack: 0.02,
+      decay: 0.2,
+      sustain: 0.5,
+      release: 0.4,
+      filterFreq: 600,
+      filterQ: 4,
+      filterEnvOctaves: 2,
+      detune: 0,
+      detune2: 0,
+      subGain: 0,
+      volume: 1,
+    },
+    Bass: {
+      oscType: "sawtooth",
+      attack: 0.01,
+      decay: 0.3,
+      sustain: 0.6,
+      release: 0.3,
+      filterFreq: 400,
+      filterQ: 6,
+      filterEnvOctaves: 3,
+      detune: 0,
+      detune2: 0,
+      subGain: 0.4,
+      volume: 1,
+    },
+    Lead: {
+      oscType: "sawtooth",
+      attack: 0.01,
+      decay: 0.15,
+      sustain: 0.7,
+      release: 0.5,
+      filterFreq: 1200,
+      filterQ: 5,
+      filterEnvOctaves: 2,
+      detune: 5,
+      detune2: 8,
+      subGain: 0,
+      volume: 0.9,
+    },
+    Pad: {
+      oscType: "triangle",
+      attack: 0.4,
+      decay: 0.5,
+      sustain: 0.8,
+      release: 1.5,
+      filterFreq: 800,
+      filterQ: 2,
+      filterEnvOctaves: 1,
+      detune: 0,
+      detune2: 12,
+      subGain: 0,
+      volume: 0.8,
+    },
+    Pluck: {
+      oscType: "square",
+      attack: 0.001,
+      decay: 0.1,
+      sustain: 0.0,
+      release: 0.2,
+      filterFreq: 2000,
+      filterQ: 8,
+      filterEnvOctaves: 3,
+      detune: 0,
+      detune2: 0,
+      subGain: 0,
+      volume: 0.9,
+    },
+  };
+
   constructor(ctx, options = {}) {
     this.ctx = ctx;
     this.oscType = options.oscType ?? "sawtooth";
@@ -27,6 +100,27 @@ export default class WebAudioSynthMono {
 
     this._out = ctx.createGain();
     this._out.gain.value = options.volume ?? 1;
+  }
+
+  /**
+   * Apply a named preset, updating all synth parameters in place.
+   * @param {string} name  Key of WebAudioSynthMono.PRESETS
+   */
+  applyPreset(name) {
+    const p = WebAudioSynthMono.PRESETS[name];
+    if (!p) return;
+    if (p.oscType          != null) this.oscType          = p.oscType;
+    if (p.attack           != null) this.attack           = p.attack;
+    if (p.decay            != null) this.decay            = p.decay;
+    if (p.sustain          != null) this.sustain          = p.sustain;
+    if (p.release          != null) this.release          = p.release;
+    if (p.filterFreq       != null) this.filterFreq       = p.filterFreq;
+    if (p.filterQ          != null) this.filterQ          = p.filterQ;
+    if (p.filterEnvOctaves != null) this.filterEnvOctaves = p.filterEnvOctaves;
+    if (p.detune           != null) this.detune           = p.detune;
+    if (p.detune2          != null) this.detune2          = p.detune2;
+    if (p.subGain          != null) this.subGain          = p.subGain;
+    if (p.volume           != null) this._out.gain.value  = p.volume;
   }
 
   /** AudioNode that downstream effects/nodes should connect to this._out. */

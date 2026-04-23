@@ -1,30 +1,15 @@
 import DemoBase from "./demo--base-element.js";
 import WebAudioSynthMono from "../src/web-audio/web-audio-synth-mono.js";
 import WebAudioSynthPad from "../src/web-audio/web-audio-synth-pad.js";
+import WebAudioSynthFM from "../src/web-audio/web-audio-synth-fm.js";
 import WebAudioPercKick from "../src/web-audio/web-audio-perc-kick.js";
 import WebAudioPercHihat from "../src/web-audio/web-audio-perc-hihat.js";
 import WebAudioFxReverb from "../src/web-audio/web-audio-fx-reverb.js";
 import WebAudioFxDelay from "../src/web-audio/web-audio-fx-delay.js";
+import WebAudioFxUnit from "../src/web-audio/web-audio-fx-unit.js";
+import WebAudioWaveform from "../src/web-audio/web-audio-waveform.js";
 import WebAudioSequencer from "../src/web-audio/web-audio-sequencer.js";
-
-// ---------------------------------------------------------------------------
-// Music theory
-// ---------------------------------------------------------------------------
-
-// Scales ordered dark (0.0) → bright (1.0) for mood mapping
-const SCALES = [
-  ["Phrygian", [0, 1, 3, 5, 7, 8, 10]],
-  ["Blues", [0, 3, 5, 6, 7, 10]],
-  ["Minor", [0, 2, 3, 5, 7, 8, 10]],
-  ["Dorian", [0, 2, 3, 5, 7, 9, 10]],
-  ["Pent Minor", [0, 3, 5, 7, 10]],
-  ["Pent Major", [0, 2, 4, 7, 9]],
-  ["Major", [0, 2, 4, 5, 7, 9, 11]],
-  ["Lydian", [0, 2, 4, 6, 7, 9, 11]],
-];
-
-// Lead oscillator type tracks mood: dark → bright
-const LEAD_OSC_TYPES = ["square", "square", "sawtooth", "sawtooth", "triangle", "triangle", "sine", "sine"];
+import { SCALES_ORDERED as SCALES, buildChordFromScale, LEAD_OSC_TYPES } from "../src/web-audio/web-audio-scales.js";
 
 const ROOT_MIDI = 48; // C3
 
@@ -65,6 +50,8 @@ class WebAudioGenerativeMusic extends DemoBase {
 
     this._beatLeds = [];
     this._sliderRefs = {};
+    this._fxUnit = null;
+    this._waveform = null;
 
     // Patterns stored as MIDI note numbers (null = rest)
     this._bassPattern = [];
@@ -72,6 +59,7 @@ class WebAudioGenerativeMusic extends DemoBase {
     this._padPattern = [];
     this._kickPattern = [];
     this._hihatPattern = [];
+    this._fmChordPattern = []; // array of chord arrays (or null = rest)
 
     this.buildUI();
     this.addCSS();
@@ -184,13 +172,28 @@ class WebAudioGenerativeMusic extends DemoBase {
     return new Array(16).fill(0).map((_, i) => (i % 2 === 0 ? 1 : Math.random() < 0.6 ? 1 : 0));
   }
 
+  _makeFmChordPattern() {
+    const d = this._p.excitement;
+    const m = this._p.mood;
+    // Chord root: 2 octaves above bass root → piano register
+    const chordRoot = ROOT_MIDI + 24;
+    const chord = buildChordFromScale(chordRoot, this._scaleName(), 3 + (m > 0.6 ? 1 : 0));
+    // Sparse 8-step pattern — more hits when excited
+    const pat = [chord, null, null, null, chord, null, null, null];
+    if (d > 0.5 && Math.random() < 0.4) pat[6] = chord;
+    if (d > 0.7 && Math.random() < 0.3) pat[2] = chord;
+    return pat;
+  }
+
   _regenPatterns() {
     this._bassPattern = this._makeBassPattern();
     this._leadPattern = this._makeLeadPattern();
     this._padPattern = this._makePadPattern();
     this._kickPattern = this._makeKickPattern();
     this._hihatPattern = this._makeHihatPattern();
+    this._fmChordPattern = this._makeFmChordPattern();
     this._seq.bpm = this._bpm();
+    if (this._fxUnit) this._fxUnit.bpm = this._bpm();
     this._updateInstrumentCharacter();
     this._updateStatus();
   }
@@ -279,6 +282,27 @@ class WebAudioGenerativeMusic extends DemoBase {
     this._hihat = new WebAudioPercHihat(this._ctx, { filterFreq: 8000, filterQ: 0.8, decay: 0.06, volume: 0.4 });
     this._hihat.connect(this._masterFilter);
 
+    // FM chord synth → reverb → masterFilter; mood drives preset choice
+    this._fmReverb = new WebAudioFxReverb(this._ctx, { decay: 3, wet: 0.4 });
+    this._fmReverb.connect(this._masterFilter);
+    this._fm = new WebAudioSynthFM(this._ctx);
+    this._fm.applyPreset("E.Piano");
+    this._fm.connect(this._fmReverb);
+
+    // WebAudioFxUnit and waveform displays (created in buildUI, initialized here)
+    // FxUnit sits between masterFilter and master gain
+    if (this._fxUnit) {
+      this._fxUnit.init(this._ctx, { title: "Master FX", bpm: this._bpm(), reverbWet: 0, delayMix: 0 });
+      this._masterFilter.disconnect();
+      this._masterFilter.connect(this._fxUnit.input);
+      this._fxUnit.connect(this._master);
+    }
+    if (this._waveform) {
+      const analyser = this._ctx.createAnalyser();
+      this._master.connect(analyser);
+      this._waveform.init(analyser, "#9090ff");
+    }
+
     // ---- Sequencer ----
     // 16 steps at 16th-note resolution; 8th-note instruments respond every 2 steps.
     this._seq = new WebAudioSequencer(this._ctx, { bpm: this._bpm(), steps: 16, subdivision: 16 });
@@ -290,6 +314,12 @@ class WebAudioGenerativeMusic extends DemoBase {
         const step8sec = this._seq.stepDurationSec() * 2;
         this._leadDelay.delayTime = step8sec;
         this._bassDelay.delayTime = step8sec;
+        // Update FM preset based on mood (darker = Pad/Organ, brighter = Bell/Vibes)
+        if (this._fm) {
+          const presetNames = Object.keys(WebAudioSynthFM.PRESETS);
+          const idx = Math.min(presetNames.length - 1, Math.floor(this._p.mood * presetNames.length));
+          this._fm.applyPreset(presetNames[idx]);
+        }
       }
 
       const step16sec = this._seq.stepDurationSec();
@@ -323,6 +353,12 @@ class WebAudioGenerativeMusic extends DemoBase {
         const chord = this._padPattern[s8];
         if (chord != null) {
           this._pad.trigger(chord, step8sec * 3.5, 0.25 + this._p.mood * 0.25, time);
+        }
+
+        // FM chord synth — sparse, higher register sparkle
+        const fmChord = this._fmChordPattern[s8];
+        if (fmChord != null && this._fm) {
+          this._fm.trigger(fmChord, step8sec * 2, time);
         }
 
         // Visual beat sync — delay the DOM update to match the audio event
@@ -495,6 +531,12 @@ class WebAudioGenerativeMusic extends DemoBase {
     this.injectHTML(
       `<div class="gm-hint">Pure Web Audio · Effects auto-follow composition · Auto oscillates sliders</div>`,
     );
+
+    // FX unit and waveform — audio-initialized lazily in _startAudio()
+    this._fxUnit = document.createElement("web-audio-fx-unit");
+    this.appendChild(this._fxUnit);
+    this._waveform = document.createElement("web-audio-waveform");
+    this.appendChild(this._waveform);
   }
 
   _makeSection(title) {

@@ -10,6 +10,13 @@
  *   hihat.trigger(0.6, time);
  */
 export default class WebAudioPercHihat {
+  static PRESETS = {
+    Default: { filterFreq: 8000, filterQ: 0.8, decay: 0.06, volume: 1 },
+    Open: { filterFreq: 7000, filterQ: 0.6, decay: 0.3, volume: 0.8 },
+    Tight: { filterFreq: 9000, filterQ: 1.2, decay: 0.03, volume: 1 },
+    Shaker: { filterFreq: 6000, filterQ: 0.5, decay: 0.12, volume: 0.7 },
+  };
+
   constructor(ctx, options = {}) {
     this.ctx = ctx;
     this.filterFreq = options.filterFreq ?? 8000; // Hz — center of bandpass
@@ -29,6 +36,19 @@ export default class WebAudioPercHihat {
     const data = buf.getChannelData(0);
     for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
     return buf;
+  }
+
+  /**
+   * Apply a named preset, updating all synth parameters in place.
+   * @param {string} name  Key of WebAudioPercHihat.PRESETS
+   */
+  applyPreset(name) {
+    const p = WebAudioPercHihat.PRESETS[name];
+    if (!p) return;
+    if (p.filterFreq != null) this.filterFreq = p.filterFreq;
+    if (p.filterQ    != null) this.filterQ    = p.filterQ;
+    if (p.decay      != null) this.decay      = p.decay;
+    if (p.volume     != null) this._out.gain.value = p.volume;
   }
 
   get input() {

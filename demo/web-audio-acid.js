@@ -7,32 +7,8 @@ import WebAudioBreakPlayer from "../src/web-audio-break-player.js";
 import WebAudioFxUnit from "../src/web-audio/web-audio-fx-unit.js";
 import WebAudioWaveform from "../src/web-audio/web-audio-waveform.js";
 import WebAudioSynthFM from "../src/web-audio/web-audio-synth-fm.js";
-
-const SCALES = {
-  Minor: [0, 2, 3, 5, 7, 8, 10],
-  Major: [0, 2, 4, 5, 7, 9, 11],
-  "Pent Minor": [0, 3, 5, 7, 10],
-  "Pent Major": [0, 2, 4, 7, 9],
-  Dorian: [0, 2, 3, 5, 7, 9, 10],
-  Phrygian: [0, 1, 3, 5, 7, 8, 10],
-  Blues: [0, 3, 5, 6, 7, 10],
-};
-
-// DX-7-inspired FM presets — each key maps to the fmXxx param names in _p
-const FM_PRESETS = {
-  "E.Piano":  { fmCarrierRatio: 1,   fmModRatio: 2,   fmModIndex: 2.5, fmModDecay: 0.20, fmAttack: 0.005, fmDecay: 0.30, fmSustain: 0.15, fmRelease: 0.5,  fmFilterFreq: 8000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.4  },
-  "Bell":     { fmCarrierRatio: 1,   fmModRatio: 3.5, fmModIndex: 5,   fmModDecay: 0.06, fmAttack: 0.001, fmDecay: 1.20, fmSustain: 0.0,  fmRelease: 2.5,  fmFilterFreq: 10000,fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.35 },
-  "Vibes":    { fmCarrierRatio: 1,   fmModRatio: 4,   fmModIndex: 1.5, fmModDecay: 0.08, fmAttack: 0.001, fmDecay: 0.30, fmSustain: 0.0,  fmRelease: 0.6,  fmFilterFreq: 6000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.5  },
-  "Organ":    { fmCarrierRatio: 1,   fmModRatio: 1,   fmModIndex: 1.5, fmModDecay: 1.00, fmAttack: 0.015, fmDecay: 0.08, fmSustain: 0.9,  fmRelease: 0.06, fmFilterFreq: 5000, fmFilterQ: 1,   fmDetune: 5,  fmVolume: 0.35 },
-  "Pad":      { fmCarrierRatio: 1,   fmModRatio: 2,   fmModIndex: 0.8, fmModDecay: 2.00, fmAttack: 0.40,  fmDecay: 0.60, fmSustain: 0.7,  fmRelease: 2.5,  fmFilterFreq: 2500, fmFilterQ: 2,   fmDetune: 8,  fmVolume: 0.3  },
-  "Pluck":    { fmCarrierRatio: 1,   fmModRatio: 7,   fmModIndex: 7,   fmModDecay: 0.04, fmAttack: 0.001, fmDecay: 0.12, fmSustain: 0.0,  fmRelease: 0.15, fmFilterFreq: 5000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.55 },
-  "Brass":    { fmCarrierRatio: 1,   fmModRatio: 1,   fmModIndex: 3,   fmModDecay: 0.15, fmAttack: 0.08,  fmDecay: 0.20, fmSustain: 0.6,  fmRelease: 0.3,  fmFilterFreq: 4000, fmFilterQ: 2,   fmDetune: 0,  fmVolume: 0.4  },
-  "Kalimba":  { fmCarrierRatio: 1,   fmModRatio: 5,   fmModIndex: 2,   fmModDecay: 0.05, fmAttack: 0.001, fmDecay: 0.20, fmSustain: 0.0,  fmRelease: 0.35, fmFilterFreq: 8000, fmFilterQ: 1,   fmDetune: 0,  fmVolume: 0.5  },
-};
-
-const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-
-const STEP_WEIGHTS = [0.95, 0.35, 0.65, 0.25, 0.8, 0.3, 0.6, 0.7, 0.85, 0.35, 0.65, 0.25, 0.75, 0.4, 0.65, 0.55];
+import WebAudioStepSeq from "../src/web-audio/web-audio-step-seq.js";
+import { SCALES, NOTE_NAMES, STEP_WEIGHTS, scaleNoteOptions, scaleNotesInRange, buildChordFromScale } from "../src/web-audio/web-audio-scales.js";
 
 const BREAK_FILES = [
   { label: "— None —", file: "" },
@@ -134,23 +110,15 @@ class WebAudioAcid extends DemoBase {
       fmChordSize: 3,
     };
 
-    this._steps = this._defaultPattern();
-    this._808Steps = this._default808Pattern();
-    this._stepEls = [];
-    this._stepOnBtns = [];
-    this._stepNoteSelects = [];
-    this._stepAccentChks = [];
-    this._808StepEls = [];
-    this._808OnBtns = [];
-    this._808NoteSelects = [];
     this._breakFileSelect = null;
     this._pendingAcidNote = null;
-    // FM chord sequencer state
-    this._chordSteps = this._defaultChordPattern();
-    this._chordStepEls = [];
-    this._chordOnBtns = [];
-    this._chordNoteSelects = [];
+    // Sequencer web components (created in buildUI)
+    this._acidSeq = null;
+    this._808Seq = null;
+    this._chordSeq = null;
     this._fmSliderInputs = {};
+    this._acidSliderInputs = {};
+    this._808SliderInputs = {};
     this._fmPresetSelect = null;
 
     this.buildUI();
@@ -293,8 +261,9 @@ class WebAudioAcid extends DemoBase {
     });
     this._seq.onStep((step, time) => {
       // TB-303
-      const acidStep = this._steps[step];
-      if (acidStep.active) {
+      const acidSteps = this._acidSeq?.steps ?? [];
+      const acidStep = acidSteps[step];
+      if (acidStep?.active) {
         this._acid.trigger(acidStep.note, this._seq.stepDurationSec(), acidStep.accent, time);
       }
       // Manual acid note queued by [B] key / button
@@ -303,8 +272,9 @@ class WebAudioAcid extends DemoBase {
         this._pendingAcidNote = null;
       }
       // 808
-      const bass808Step = this._808Steps[step];
-      if (bass808Step.active) {
+      const seq808Steps = this._808Seq?.steps ?? [];
+      const bass808Step = seq808Steps[step];
+      if (bass808Step?.active) {
         this._808.trigger(bass808Step.note, this._seq.stepDurationSec(), time);
       }
       // Break — manual segment queued by jam buttons takes priority
@@ -324,8 +294,10 @@ class WebAudioAcid extends DemoBase {
         this._zzfxLastStep = this._globalStep;
       }
       // FM Chord — trigger when step is active, using that step's root note
-      if (this._chordSteps[step].active) {
-        const chord = this._buildChordFromScale(this._chordSteps[step].note, this._scaleSelect.value, this._p.fmChordSize);
+      const chordSteps = this._chordSeq?.steps ?? [];
+      const chordStep = chordSteps[step];
+      if (chordStep?.active) {
+        const chord = this._buildChordFromScale(chordStep.note, this._scaleSelect.value, this._p.fmChordSize);
         this._fmSynth.trigger(chord, this._seq.stepDurationSec(), time);
       }
 
@@ -362,23 +334,15 @@ class WebAudioAcid extends DemoBase {
   }
 
   _highlightStep(i) {
-    this._stepEls.forEach((el, idx) => el.classList.toggle("active-step", idx === i));
-    this._808StepEls.forEach((el, idx) => el.classList.toggle("bass808-active-step", idx === i));
-    this._chordStepEls.forEach((el, idx) => el.classList.toggle("chord-fm-active-step", idx === i));
+    this._acidSeq?.setActiveStep(i);
+    this._808Seq?.setActiveStep(i);
+    this._chordSeq?.setActiveStep(i);
   }
 
   // ---- Randomizer ----
 
   _buildScaleNotes(rootMidi, scaleName) {
-    const intervals = SCALES[scaleName];
-    const notes = [];
-    for (let oct = 0; oct < 3; oct++) {
-      for (const interval of intervals) {
-        const midi = rootMidi + oct * 12 + interval;
-        if (midi >= 24 && midi <= 60) notes.push(midi);
-      }
-    }
-    return notes;
+    return scaleNotesInRange(rootMidi, scaleName, 24, 60);
   }
 
   _randomize() {
@@ -391,7 +355,7 @@ class WebAudioAcid extends DemoBase {
     });
 
     let prevNote = root;
-    this._steps = this._steps.map((_, i) => {
+    const newSteps = Array.from({ length: 16 }, (_, i) => {
       const active = Math.random() < STEP_WEIGHTS[i];
       const nearby = pool.filter((n) => Math.abs(n - prevNote) <= 7);
       const src = nearby.length >= 3 ? nearby : pool;
@@ -400,18 +364,8 @@ class WebAudioAcid extends DemoBase {
       const accent = [0, 4, 8, 12].includes(i) && Math.random() < 0.4;
       return { active, note, accent };
     });
-    this._steps[0] = { active: true, note: root, accent: Math.random() < 0.5 };
-    this._refreshSeqUI();
-  }
-
-  _refreshSeqUI() {
-    this._steps.forEach((step, i) => {
-      const btn = this._stepOnBtns[i];
-      btn.className = `acid-step-on${step.active ? " on" : ""}`;
-      btn.textContent = step.active ? "●" : "○";
-      this._stepNoteSelects[i].value = step.note;
-      this._stepAccentChks[i].checked = step.accent;
-    });
+    newSteps[0] = { active: true, note: root, accent: Math.random() < 0.5 };
+    if (this._acidSeq) this._acidSeq.steps = newSteps;
   }
 
   _queueRandomAcidNote() {
@@ -428,15 +382,7 @@ class WebAudioAcid extends DemoBase {
   }
 
   _buildChordFromScale(rootMidi, scaleName, size) {
-    const intervals = SCALES[scaleName];
-    const chordRoot = rootMidi + 24; // 2 octaves above bass root → piano/chord range
-    const chord = [];
-    for (let i = 0; i < size; i++) {
-      const degreeIdx = (i * 2) % intervals.length;
-      const octaveOffset = Math.floor((i * 2) / intervals.length) * 12;
-      chord.push(chordRoot + intervals[degreeIdx] + octaveOffset);
-    }
-    return chord;
+    return buildChordFromScale(rootMidi + 24, scaleName, size);
   }
 
   _triggerJamChord() {
@@ -446,10 +392,61 @@ class WebAudioAcid extends DemoBase {
     this._fmSynth.trigger(chord, this._seq?.stepDurationSec() ?? 0.25, this._ctx.currentTime);
   }
 
-  _applyFmPreset(presetName) {
-    const preset = FM_PRESETS[presetName];
+  _applyAcidPreset(presetName) {
+    const preset = WebAudioSynthAcid.PRESETS[presetName];
     if (!preset) return;
-    Object.entries(preset).forEach(([param, val]) => {
+    const paramMap = {
+      cutoff: "cutoff", resonance: "resonance", envMod: "envMod", decay: "decay",
+      attack: "attack", distortion: "distortion", portamento: "portamento",
+      volume: "volume", oscType: "waveform",
+    };
+    Object.entries(preset).forEach(([key, val]) => {
+      const param = paramMap[key] ?? key;
+      this._p[param] = val;
+      const input = this._acidSliderInputs[param];
+      if (input) {
+        input.value = val;
+        const step = parseFloat(input.step);
+        const span = input.closest(".acid-ctrl")?.querySelector(".acid-ctrl-val");
+        if (span) span.textContent = step < 0.1 ? val.toFixed(3) : step < 1 ? val.toFixed(2) : Math.round(val);
+      }
+    });
+    if (this._acid) this._acid.applyPreset(presetName);
+    // Update waveform buttons
+    if (preset.oscType) {
+      this.el.querySelectorAll(".acid-wave-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.textContent === (preset.oscType === "sawtooth" ? "SAW" : "SQR"));
+      });
+    }
+  }
+
+  _apply808Preset(presetName) {
+    const preset = WebAudioSynth808.PRESETS[presetName];
+    if (!preset) return;
+    const paramMap = {
+      pitchSweepSemitones: "bass808PitchSweep", pitchDecay: "bass808PitchDecay",
+      decay: "bass808Decay", distortion: "bass808Distortion", click: "bass808Click",
+      subOscMix: "bass808SubMix", tone: "bass808Tone", volume: "bass808Volume",
+    };
+    Object.entries(preset).forEach(([key, val]) => {
+      const param = paramMap[key] ?? key;
+      this._p[param] = val;
+      const input = this._808SliderInputs[param];
+      if (input) {
+        input.value = val;
+        const step = parseFloat(input.step);
+        const span = input.closest(".acid-ctrl")?.querySelector(".acid-ctrl-val");
+        if (span) span.textContent = step < 0.1 ? val.toFixed(3) : step < 1 ? val.toFixed(2) : Math.round(val);
+      }
+    });
+    if (this._808) this._808.applyPreset(presetName);
+  }
+
+  _applyFmPreset(presetName) {
+    const preset = WebAudioSynthFM.PRESETS[presetName];
+    if (!preset) return;
+    Object.entries(preset).forEach(([key, val]) => {
+      const param = WebAudioSynthFM.PARAM_KEY_MAP[key] ?? key;
       this._p[param] = val;
       const input = this._fmSliderInputs[param];
       if (input) {
@@ -459,35 +456,17 @@ class WebAudioAcid extends DemoBase {
         if (span) span.textContent = step < 0.1 ? val.toFixed(3) : step < 1 ? val.toFixed(2) : Math.round(val);
       }
     });
-    if (this._fmSynth) {
-      const s = this._fmSynth;
-      if (preset.fmCarrierRatio != null) s.carrierRatio = preset.fmCarrierRatio;
-      if (preset.fmModRatio     != null) s.modRatio     = preset.fmModRatio;
-      if (preset.fmModIndex     != null) s.modIndex     = preset.fmModIndex;
-      if (preset.fmModDecay     != null) s.modDecay     = preset.fmModDecay;
-      if (preset.fmAttack       != null) s.attack       = preset.fmAttack;
-      if (preset.fmDecay        != null) s.decay        = preset.fmDecay;
-      if (preset.fmSustain      != null) s.sustain      = preset.fmSustain;
-      if (preset.fmRelease      != null) s.release      = preset.fmRelease;
-      if (preset.fmFilterFreq   != null) s.filterFreq   = preset.fmFilterFreq;
-      if (preset.fmFilterQ      != null) s.filterQ      = preset.fmFilterQ;
-      if (preset.fmDetune       != null) s.detune       = preset.fmDetune;
-      if (preset.fmVolume       != null) s.volume       = preset.fmVolume;
-    }
+    if (this._fmSynth) this._fmSynth.applyPreset(presetName);
   }
 
   _refreshChordSeqUI() {
-    this._chordSteps.forEach((step, i) => {
-      const btn = this._chordOnBtns[i];
-      btn.className = `chord-fm-step-on${step.active ? " on" : ""}`;
-      btn.textContent = step.active ? "●" : "○";
-      if (this._chordNoteSelects[i]) this._chordNoteSelects[i].value = step.note;
-    });
+    // No-op — _chordSeq component manages its own display.
+    // Retained for compatibility with callers; use _chordSeq.steps setter directly.
   }
 
   _randomizeFm() {
     // Random preset
-    const presetNames = Object.keys(FM_PRESETS);
+    const presetNames = Object.keys(WebAudioSynthFM.PRESETS);
     const presetName = presetNames[Math.floor(Math.random() * presetNames.length)];
     this._applyFmPreset(presetName);
     if (this._fmPresetSelect) this._fmPresetSelect.value = presetName;
@@ -498,11 +477,11 @@ class WebAudioAcid extends DemoBase {
     const numActive = 1 + Math.floor(Math.random() * 3);
     const activeSet = new Set([0]); // always keep beat 1
     while (activeSet.size < numActive) activeSet.add(Math.floor(Math.random() * 16));
-    this._chordSteps = this._chordSteps.map((_, i) => ({
+    const newChordSteps = Array.from({ length: 16 }, (_, i) => ({
       active: activeSet.has(i),
       note: scaleNotes[Math.floor(Math.random() * scaleNotes.length)],
     }));
-    this._refreshChordSeqUI();
+    if (this._chordSeq) this._chordSeq.steps = newChordSteps;
   }
 
   _setupKeyboardJam() {
@@ -711,63 +690,46 @@ class WebAudioAcid extends DemoBase {
     bass808Row.appendChild(
       Object.assign(document.createElement("div"), { className: "acid-section-title", textContent: "808 Bass" }),
     );
-    bass808Row.appendChild(this._makeSlider("Decay", "bass808Decay", 0.1, 3, 0.01, this._p.bass808Decay));
-    bass808Row.appendChild(this._makeSlider("Pitch Sweep", "bass808PitchSweep", 0, 36, 1, this._p.bass808PitchSweep));
-    bass808Row.appendChild(
-      this._makeSlider("Pitch Decay", "bass808PitchDecay", 0.01, 1, 0.01, this._p.bass808PitchDecay),
-    );
-    bass808Row.appendChild(this._makeSlider("Distortion", "bass808Distortion", 0, 1, 0.01, this._p.bass808Distortion));
-    bass808Row.appendChild(this._makeSlider("Vol", "bass808Volume", 0, 1, 0.01, this._p.bass808Volume));
-    bass808Row.appendChild(this._makeSlider("Click", "bass808Click", 0, 1, 0.01, this._p.bass808Click));
-    bass808Row.appendChild(this._makeSlider("Sub Mix", "bass808SubMix", 0, 1, 0.01, this._p.bass808SubMix));
-    bass808Row.appendChild(this._makeSlider("Tone", "bass808Tone", 50, 8000, 1, this._p.bass808Tone));
 
-    const seq808 = document.createElement("div");
-    seq808.className = "bass808-seq";
-    const note808Opts = this._scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 48);
-    this._808Steps.forEach((step, i) => {
-      const el = document.createElement("div");
-      el.className = "bass808-step";
+    // 808 preset select
+    this._808PresetSelect = document.createElement("select");
+    this._808PresetSelect.className = "acid-select";
+    Object.keys(WebAudioSynth808.PRESETS).forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      this._808PresetSelect.appendChild(opt);
+    });
+    this._808PresetSelect.addEventListener("change", () => this._apply808Preset(this._808PresetSelect.value));
+    bass808Row.appendChild(this._808PresetSelect);
 
-      const num808 = document.createElement("div");
-      num808.className = "acid-step-num";
-      num808.textContent = i + 1;
-      el.appendChild(num808);
+    // Helper: append a slider and store its input for preset updates
+    const bass808Slider = (label, param, min, max, step) => {
+      const wrap = this._makeSlider(label, param, min, max, step, this._p[param]);
+      this._808SliderInputs[param] = wrap.querySelector("input[type=range]");
+      bass808Row.appendChild(wrap);
+    };
+    bass808Slider("Decay", "bass808Decay", 0.1, 3, 0.01);
+    bass808Slider("Pitch Sweep", "bass808PitchSweep", 0, 36, 1);
+    bass808Slider("Pitch Decay", "bass808PitchDecay", 0.01, 1, 0.01);
+    bass808Slider("Distortion", "bass808Distortion", 0, 1, 0.01);
+    bass808Slider("Vol", "bass808Volume", 0, 1, 0.01);
+    bass808Slider("Click", "bass808Click", 0, 1, 0.01);
+    bass808Slider("Sub Mix", "bass808SubMix", 0, 1, 0.01);
+    bass808Slider("Tone", "bass808Tone", 50, 8000, 1);
 
-      const onBtn808 = document.createElement("button");
-      onBtn808.className = `bass808-step-on${step.active ? " on" : ""}`;
-      onBtn808.textContent = step.active ? "●" : "○";
-      onBtn808.addEventListener("click", () => {
-        this._808Steps[i].active = !this._808Steps[i].active;
-        onBtn808.className = `bass808-step-on${this._808Steps[i].active ? " on" : ""}`;
-        onBtn808.textContent = this._808Steps[i].active ? "●" : "○";
-      });
-      el.appendChild(onBtn808);
-      this._808OnBtns.push(onBtn808);
-
-      const noteSelect808 = document.createElement("select");
-      noteSelect808.className = "acid-step-note";
-      note808Opts.forEach(([name, midi]) => {
-        const opt = document.createElement("option");
-        opt.value = midi;
-        opt.textContent = name;
-        if (midi === step.note) opt.selected = true;
-        noteSelect808.appendChild(opt);
-      });
-      noteSelect808.addEventListener("change", () => {
-        this._808Steps[i].note = parseInt(noteSelect808.value);
-      });
-      el.appendChild(noteSelect808);
-      this._808NoteSelects.push(noteSelect808);
-
-      seq808.appendChild(el);
-      this._808StepEls.push(el);
+    this._808Seq = document.createElement("web-audio-step-seq");
+    const note808Opts = scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 48);
+    this._808Seq.init({
+      steps: this._default808Pattern(),
+      noteOptions: note808Opts,
+      color: "#fa0",
     });
 
     this._808Fx = document.createElement("web-audio-fx-unit");
     this._808Waveform = document.createElement("web-audio-waveform");
     g808.appendChild(bass808Row);
-    g808.appendChild(seq808);
+    g808.appendChild(this._808Seq);
     g808.appendChild(this._808Fx);
     g808.appendChild(this._808Waveform);
 
@@ -816,53 +778,19 @@ class WebAudioAcid extends DemoBase {
     fmRow.appendChild(chordSizeWrap);
 
     // FM chord step sequencer (on/off + root note — chord built from note + global scale)
-    const seqFm = document.createElement("div");
-    seqFm.className = "chord-fm-seq";
-    const chordNoteOpts = this._scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 48);
-    this._chordSteps.forEach((step, i) => {
-      const el = document.createElement("div");
-      el.className = "chord-fm-step";
-
-      const num = document.createElement("div");
-      num.className = "acid-step-num";
-      num.textContent = i + 1;
-      el.appendChild(num);
-
-      const onBtn = document.createElement("button");
-      onBtn.className = `chord-fm-step-on${step.active ? " on" : ""}`;
-      onBtn.textContent = step.active ? "●" : "○";
-      onBtn.addEventListener("click", () => {
-        this._chordSteps[i].active = !this._chordSteps[i].active;
-        onBtn.className = `chord-fm-step-on${this._chordSteps[i].active ? " on" : ""}`;
-        onBtn.textContent = this._chordSteps[i].active ? "●" : "○";
-      });
-      el.appendChild(onBtn);
-      this._chordOnBtns.push(onBtn);
-
-      const noteSelect = document.createElement("select");
-      noteSelect.className = "acid-step-note";
-      chordNoteOpts.forEach(([name, midi]) => {
-        const opt = document.createElement("option");
-        opt.value = midi;
-        opt.textContent = name;
-        if (midi === step.note) opt.selected = true;
-        noteSelect.appendChild(opt);
-      });
-      noteSelect.addEventListener("change", () => {
-        this._chordSteps[i].note = parseInt(noteSelect.value);
-      });
-      el.appendChild(noteSelect);
-      this._chordNoteSelects.push(noteSelect);
-
-      seqFm.appendChild(el);
-      this._chordStepEls.push(el);
+    this._chordSeq = document.createElement("web-audio-step-seq");
+    const chordNoteOpts = scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 48);
+    this._chordSeq.init({
+      steps: this._defaultChordPattern(),
+      noteOptions: chordNoteOpts,
+      color: "#4af",
     });
 
     const fmJamRow = document.createElement("div");
     fmJamRow.className = "acid-rand-row";
 
     // Preset select
-    const presetNames = Object.keys(FM_PRESETS);
+    const presetNames = Object.keys(WebAudioSynthFM.PRESETS);
     this._fmPresetSelect = document.createElement("select");
     this._fmPresetSelect.className = "acid-select";
     presetNames.forEach((name) => {
@@ -905,7 +833,7 @@ class WebAudioAcid extends DemoBase {
     this._fmFx = document.createElement("web-audio-fx-unit");
     this._fmWaveform = document.createElement("web-audio-waveform");
     fmGroup.appendChild(fmRow);
-    fmGroup.appendChild(seqFm);
+    fmGroup.appendChild(this._chordSeq);
     fmGroup.appendChild(fmJamRow);
     fmGroup.appendChild(this._fmFx);
     fmGroup.appendChild(this._fmWaveform);
@@ -975,20 +903,39 @@ class WebAudioAcid extends DemoBase {
     });
     controls.appendChild(waveRow);
 
-    controls.appendChild(this._makeSlider("Cutoff", "cutoff", 50, 10000, 1, this._p.cutoff));
-    controls.appendChild(this._makeSlider("Resonance", "resonance", 0.1, 30, 0.1, this._p.resonance));
-    controls.appendChild(this._makeSlider("Env Mod", "envMod", 0, 1, 0.01, this._p.envMod));
-    controls.appendChild(this._makeSlider("Decay", "decay", 0.01, 2, 0.01, this._p.decay));
-    controls.appendChild(this._makeSlider("Attack", "attack", 0.001, 0.3, 0.001, this._p.attack));
-    controls.appendChild(this._makeSlider("Distortion", "distortion", 0, 1, 0.01, this._p.distortion));
-    controls.appendChild(this._makeSlider("Portamento", "portamento", 0, 0.5, 0.001, this._p.portamento));
-    controls.appendChild(this._makeSlider("Vol", "volume", 0, 1, 0.01, this._p.volume));
+    // Helper: append a slider and store its input for preset updates
+    const acidSlider = (label, param, min, max, step) => {
+      const wrap = this._makeSlider(label, param, min, max, step, this._p[param]);
+      this._acidSliderInputs[param] = wrap.querySelector("input[type=range]");
+      controls.appendChild(wrap);
+    };
+    acidSlider("Cutoff", "cutoff", 50, 10000, 1);
+    acidSlider("Resonance", "resonance", 0.1, 30, 0.1);
+    acidSlider("Env Mod", "envMod", 0, 1, 0.01);
+    acidSlider("Decay", "decay", 0.01, 2, 0.01);
+    acidSlider("Attack", "attack", 0.001, 0.3, 0.001);
+    acidSlider("Distortion", "distortion", 0, 1, 0.01);
+    acidSlider("Portamento", "portamento", 0, 0.5, 0.001);
+    acidSlider("Vol", "volume", 0, 1, 0.01);
 
     this._acidFx = document.createElement("web-audio-fx-unit");
 
     // Randomizer
     const randRow = document.createElement("div");
     randRow.className = "acid-rand-row";
+
+    // 303 preset select
+    this._acidPresetSelect = document.createElement("select");
+    this._acidPresetSelect.className = "acid-select";
+    Object.keys(WebAudioSynthAcid.PRESETS).forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      this._acidPresetSelect.appendChild(opt);
+    });
+    this._acidPresetSelect.addEventListener("change", () => this._applyAcidPreset(this._acidPresetSelect.value));
+    randRow.appendChild(this._acidPresetSelect);
+
     const randBtn = document.createElement("button");
     randBtn.textContent = "⚄ Randomize";
     randBtn.className = "acid-rand-btn";
@@ -1001,123 +948,29 @@ class WebAudioAcid extends DemoBase {
     randRow.appendChild(noteBtn);
 
     // 303 step sequencer
-    const seq = document.createElement("div");
-    seq.className = "acid-seq";
-    const noteOpts = this._scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 60);
-    this._steps.forEach((step, i) => {
-      const el = document.createElement("div");
-      el.className = "acid-step";
-
-      const num = document.createElement("div");
-      num.className = "acid-step-num";
-      num.textContent = i + 1;
-      el.appendChild(num);
-
-      const onBtn = document.createElement("button");
-      onBtn.className = `acid-step-on${step.active ? " on" : ""}`;
-      onBtn.textContent = step.active ? "●" : "○";
-      onBtn.addEventListener("click", () => {
-        this._steps[i].active = !this._steps[i].active;
-        onBtn.className = `acid-step-on${this._steps[i].active ? " on" : ""}`;
-        onBtn.textContent = this._steps[i].active ? "●" : "○";
-      });
-      el.appendChild(onBtn);
-      this._stepOnBtns.push(onBtn);
-
-      const noteSelect = document.createElement("select");
-      noteSelect.className = "acid-step-note";
-      noteOpts.forEach(([name, midi]) => {
-        const opt = document.createElement("option");
-        opt.value = midi;
-        opt.textContent = name;
-        if (midi === step.note) opt.selected = true;
-        noteSelect.appendChild(opt);
-      });
-      noteSelect.addEventListener("change", () => {
-        this._steps[i].note = parseInt(noteSelect.value);
-      });
-      el.appendChild(noteSelect);
-      this._stepNoteSelects.push(noteSelect);
-
-      const accentLabel = document.createElement("label");
-      accentLabel.className = "acid-step-accent";
-      accentLabel.title = "Accent — louder with stronger filter sweep";
-      const accentChk = document.createElement("input");
-      accentChk.type = "checkbox";
-      accentChk.checked = step.accent;
-      accentChk.addEventListener("change", () => {
-        this._steps[i].accent = accentChk.checked;
-      });
-      accentLabel.appendChild(accentChk);
-      accentLabel.appendChild(document.createTextNode("Acc"));
-      el.appendChild(accentLabel);
-      this._stepAccentChks.push(accentChk);
-
-      seq.appendChild(el);
-      this._stepEls.push(el);
+    this._acidSeq = document.createElement("web-audio-step-seq");
+    const acidNoteOpts = scaleNoteOptions(parseInt(this._rootSelect.value), this._scaleSelect.value, 24, 60);
+    this._acidSeq.init({
+      steps: this._defaultPattern(),
+      noteOptions: acidNoteOpts,
+      accent: true,
+      color: "#0f0",
     });
 
     this._acidWaveform = document.createElement("web-audio-waveform");
     acidGroup.appendChild(controls);
     acidGroup.appendChild(this._acidFx);
     acidGroup.appendChild(randRow);
-    acidGroup.appendChild(seq);
+    acidGroup.appendChild(this._acidSeq);
     acidGroup.appendChild(this._acidWaveform);
-  }
-
-  _noteOptions() {
-    const opts = [];
-    for (let midi = 24; midi <= 60; midi++) {
-      opts.push([`${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`, midi]);
-    }
-    return opts;
-  }
-
-  _bass808NoteOptions() {
-    const opts = [];
-    for (let midi = 24; midi <= 48; midi++) {
-      opts.push([`${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`, midi]);
-    }
-    return opts;
-  }
-
-  _scaleNoteOptions(rootMidi, scaleName, minMidi, maxMidi) {
-    const intervals = new Set(SCALES[scaleName]);
-    const opts = [];
-    for (let midi = minMidi; midi <= maxMidi; midi++) {
-      if (intervals.has(((midi - rootMidi) % 12 + 12) % 12)) {
-        opts.push([`${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`, midi]);
-      }
-    }
-    return opts;
   }
 
   _updateAllNoteSelects() {
     const root = parseInt(this._rootSelect.value);
     const scale = this._scaleSelect.value;
-    const acidOpts  = this._scaleNoteOptions(root, scale, 24, 60);
-    const bassOpts  = this._scaleNoteOptions(root, scale, 24, 48);
-    const chordOpts = this._scaleNoteOptions(root, scale, 24, 48);
-
-    const repopulate = (select, opts, stepArr, idx) => {
-      const prev = parseInt(select.value);
-      select.innerHTML = "";
-      opts.forEach(([name, midi]) => {
-        const opt = document.createElement("option");
-        opt.value = midi;
-        opt.textContent = name;
-        select.appendChild(opt);
-      });
-      // Snap to nearest available note
-      const vals = opts.map(([, m]) => m);
-      const nearest = vals.reduce((a, b) => (Math.abs(b - prev) < Math.abs(a - prev) ? b : a), vals[0]);
-      select.value = nearest;
-      if (stepArr) stepArr[idx].note = nearest;
-    };
-
-    this._stepNoteSelects.forEach((sel, i) => repopulate(sel, acidOpts,  this._steps,       i));
-    this._808NoteSelects.forEach( (sel, i) => repopulate(sel, bassOpts,  this._808Steps,    i));
-    this._chordNoteSelects.forEach((sel, i) => repopulate(sel, chordOpts, this._chordSteps, i));
+    this._acidSeq?.setNoteOptions(scaleNoteOptions(root, scale, 24, 60));
+    this._808Seq?.setNoteOptions(scaleNoteOptions(root, scale, 24, 48));
+    this._chordSeq?.setNoteOptions(scaleNoteOptions(root, scale, 24, 48));
   }
 
   _makeSlider(label, param, min, max, step, value) {

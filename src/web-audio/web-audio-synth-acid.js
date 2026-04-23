@@ -16,6 +16,15 @@
  *   acid.reset(); // clear portamento tracking (call on stop/restart)
  */
 export default class WebAudioSynthAcid {
+
+  static PRESETS = {
+    Default: { cutoff: 600,  resonance: 18, envMod: 0.6, decay: 0.25, attack: 0.005, distortion: 0,   portamento: 0,    oscType: "sawtooth", volume: 1.0 },
+    Squelch: { cutoff: 400,  resonance: 24, envMod: 0.9, decay: 0.18, attack: 0.003, distortion: 0,   portamento: 0,    oscType: "sawtooth", volume: 0.9 },
+    Growl:   { cutoff: 300,  resonance: 16, envMod: 0.7, decay: 0.35, attack: 0.008, distortion: 0.4, portamento: 0,    oscType: "sawtooth", volume: 0.85 },
+    Smooth:  { cutoff: 800,  resonance: 8,  envMod: 0.4, decay: 0.40, attack: 0.015, distortion: 0,   portamento: 0.05, oscType: "sawtooth", volume: 1.0 },
+    Square:  { cutoff: 500,  resonance: 20, envMod: 0.75,decay: 0.20, attack: 0.004, distortion: 0,   portamento: 0,    oscType: "square",   volume: 0.8 },
+  };
+
   /**
    * @param {AudioContext} ctx
    * @param {object} [options]
@@ -92,6 +101,24 @@ export default class WebAudioSynthAcid {
       curve[i] = k > 0 ? ((Math.PI + k) * x) / (Math.PI + k * Math.abs(x)) : x;
     }
     return curve;
+  }
+
+  /**
+   * Apply a named preset, updating all synth parameters in place.
+   * @param {string} name  Key of WebAudioSynthAcid.PRESETS
+   */
+  applyPreset(name) {
+    const p = WebAudioSynthAcid.PRESETS[name];
+    if (!p) return;
+    if (p.cutoff     != null) this.cutoff     = p.cutoff;
+    if (p.resonance  != null) this.resonance  = p.resonance;
+    if (p.envMod     != null) this.envMod     = p.envMod;
+    if (p.decay      != null) this.decay      = p.decay;
+    if (p.attack     != null) this.attack     = p.attack;
+    if (p.distortion != null) this.distortion = p.distortion;
+    if (p.portamento != null) this.portamento = p.portamento;
+    if (p.oscType    != null) this.oscType    = p.oscType;
+    if (p.volume     != null) this.volume     = p.volume;
   }
 
   /** Clear portamento memory — call when stopping/restarting the sequencer. */
