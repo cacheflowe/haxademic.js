@@ -1,3 +1,6 @@
+import "./web-audio-slider.js";
+import { injectControlsCSS } from "./web-audio-slider.js";
+
 /**
  * WebAudioPercKick — 808-style kick via sine oscillator with pitch sweep.
  *
@@ -18,15 +21,10 @@ export default class WebAudioPercKick {
     Snap: { startFreq: 300, endFreq: 60, sweepTime: 0.03, decay: 0.18, volume: 1 },
   };
 
-  constructor(ctx, options = {}) {
+  constructor(ctx, preset = "Default") {
     this.ctx = ctx;
-    this.startFreq = options.startFreq ?? 150; // Hz — the initial click transient
-    this.endFreq = options.endFreq ?? 40; // Hz — low body tone
-    this.sweepTime = options.sweepTime ?? 0.08; // seconds for pitch to fall
-    this.decay = options.decay ?? 0.35; // total amplitude decay time
-
     this._out = ctx.createGain();
-    this._out.gain.value = options.volume ?? 1;
+    this.applyPreset(preset);
   }
 
   /**
@@ -40,8 +38,11 @@ export default class WebAudioPercKick {
     if (p.endFreq   != null) this.endFreq   = p.endFreq;
     if (p.sweepTime != null) this.sweepTime = p.sweepTime;
     if (p.decay     != null) this.decay     = p.decay;
-    if (p.volume    != null) this._out.gain.value = p.volume;
+    if (p.volume    != null) this.volume    = p.volume;
   }
+
+  get volume() { return this._out.gain.value; }
+  set volume(v) { this._out.gain.value = v; }
 
   get input() {
     return this._out;
@@ -79,3 +80,105 @@ export default class WebAudioPercKick {
     return this;
   }
 }
+
+// ---- Controls companion component ----
+
+export class WebAudioPercKickControls extends HTMLElement {
+
+  static SLIDER_DEFS = [
+    { param: "startFreq", label: "Start Freq", min: 50,   max: 500,  step: 1 },
+    { param: "endFreq",   label: "End Freq",   min: 20,   max: 200,  step: 1 },
+    { param: "sweepTime", label: "Sweep",      min: 0.01, max: 0.5,  step: 0.01 },
+    { param: "decay",     label: "Decay",      min: 0.05, max: 1.5,  step: 0.01 },
+    { param: "volume",    label: "Vol",        min: 0,    max: 1,    step: 0.01 },
+  ];
+
+  constructor() {
+    super();
+    this._instrument = null;
+    this._sliders = {};
+    this._presetSelect = null;
+    this._fxUnit = null;
+    this._out = null;
+  }
+
+  bind(instrument, ctx, options = {}) {
+    this._instrument = instrument;
+    const color = options.color || "#f44";
+    this.innerHTML = "";
+    injectControlsCSS();
+    this.style.setProperty("--slider-accent", color);
+    this.style.setProperty("--fx-accent", color);
+
+    const title = document.createElement("div");
+    title.className = "wac-title";
+    title.textContent = options.title || "Kick";
+    this.appendChild(title);
+
+    const controls = document.createElement("div");
+    controls.className = "wac-controls";
+    this.appendChild(controls);
+
+    this._presetSelect = document.createElement("select");
+    this._presetSelect.className = "wac-select";
+    Object.keys(WebAudioPercKick.PRESETS).forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name.replace(/_/g, " ");
+      this._presetSelect.appendChild(opt);
+    });
+    this._presetSelect.addEventListener("change", () => this.applyPreset(this._presetSelect.value));
+    controls.appendChild(this._presetSelect);
+
+    for (const def of WebAudioPercKickControls.SLIDER_DEFS) {
+      const slider = document.createElement("web-audio-slider");
+      slider.setAttribute("param", def.param);
+      slider.setAttribute("label", def.label);
+      slider.setAttribute("min", def.min);
+      slider.setAttribute("max", def.max);
+      slider.setAttribute("step", def.step);
+      if (def.scale) slider.setAttribute("scale", def.scale);
+      slider.value = instrument[def.param];
+      controls.appendChild(slider);
+      this._sliders[def.param] = slider;
+    }
+
+    this.addEventListener("slider-input", (e) => {
+      if (!this._instrument) return;
+      this._instrument[e.detail.param] = e.detail.value;
+    });
+
+    this._fxUnit = document.createElement("web-audio-fx-unit");
+    this.appendChild(this._fxUnit);
+    this._fxUnit.init(ctx, { title: "Kick FX", bpm: options.fx?.bpm ?? 120, ...options.fx });
+
+    const waveform = document.createElement("web-audio-waveform");
+    this.appendChild(waveform);
+
+    const analyser = ctx.createAnalyser();
+    instrument.connect(analyser);
+    analyser.connect(this._fxUnit.input);
+    this._out = ctx.createGain();
+    this._fxUnit.connect(this._out);
+    waveform.init(analyser, color);
+  }
+
+  applyPreset(name) {
+    if (!this._instrument) return;
+    this._instrument.applyPreset(name);
+    for (const def of WebAudioPercKickControls.SLIDER_DEFS) {
+      const slider = this._sliders[def.param];
+      if (slider) slider.value = this._instrument[def.param];
+    }
+    if (this._presetSelect) this._presetSelect.value = name;
+  }
+
+  set bpm(v) { if (this._fxUnit) this._fxUnit.bpm = v; }
+
+  connect(node) {
+    if (this._out) this._out.connect(node.input ?? node);
+    return this;
+  }
+}
+
+customElements.define("web-audio-perc-kick-controls", WebAudioPercKickControls);

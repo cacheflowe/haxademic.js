@@ -1,12 +1,15 @@
 /**
- * WebAudioFxUnit — reusable effects web component (reverb + tempo-synced delay).
+ * WebAudioFxUnit — reusable effects web component (reverb + delay + filter).
  *
- * Each instrument gets its own fx unit. Color theme is set via the CSS custom
- * property `--fx-accent` on a parent element (defaults to green).
+ * Composed from standalone FX classes:
+ *   - WebAudioFxReverb  (convolution reverb with wet/dry)
+ *   - WebAudioFxDelay   (dub-style delay with BPM sync, feedback filter, LFO)
+ *   - WebAudioFxFilter  (combined HP + LP with shared Q)
  *
  * Audio chain:
- *   input → reverb (dry=1 always, wet adjustable) → output
- *   input → delay → feedback loop → delay wet gain → output
+ *   in → reverb (dry=1, wet adjustable) → pre_out
+ *   in → delay (wet/dry internal)       → pre_out
+ *   pre_out → filter (HP → LP)          → out
  *
  * Usage:
  *   const fx = document.createElement("web-audio-fx-unit");
@@ -18,15 +21,9 @@
  */
 
 import WebAudioFxReverb from "./web-audio-fx-reverb.js";
-
-const DELAY_INTERVALS = [
-  { label: "1/16", beats: 0.25 },
-  { label: "1/8", beats: 0.5 },
-  { label: "1/8·", beats: 0.75 },
-  { label: "1/4", beats: 1 },
-  { label: "1/4·", beats: 1.5 },
-  { label: "1/2", beats: 2 },
-];
+import WebAudioFxDelay from "./web-audio-fx-delay.js";
+import WebAudioFxFilter from "./web-audio-fx-filter.js";
+import "./web-audio-slider.js";
 
 export default class WebAudioFxUnit extends HTMLElement {
   static #cssInjected = false;
@@ -37,11 +34,8 @@ export default class WebAudioFxUnit extends HTMLElement {
     this._in = null;
     this._out = null;
     this._reverb = null;
-    this._delayNode = null;
-    this._delayFeedback = null;
-    this._delayWet = null;
-    this._bpm = 120;
-    this._delayInterval = 0.75;
+    this._delay = null;
+    this._filter = null;
   }
 
   /**
@@ -54,36 +48,47 @@ export default class WebAudioFxUnit extends HTMLElement {
    * @param {number}  [options.delayInterval=0.75]   beat multiplier
    * @param {number}  [options.delayFeedback=0.35]
    * @param {number}  [options.delayMix=0]
+   * @param {number}  [options.delayFilterFreq=12000]
+   * @param {number}  [options.lpFreq=20000]
+   * @param {number}  [options.hpFreq=20]
+   * @param {number}  [options.filterQ=0.7]
    */
   init(ctx, options = {}) {
     this._ctx = ctx;
-    this._bpm = options.bpm ?? 120;
-    this._delayInterval = options.delayInterval ?? 0.75;
 
     // ---- Audio chain ----
     this._in = ctx.createGain();
+    const preOut = ctx.createGain();
     this._out = ctx.createGain();
 
-    // Reverb — WebAudioFxReverb provides dry=1 internally
+    // Reverb — dry=1 always, wet adjustable
     this._reverb = new WebAudioFxReverb(ctx, {
       decay: options.reverbDecay ?? 2.5,
       wet: options.reverbWet ?? 0,
     });
     this._in.connect(this._reverb.input);
-    this._reverb.connect(this._out);
+    this._reverb.connect(preOut);
 
-    // Delay send
-    this._delayNode = ctx.createDelay(2.0);
-    this._delayFeedback = ctx.createGain();
-    this._delayWet = ctx.createGain();
-    this._delayNode.delayTime.value = this._computeDelayTime();
-    this._delayFeedback.gain.value = options.delayFeedback ?? 0.35;
-    this._delayWet.gain.value = options.delayMix ?? 0;
-    this._delayNode.connect(this._delayFeedback);
-    this._delayFeedback.connect(this._delayNode);
-    this._delayNode.connect(this._delayWet);
-    this._delayWet.connect(this._out);
-    this._in.connect(this._delayNode);
+    // Delay — dub-style with feedback filter + LFO
+    this._delay = new WebAudioFxDelay(ctx, {
+      interval: options.delayInterval ?? 0.75,
+      bpm: options.bpm ?? 120,
+      feedback: options.delayFeedback ?? 0.35,
+      wet: options.delayMix ?? 0,
+      filterFreq: options.delayFilterFreq ?? 12000,
+      modulation: 0,
+    });
+    this._in.connect(this._delay.input);
+    this._delay.connect(preOut);
+
+    // Filter — HP → LP on master output
+    this._filter = new WebAudioFxFilter(ctx, {
+      lpFreq: options.lpFreq ?? 20000,
+      hpFreq: options.hpFreq ?? 20,
+      q: options.filterQ ?? 0.7,
+    });
+    preOut.connect(this._filter.input);
+    this._filter.connect(this._out);
 
     // ---- UI ----
     WebAudioFxUnit._injectCSS();
@@ -93,12 +98,7 @@ export default class WebAudioFxUnit extends HTMLElement {
   // ---- Properties ----
 
   set bpm(v) {
-    this._bpm = v;
-    if (this._delayNode) this._delayNode.delayTime.value = this._computeDelayTime();
-  }
-
-  _computeDelayTime() {
-    return (60 / this._bpm) * this._delayInterval;
+    if (this._delay) this._delay.bpm = v;
   }
 
   // ---- Routing ----
@@ -112,6 +112,71 @@ export default class WebAudioFxUnit extends HTMLElement {
     return this;
   }
 
+  // ---- Serialization ----
+
+  toJSON() {
+    return {
+      reverbWet: this._reverb?.wet ?? 0,
+      delayInterval: this._delay?.interval ?? 0.75,
+      delayFeedback: this._delay?.feedback ?? 0.35,
+      delayMix: this._delay?.wet ?? 0,
+      delayFilterFreq: this._delay?.filterFreq ?? 12000,
+      delayModulation: this._delay?.modulation ?? 0,
+      lpFreq: this._filter?.lpFreq ?? 20000,
+      hpFreq: this._filter?.hpFreq ?? 20,
+      filterQ: this._filter?.q ?? 0.7,
+    };
+  }
+
+  fromJSON(obj) {
+    if (!obj) return;
+    if (obj.reverbWet != null && this._reverb) {
+      this._reverb.wet = obj.reverbWet;
+      const s = this.querySelector('web-audio-slider[param="reverbWet"]');
+      if (s) s.value = obj.reverbWet;
+    }
+    if (obj.delayInterval != null && this._delay) {
+      this._delay.interval = obj.delayInterval;
+      const sel = this.querySelector('.fx-select');
+      if (sel) sel.value = obj.delayInterval;
+    }
+    if (obj.delayFeedback != null && this._delay) {
+      this._delay.feedback = obj.delayFeedback;
+      const s = this.querySelector('web-audio-slider[param="delayFeedback"]');
+      if (s) s.value = obj.delayFeedback;
+    }
+    if (obj.delayMix != null && this._delay) {
+      this._delay.wet = obj.delayMix;
+      const s = this.querySelector('web-audio-slider[param="delayMix"]');
+      if (s) s.value = obj.delayMix;
+    }
+    if (obj.delayFilterFreq != null && this._delay) {
+      this._delay.filterFreq = obj.delayFilterFreq;
+      const s = this.querySelector('web-audio-slider[param="delayFilterFreq"]');
+      if (s) s.value = obj.delayFilterFreq;
+    }
+    if (obj.delayModulation != null && this._delay) {
+      this._delay.modulation = obj.delayModulation;
+      const s = this.querySelector('web-audio-slider[param="delayModulation"]');
+      if (s) s.value = obj.delayModulation;
+    }
+    if (obj.lpFreq != null && this._filter) {
+      this._filter.lpFreq = obj.lpFreq;
+      const s = this.querySelector('web-audio-slider[param="lpFreq"]');
+      if (s) s.value = obj.lpFreq;
+    }
+    if (obj.hpFreq != null && this._filter) {
+      this._filter.hpFreq = obj.hpFreq;
+      const s = this.querySelector('web-audio-slider[param="hpFreq"]');
+      if (s) s.value = obj.hpFreq;
+    }
+    if (obj.filterQ != null && this._filter) {
+      this._filter.q = obj.filterQ;
+      const s = this.querySelector('web-audio-slider[param="filterQ"]');
+      if (s) s.value = obj.filterQ;
+    }
+  }
+
   // ---- UI ----
 
   _buildUI(options) {
@@ -122,11 +187,8 @@ export default class WebAudioFxUnit extends HTMLElement {
     header.textContent = options.title ?? "FX";
     this.appendChild(header);
 
-    this.appendChild(
-      this._makeSlider("Reverb", options.reverbWet ?? 0, 0, 1, 0.01, (v) => {
-        if (this._reverb) this._reverb.wet = v;
-      }),
-    );
+    // Reverb wet slider
+    this._addSlider("reverbWet", "Reverb", 0, 1, 0.01, options.reverbWet ?? 0);
 
     // Delay interval select
     const intervalWrap = document.createElement("div");
@@ -134,59 +196,58 @@ export default class WebAudioFxUnit extends HTMLElement {
     intervalWrap.appendChild(Object.assign(document.createElement("label"), { textContent: "Delay" }));
     const intervalSelect = document.createElement("select");
     intervalSelect.className = "fx-select";
-    DELAY_INTERVALS.forEach(({ label, beats }) => {
+    WebAudioFxDelay.INTERVALS.forEach(({ label, beats }) => {
       const opt = document.createElement("option");
       opt.value = beats;
       opt.textContent = label;
-      if (beats === this._delayInterval) opt.selected = true;
+      if (beats === (options.delayInterval ?? 0.75)) opt.selected = true;
       intervalSelect.appendChild(opt);
     });
     intervalSelect.addEventListener("change", () => {
-      this._delayInterval = parseFloat(intervalSelect.value);
-      if (this._delayNode) this._delayNode.delayTime.value = this._computeDelayTime();
+      if (this._delay) this._delay.interval = parseFloat(intervalSelect.value);
     });
     intervalWrap.appendChild(intervalSelect);
     this.appendChild(intervalWrap);
 
-    this.appendChild(
-      this._makeSlider("Feedbk", options.delayFeedback ?? 0.35, 0, 0.9, 0.01, (v) => {
-        if (this._delayFeedback) this._delayFeedback.gain.value = v;
-      }),
-    );
+    // Delay sliders
+    this._addSlider("delayFeedback", "Feedbk", 0, 0.9, 0.01, options.delayFeedback ?? 0.35);
+    this._addSlider("delayMix", "Mix", 0, 1, 0.01, options.delayMix ?? 0);
+    this._addSlider("delayFilterFreq", "Filter", 200, 12000, 1, options.delayFilterFreq ?? 12000, { hint: "dub", scale: "log" });
+    this._addSlider("delayModulation", "Mod", 0, 1, 0.01, 0);
 
-    this.appendChild(
-      this._makeSlider("Mix", options.delayMix ?? 0, 0, 1, 0.01, (v) => {
-        if (this._delayWet) this._delayWet.gain.value = v;
-      }),
-    );
+    // Master filter sliders
+    this._addSlider("lpFreq", "LPF", 80, 20000, 1, options.lpFreq ?? 20000, { scale: "log" });
+    this._addSlider("hpFreq", "HPF", 20, 8000, 1, options.hpFreq ?? 20, { scale: "log" });
+    this._addSlider("filterQ", "Q", 0.5, 15, 0.1, options.filterQ ?? 0.7);
+
+    // Delegated listener for all sliders
+    this.addEventListener("slider-input", (e) => {
+      const { param, value } = e.detail;
+      switch (param) {
+        case "reverbWet":       if (this._reverb) this._reverb.wet = value; break;
+        case "delayFeedback":   if (this._delay)  this._delay.feedback = value; break;
+        case "delayMix":        if (this._delay)  this._delay.wet = value; break;
+        case "delayFilterFreq": if (this._delay)  this._delay.filterFreq = value; break;
+        case "delayModulation": if (this._delay)  this._delay.modulation = value; break;
+        case "lpFreq":          if (this._filter) this._filter.lpFreq = value; break;
+        case "hpFreq":          if (this._filter) this._filter.hpFreq = value; break;
+        case "filterQ":         if (this._filter) this._filter.q = value; break;
+      }
+    });
   }
 
-  _makeSlider(label, value, min, max, step, onChange) {
-    const wrap = document.createElement("div");
-    wrap.className = "fx-ctrl";
-
-    const lbl = document.createElement("label");
-    const valSpan = document.createElement("span");
-    valSpan.className = "fx-val";
-    valSpan.textContent = value.toFixed(2);
-    lbl.textContent = `${label} `;
-    lbl.appendChild(valSpan);
-
-    const slider = document.createElement("input");
-    slider.type = "range";
-    slider.min = min;
-    slider.max = max;
-    slider.step = step;
+  _addSlider(param, label, min, max, step, value, opts = {}) {
+    const slider = document.createElement("web-audio-slider");
+    slider.setAttribute("param", param);
+    slider.setAttribute("label", label);
+    slider.setAttribute("min", min);
+    slider.setAttribute("max", max);
+    slider.setAttribute("step", step);
+    if (opts.hint) slider.setAttribute("hint", opts.hint);
+    if (opts.scale) slider.setAttribute("scale", opts.scale);
     slider.value = value;
-    slider.addEventListener("input", () => {
-      const v = parseFloat(slider.value);
-      valSpan.textContent = v.toFixed(2);
-      onChange(v);
-    });
-
-    wrap.appendChild(lbl);
-    wrap.appendChild(slider);
-    return wrap;
+    this.appendChild(slider);
+    return slider;
   }
 
   // ---- CSS (injected once per page) ----
@@ -205,6 +266,7 @@ export default class WebAudioFxUnit extends HTMLElement {
         background: #0d0d0d;
         border-top: 1px solid #1e1e1e;
         font-family: monospace;
+        --slider-accent: var(--fx-accent, #0f0);
       }
       .fx-unit-header {
         width: 100%;
@@ -225,11 +287,6 @@ export default class WebAudioFxUnit extends HTMLElement {
         color: #555;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-      }
-      .fx-val { color: var(--fx-accent, #0f0); }
-      .fx-ctrl input[type=range] {
-        accent-color: var(--fx-accent, #0f0);
-        width: 100%;
       }
       .fx-select {
         font-family: monospace;

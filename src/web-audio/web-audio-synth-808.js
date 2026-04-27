@@ -1,3 +1,8 @@
+import "./web-audio-slider.js";
+import { injectControlsCSS, createTitleWithMute } from "./web-audio-slider.js";
+import "./web-audio-step-seq.js";
+import { scaleNoteOptions } from "./web-audio-scales.js";
+
 /**
  * WebAudioSynth808 — pitched 808-style sub-bass synthesizer.
  *
@@ -20,9 +25,11 @@ export default class WebAudioSynth808 {
 
   static PRESETS = {
     Default: { pitchSweepSemitones: 24, pitchDecay: 0.10, decay: 0.80, distortion: 0,   click: 0.4, subOscMix: 0,   tone: 3000, volume: 1.0 },
-    Boom:    { pitchSweepSemitones: 12, pitchDecay: 0.20, decay: 1.20, distortion: 0,   click: 0.2, subOscMix: 0.5, tone: 2000, volume: 0.9 },
+    Boom:    { pitchSweepSemitones: 12, pitchDecay: 0.20, decay: 3.0,  distortion: 0,   click: 0.2, subOscMix: 0.5, tone: 2000, volume: 0.9 },
     Tight:   { pitchSweepSemitones: 24, pitchDecay: 0.06, decay: 0.40, distortion: 0,   click: 0.6, subOscMix: 0,   tone: 4000, volume: 1.0 },
     Dirty:   { pitchSweepSemitones: 24, pitchDecay: 0.10, decay: 0.70, distortion: 0.5, click: 0.4, subOscMix: 0,   tone: 2500, volume: 0.85 },
+    Deep:    { pitchSweepSemitones: 8,  pitchDecay: 0.25, decay: 2.0,  distortion: 0,   click: 0.1, subOscMix: 0.7, tone: 1500, volume: 0.9 },
+    Trap:    { pitchSweepSemitones: 36, pitchDecay: 0.04, decay: 0.60, distortion: 0,   click: 0.8, subOscMix: 0.2, tone: 5000, volume: 0.95 },
   };
 
   /**
@@ -37,26 +44,17 @@ export default class WebAudioSynth808 {
    * @param {number} [options.tone=3000]                Tone lowpass cutoff Hz
    * @param {number} [options.volume=1.0]
    */
-  constructor(ctx, options = {}) {
+  constructor(ctx, preset = "Default") {
     this.ctx = ctx;
-    this.pitchSweepSemitones = options.pitchSweepSemitones ?? 24;
-    this.pitchDecay = options.pitchDecay ?? 0.1;
-    this.decay = options.decay ?? 0.8;
-    this.click = options.click ?? 0.4;
-    this.subOscMix = options.subOscMix ?? 0;
-
-    this._distortion = options.distortion ?? 0;
-    this._distortionCurve = this._makeDistortionCurve(this._distortion);
+    this._distortion = 0;
+    this._distortionCurve = this._makeDistortionCurve(0);
 
     // Tone lowpass — shaping before output
     this._filter = ctx.createBiquadFilter();
     this._filter.type = "lowpass";
-    this._filter.frequency.value = options.tone ?? 3000;
     this._filter.Q.value = 1;
 
     this._out = ctx.createGain();
-    this._out.gain.value = options.volume ?? 1.0;
-
     this._filter.connect(this._out);
 
     // Pre-bake click noise buffer (15ms, linearly enveloped) — reused on every trigger
@@ -66,6 +64,8 @@ export default class WebAudioSynth808 {
     for (let i = 0; i < clickSamples; i++) {
       cd[i] = (Math.random() * 2 - 1) * (1 - i / clickSamples);
     }
+
+    this.applyPreset(preset);
   }
 
   // ---- Properties ----
@@ -201,3 +201,175 @@ export default class WebAudioSynth808 {
     }
   }
 }
+
+// ---- Controls companion component ----
+
+export class WebAudioSynth808Controls extends HTMLElement {
+
+  static SLIDER_DEFS = [
+    { param: "volume",              label: "Vol",         min: 0,    max: 1,    step: 0.01 },
+    { param: "decay",               label: "Decay",       min: 0.1,  max: 3,    step: 0.01 },
+    { param: "pitchSweepSemitones", label: "Pitch Sweep", min: 0,    max: 36,   step: 1 },
+    { param: "pitchDecay",          label: "Pitch Decay",  min: 0.01, max: 1,    step: 0.01 },
+    { param: "distortion",          label: "Distortion",  min: 0,    max: 1,    step: 0.01 },
+    { param: "click",               label: "Click",       min: 0,    max: 1,    step: 0.01 },
+    { param: "subOscMix",           label: "Sub Mix",     min: 0,    max: 1,    step: 0.01 },
+    { param: "tone",                label: "Tone",        min: 50,   max: 8000, step: 1, scale: "log" },
+  ];
+
+  static DEFAULT_PATTERN() {
+    return Array.from({ length: 16 }, (_, i) => ({ active: i === 0 || i === 8, note: 29 }));
+  }
+
+  constructor() {
+    super();
+    this._instrument = null;
+    this._sliders = {};
+    this._presetSelect = null;
+    this._fxUnit = null;
+    this._out = null;
+    this._seq = null;
+  }
+
+  bind(instrument, ctx, options = {}) {
+    this._instrument = instrument;
+    const color = options.color || "#fa0";
+    this.innerHTML = "";
+    injectControlsCSS();
+    this.style.setProperty("--slider-accent", color);
+    this.style.setProperty("--fx-accent", color);
+
+    this._muteHandle = createTitleWithMute(this, options.title || "808 Bass", () => this._out);
+
+    const controls = document.createElement("div");
+    controls.className = "wac-controls";
+    this.appendChild(controls);
+
+    // Preset dropdown
+    this._presetSelect = document.createElement("select");
+    this._presetSelect.className = "wac-select";
+    Object.keys(WebAudioSynth808.PRESETS).forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name.replace(/_/g, " ");
+      this._presetSelect.appendChild(opt);
+    });
+    this._presetSelect.addEventListener("change", () => {
+      this.applyPreset(this._presetSelect.value);
+      this._emitChange();
+    });
+    controls.appendChild(this._presetSelect);
+
+    for (const def of WebAudioSynth808Controls.SLIDER_DEFS) {
+      const slider = document.createElement("web-audio-slider");
+      slider.setAttribute("param", def.param);
+      slider.setAttribute("label", def.label);
+      slider.setAttribute("min", def.min);
+      slider.setAttribute("max", def.max);
+      slider.setAttribute("step", def.step);
+      if (def.scale) slider.setAttribute("scale", def.scale);
+      slider.value = instrument[def.param];
+      controls.appendChild(slider);
+      this._sliders[def.param] = slider;
+    }
+
+    this.addEventListener("slider-input", (e) => {
+      if (!this._instrument) return;
+      this._instrument[e.detail.param] = e.detail.value;
+      this._emitChange();
+    });
+
+    // Step sequencer
+    this._seq = document.createElement("web-audio-step-seq");
+    const noteOpts = scaleNoteOptions(29, "Minor", 24, 48);
+    this._seq.init({
+      steps: WebAudioSynth808Controls.DEFAULT_PATTERN(),
+      noteOptions: noteOpts,
+      color,
+    });
+    this.appendChild(this._seq);
+    this._seq.addEventListener("step-change", () => this._emitChange());
+
+    this._fxUnit = document.createElement("web-audio-fx-unit");
+    this.appendChild(this._fxUnit);
+    this._fxUnit.init(ctx, { title: "808 FX", bpm: options.fx?.bpm ?? 120, ...options.fx });
+
+    const waveform = document.createElement("web-audio-waveform");
+    this.appendChild(waveform);
+
+    const analyser = ctx.createAnalyser();
+    instrument.connect(analyser);
+    analyser.connect(this._fxUnit.input);
+    this._out = ctx.createGain();
+    this._fxUnit.connect(this._out);
+    waveform.init(analyser, color);
+  }
+
+  // ---- Sequencer integration ----
+
+  step(index, time, stepDurationSec) {
+    if (!this._instrument || !this._seq) return;
+    const s = this._seq.steps[index];
+    if (s?.active) {
+      this._instrument.trigger(s.note, stepDurationSec, time);
+    }
+  }
+
+  setActiveStep(i) { this._seq?.setActiveStep(i); }
+
+  setScale(rootMidi, scaleName) {
+    this._seq?.setNoteOptions(scaleNoteOptions(rootMidi, scaleName, 24, 48));
+  }
+
+  // ---- Serialization ----
+
+  _emitChange() {
+    this.dispatchEvent(new CustomEvent("controls-change", { bubbles: true }));
+  }
+
+  toJSON() {
+    if (!this._instrument) return null;
+    const params = {};
+    for (const def of WebAudioSynth808Controls.SLIDER_DEFS) params[def.param] = this._instrument[def.param];
+    return {
+      params,
+      steps: this._seq?.steps ?? [],
+      fx: this._fxUnit?.toJSON(),
+      muted: this._muteHandle?.isMuted() ?? false,
+    };
+  }
+
+  fromJSON(obj) {
+    if (!obj || !this._instrument) return;
+    if (obj.params) {
+      for (const [key, val] of Object.entries(obj.params)) {
+        this._instrument[key] = val;
+        if (this._sliders[key]) this._sliders[key].value = val;
+      }
+    }
+    if (obj.steps && this._seq) this._seq.steps = obj.steps;
+    if (obj.fx) this._fxUnit?.fromJSON(obj.fx);
+    if (obj.muted != null) this._muteHandle?.setMuted(obj.muted);
+  }
+
+  // ---- Preset / routing ----
+
+  applyPreset(name) {
+    if (!this._instrument) return;
+    this._instrument.applyPreset(name);
+    for (const def of WebAudioSynth808Controls.SLIDER_DEFS) {
+      const slider = this._sliders[def.param];
+      if (slider) slider.value = this._instrument[def.param];
+    }
+    if (this._presetSelect) this._presetSelect.value = name;
+  }
+
+  set bpm(v) { if (this._fxUnit) this._fxUnit.bpm = v; }
+
+  connect(node) {
+    if (this._out) this._out.connect(node.input ?? node);
+    return this;
+  }
+}
+
+customElements.define("web-audio-synth-808-controls", WebAudioSynth808Controls);

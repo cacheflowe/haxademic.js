@@ -6,8 +6,9 @@ import WebAudioPercKick from "../src/web-audio/web-audio-perc-kick.js";
 import WebAudioPercHihat from "../src/web-audio/web-audio-perc-hihat.js";
 import WebAudioFxReverb from "../src/web-audio/web-audio-fx-reverb.js";
 import WebAudioFxDelay from "../src/web-audio/web-audio-fx-delay.js";
-import WebAudioFxUnit from "../src/web-audio/web-audio-fx-unit.js";
-import WebAudioWaveform from "../src/web-audio/web-audio-waveform.js";
+import "../src/web-audio/web-audio-slider.js";
+import "../src/web-audio/web-audio-fx-unit.js";
+import "../src/web-audio/web-audio-waveform.js";
 import WebAudioSequencer from "../src/web-audio/web-audio-sequencer.js";
 import { SCALES_ORDERED as SCALES, buildChordFromScale, LEAD_OSC_TYPES } from "../src/web-audio/web-audio-scales.js";
 
@@ -234,59 +235,30 @@ class WebAudioGenerativeMusic extends DemoBase {
 
     // ---- Instruments ----
 
-    this._bass = new WebAudioSynthMono(this._ctx, {
-      oscType: "sawtooth",
-      filterFreq: 500,
-      filterQ: 5,
-      filterEnvOctaves: 2,
-      attack: 0.02,
-      decay: 0.2,
-      sustain: 0.5,
-      release: 0.4,
-      volume: 0.6,
-    });
+    this._bass = new WebAudioSynthMono(this._ctx, "Soft_Bass");
     this._bass.connect(this._bassDelay);
 
-    this._lead = new WebAudioSynthMono(this._ctx, {
-      oscType: LEAD_OSC_TYPES[this._scaleIndex()],
-      filterFreq: 4000,
-      filterQ: 1,
-      filterEnvOctaves: 0, // lead uses a stable filter; character comes from osc type
-      attack: 0.02,
-      decay: 0.15,
-      sustain: 0.3,
-      release: 0.8,
-      volume: 0.35,
-    });
+    this._lead = new WebAudioSynthMono(this._ctx, "Airy_Lead");
+    this._lead.oscType = LEAD_OSC_TYPES[this._scaleIndex()];
     this._lead.connect(this._leadDelay);
 
-    this._pad = new WebAudioSynthPad(this._ctx, {
-      attack: 0.5,
-      decay: 0.5,
-      sustain: 0.7,
-      release: 2.0,
-      volume: 0.5,
-    });
+    this._pad = new WebAudioSynthPad(this._ctx);
+    this._pad.volume = 0.5;
     this._pad.connect(this._padReverb);
 
     // Kick and hihat go dry into the master filter
-    this._kick = new WebAudioPercKick(this._ctx, {
-      startFreq: 150,
-      endFreq: 40,
-      sweepTime: 0.08,
-      decay: 0.35,
-      volume: 0.9,
-    });
+    this._kick = new WebAudioPercKick(this._ctx);
+    this._kick.volume = 0.9;
     this._kick.connect(this._masterFilter);
 
-    this._hihat = new WebAudioPercHihat(this._ctx, { filterFreq: 8000, filterQ: 0.8, decay: 0.06, volume: 0.4 });
+    this._hihat = new WebAudioPercHihat(this._ctx);
+    this._hihat.volume = 0.4;
     this._hihat.connect(this._masterFilter);
 
     // FM chord synth → reverb → masterFilter; mood drives preset choice
     this._fmReverb = new WebAudioFxReverb(this._ctx, { decay: 3, wet: 0.4 });
     this._fmReverb.connect(this._masterFilter);
     this._fm = new WebAudioSynthFM(this._ctx);
-    this._fm.applyPreset("E.Piano");
     this._fm.connect(this._fmReverb);
 
     // WebAudioFxUnit and waveform displays (created in buildUI, initialized here)
@@ -372,8 +344,6 @@ class WebAudioGenerativeMusic extends DemoBase {
     this._updateEffects();
     this._seq.start();
   }
-
-  // ---- Lead character ----
 
   // ---- Instrument character ----
   // Called every bar and on slider changes — maps composition state to synth timbre.
@@ -476,11 +446,8 @@ class WebAudioGenerativeMusic extends DemoBase {
       const phase = this._autoPhase[param];
       const v = (Math.sin((elapsed / period) * Math.PI * 2 + phase) + 1) / 2;
       this._p[param] = v;
-      const ref = this._sliderRefs[param];
-      if (ref) {
-        ref.range.value = v;
-        ref.valEl.textContent = Math.round(v * 100) + "%";
-      }
+      const slider = this._sliderRefs[param];
+      if (slider) slider.value = v;
     });
 
     if (this._started) this._updateEffects();
@@ -518,15 +485,46 @@ class WebAudioGenerativeMusic extends DemoBase {
       this._beatLeds.push(led);
     }
 
+    // Helper: create a web-audio-slider for composition/sound params
+    const makeSlider = (param, label, color, hint) => {
+      const slider = document.createElement("web-audio-slider");
+      slider.setAttribute("param", param);
+      slider.setAttribute("label", label);
+      slider.setAttribute("min", 0);
+      slider.setAttribute("max", 1);
+      slider.setAttribute("step", 0.01);
+      slider.setAttribute("color", color);
+      if (hint) slider.setAttribute("hint", hint);
+      slider.value = this._p[param];
+      return slider;
+    };
+
     const sec1 = this._makeSection("Composition");
-    sec1.appendChild(this._makeSlider("Mood", "mood", 0, 1, 0.01, this._p.mood, "#b070ff", "Dark — Bright"));
-    sec1.appendChild(
-      this._makeSlider("Excitement", "excitement", 0, 1, 0.01, this._p.excitement, "#ff6040", "Calm — Intense"),
-    );
-    sec1.appendChild(this._makeSlider("Health", "health", 0, 1, 0.01, this._p.health, "#40d080", "Degraded — Pure"));
+    const moodSlider = makeSlider("mood", "Mood", "#b070ff", "Dark — Bright");
+    sec1.appendChild(moodSlider);
+    this._sliderRefs.mood = moodSlider;
+
+    const excitementSlider = makeSlider("excitement", "Excitement", "#ff6040", "Calm — Intense");
+    sec1.appendChild(excitementSlider);
+    this._sliderRefs.excitement = excitementSlider;
+
+    const healthSlider = makeSlider("health", "Health", "#40d080", "Degraded — Pure");
+    sec1.appendChild(healthSlider);
+    this._sliderRefs.health = healthSlider;
 
     const sec2 = this._makeSection("Sound");
-    sec2.appendChild(this._makeSlider("Volume", "volume", 0, 1, 0.01, this._p.volume, "#60c0ff", ""));
+    sec2.appendChild(makeSlider("volume", "Volume", "#60c0ff"));
+
+    // Delegated slider-input listener for all composition + sound sliders
+    this.addEventListener("slider-input", (e) => {
+      const { param, value } = e.detail;
+      this._p[param] = value;
+      if (param === "volume" && this._master) {
+        this._master.gain.value = value;
+      } else if (this._started) {
+        this._updateEffects();
+      }
+    });
 
     this.injectHTML(
       `<div class="gm-hint">Pure Web Audio · Effects auto-follow composition · Auto oscillates sliders</div>`,
@@ -546,58 +544,6 @@ class WebAudioGenerativeMusic extends DemoBase {
     t.textContent = title;
     sec.appendChild(t);
     return sec;
-  }
-
-  _makeSlider(label, param, min, max, step, value, color, hint) {
-    const wrap = document.createElement("div");
-    wrap.className = "gm-ctrl";
-
-    const top = document.createElement("div");
-    top.className = "gm-ctrl-top";
-
-    const lbl = document.createElement("span");
-    lbl.className = "gm-ctrl-label";
-    lbl.textContent = label;
-
-    const val = document.createElement("span");
-    val.className = "gm-ctrl-val";
-    val.style.color = color;
-    val.textContent = Math.round(value * 100) + "%";
-
-    top.appendChild(lbl);
-    top.appendChild(val);
-    if (hint) {
-      const h = document.createElement("span");
-      h.className = "gm-ctrl-hint";
-      h.textContent = hint;
-      top.appendChild(h);
-    }
-
-    const range = document.createElement("input");
-    range.type = "range";
-    range.min = min;
-    range.max = max;
-    range.step = step;
-    range.value = value;
-    range.style.setProperty("--gm-accent", color);
-    range.addEventListener("input", () => {
-      const v = parseFloat(range.value);
-      this._p[param] = v;
-      val.textContent = Math.round(v * 100) + "%";
-
-      if (param === "volume" && this._master) {
-        this._master.gain.value = v;
-      } else if (this._started) {
-        this._updateEffects();
-        if (param === "mood") this._updateInstrumentCharacter();
-      }
-    });
-
-    if (param !== "volume") this._sliderRefs[param] = { range, valEl: val };
-
-    wrap.appendChild(top);
-    wrap.appendChild(range);
-    return wrap;
   }
 
   addCSS() {
@@ -696,36 +642,6 @@ class WebAudioGenerativeMusic extends DemoBase {
         text-transform: uppercase;
         letter-spacing: 0.12em;
         margin-bottom: -4px;
-      }
-
-      web-audio-generative-music .gm-ctrl { display: flex; flex-direction: column; gap: 6px; }
-
-      web-audio-generative-music .gm-ctrl-top {
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-      }
-      web-audio-generative-music .gm-ctrl-label {
-        font-size: 0.78em;
-        color: #666;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        min-width: 80px;
-      }
-      web-audio-generative-music .gm-ctrl-val {
-        font-size: 0.88em;
-        font-weight: bold;
-        min-width: 38px;
-      }
-      web-audio-generative-music .gm-ctrl-hint {
-        font-size: 0.68em;
-        color: #334;
-        margin-left: auto;
-      }
-      web-audio-generative-music .gm-ctrl input[type=range] {
-        width: 100%;
-        cursor: pointer;
-        accent-color: var(--gm-accent, #9090ff);
       }
 
       web-audio-generative-music .gm-hint {

@@ -1,9 +1,10 @@
 /**
- * WebAudioWaveform — audio visualizer web component (waveform + spectrogram).
+ * WebAudioWaveform — audio visualizer web component.
  *
- * Two display modes, toggled by clicking:
+ * Three display modes, cycled by clicking:
  *   - "waveform"    — oscilloscope-style time-domain display (default)
  *   - "spectrogram" — scrolling frequency waterfall
+ *   - "bars"        — FFT EQ bar graph
  *
  * Reads data from an AnalyserNode and draws to a canvas at ~60fps via
  * requestAnimationFrame. Resizes responsively via ResizeObserver.
@@ -13,9 +14,9 @@
  *   parentEl.appendChild(vis);
  *   const analyser = ctx.createAnalyser();
  *   someNode.connect(analyser);
- *   vis.init(analyser, "#0f0");                  // default waveform mode
- *   vis.init(analyser, "#0f0", { mode: "spectrogram" }); // start as spectrogram
- *   vis.mode = "spectrogram";                    // toggle at runtime
+ *   vis.init(analyser, "#0f0");                          // default waveform
+ *   vis.init(analyser, "#0f0", { mode: "bars" });        // start as EQ bars
+ *   vis.mode = "spectrogram";                            // toggle at runtime
  */
 export default class WebAudioWaveform extends HTMLElement {
   static #cssInjected = false;
@@ -58,17 +59,19 @@ export default class WebAudioWaveform extends HTMLElement {
     this._canvas.height = this.clientHeight;
   }
 
+  static MODES = ["waveform", "spectrogram", "bars"];
+
   _onClick = () => {
-    this.mode = this._mode === "waveform" ? "spectrogram" : "waveform";
+    const modes = WebAudioWaveform.MODES;
+    this.mode = modes[(modes.indexOf(this._mode) + 1) % modes.length];
   };
 
-  /** @param {"waveform"|"spectrogram"} m */
+  /** @param {"waveform"|"spectrogram"|"bars"} m */
   set mode(m) {
     if (m === this._mode) return;
     this._mode = m;
-    // Update analyser fftSize for the new mode
     if (this._analyser) {
-      this._analyser.fftSize = m === "spectrogram" ? 2048 : 512;
+      this._analyser.fftSize = m === "waveform" ? 512 : 2048;
       this._data = new Uint8Array(this._analyser.frequencyBinCount);
       this._freqData = new Uint8Array(this._analyser.frequencyBinCount);
     }
@@ -86,14 +89,14 @@ export default class WebAudioWaveform extends HTMLElement {
    * @param {AnalyserNode} analyserNode
    * @param {string} [color="#00ff00"]
    * @param {object} [options]
-   * @param {"waveform"|"spectrogram"} [options.mode="waveform"]
+   * @param {"waveform"|"spectrogram"|"bars"} [options.mode="waveform"]
    */
   init(analyserNode, color = "#00ff00", options = {}) {
     this._analyser = analyserNode;
     this._color = color;
     this._colorRGB = WebAudioWaveform._parseColor(color);
     this._mode = options.mode ?? "waveform";
-    this._analyser.fftSize = this._mode === "spectrogram" ? 2048 : 512;
+    this._analyser.fftSize = this._mode === "waveform" ? 512 : 2048;
     this._data = new Uint8Array(this._analyser.frequencyBinCount);
     this._freqData = new Uint8Array(this._analyser.frequencyBinCount);
     this._startLoop();
@@ -110,6 +113,7 @@ export default class WebAudioWaveform extends HTMLElement {
 
   _draw() {
     if (this._mode === "spectrogram") this._drawSpectrogram();
+    else if (this._mode === "bars") this._drawBars();
     else this._drawWaveform();
   }
 
@@ -169,6 +173,42 @@ export default class WebAudioWaveform extends HTMLElement {
     }
 
     ctx.putImageData(col, w - 1, 0);
+  }
+
+  _drawBars() {
+    if (!this._analyser || !this._canvas) return;
+    const w = this._canvas.width;
+    const h = this._canvas.height;
+    if (w === 0 || h === 0) return;
+
+    this._analyser.getByteFrequencyData(this._freqData);
+
+    const ctx = this._ctx2d ?? (this._ctx2d = this._canvas.getContext("2d"));
+    ctx.clearRect(0, 0, w, h);
+
+    // Group frequency bins into bars that fit the canvas width
+    const gap = 1;
+    const barWidth = Math.max(2, Math.floor(w / 64) - gap);
+    const numBars = Math.floor(w / (barWidth + gap));
+    const len = this._freqData.length;
+    const [r, g, b] = this._colorRGB;
+
+    for (let i = 0; i < numBars; i++) {
+      // Map bars to frequency bins (use lower ~75% of spectrum to skip empty high bins)
+      const binStart = Math.floor((i / numBars) * len * 0.75);
+      const binEnd = Math.floor(((i + 1) / numBars) * len * 0.75);
+      let sum = 0;
+      const count = Math.max(1, binEnd - binStart);
+      for (let j = binStart; j < binEnd; j++) sum += this._freqData[j];
+      const intensity = sum / count / 255;
+
+      const barH = intensity * h;
+      const x = i * (barWidth + gap);
+      // Brighter bars at higher intensity
+      const bright = 0.3 + intensity * 0.7;
+      ctx.fillStyle = `rgb(${Math.round(r * bright)},${Math.round(g * bright)},${Math.round(b * bright)})`;
+      ctx.fillRect(x, h - barH, barWidth, barH);
+    }
   }
 
   /**
