@@ -13,7 +13,7 @@
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
-    "axios": "^1.15.0",
+    "axios": "^1.15.2",
     "cheerio": "^1.2.0",
     "desktop": "^0.1.0",
     "express": "^5.2.1",
