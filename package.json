@@ -30,7 +30,7 @@
     "tone": "^15.1.22",
     "tslib": "^2.8.1",
     "websocket": "^1.0.35",
-    "ws": "^8.20.0"
+    "ws": "^8.21.0"
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^2.3.0",
